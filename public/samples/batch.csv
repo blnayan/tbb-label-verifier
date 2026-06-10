@@ -2,8 +2,30 @@ filename,brandName,classType,alcoholPercent,netContents
 old-tom-clean.png,OLD TOM DISTILLERY,Kentucky Straight Bourbon Whiskey,45,750 mL
 real-mb-liquors-vodka.jpg,MB LIQUORS,VODKA WITH NATURAL FLAVORS,40,750ML
 real-iprandi-soave.jpg,i PRANDI,White Wine,12,750 mL
+real-valle-etrusca-rosso.jpg,Rosso Toscana,Red Wine,12.5,750 ML
+real-garaudet-monthelie.jpg,GARAUDET PERE ET FILS,White Table Wine,13.5,750ml
+real-charlie-henri-pinot.jpg,CHARLIE et HENRI,PINOT NOIR,12.5,750 ML
+real-beaumes-de-venise.jpg,François Xavier Lambert,RED WINE,14.5,750ml.
+real-european-standard-vodka.png,EUROPEAN STANDARD,HANDCRAFTED VODKA INFUSED WITH ALL - NATURAL COCONUT & VANILLA BEANS,30.0,1 L
+real-zhenjiu-baijiu.png,ZHENJIU·ZHEN 15,SPIRITS DISTILLED FROM SORGHUM AND WHEAT,53.0,100ML
+real-victoria-beer.jpg,Victoria,BEER,4.0,8 FL OZ
+real-mastri-birrai-ipa.jpg,MASTRI BIRRAI UMBRI,ITALIAN PALE ALE,6.5,CONTENTS 10.14 FL.OZ.
+real-geoffroy-champagne.jpg,GEOFFROY,CHAMPAGNE,12.5,750ml
+real-tsarine-champagne.jpg,TSARINE,CHAMPAGNE EXTRA-BRUT,12.0,NET CONTENTS 750 ml
+real-mouton-rothschild.png,CHATEAU MOUTON ROTHSCHILD,RED BORDEAUX WINE,14.5,NET CONTENTS 750ML
+real-zd-wines-cabernet.jpg,ZD WINES®,Cabernet Sauvignon,14.5,750mL
+real-allegro-box-wine.jpg,ALLEGRO winery,Red Wine,8.0,18 L
+real-austerum-red.jpg,Austerum,Red wine,14.0,750 ml
+real-house-of-harvey-sparkling.jpg,Thee House of Harvey,APPELLATION AMERICAN SPARKLING WINE,12.0,750 ML
+real-sentada-white.jpg,SENTADA,VINHO BRANCO . WHITE WINE,11.0,750ML
+photo-austerum-red.jpg,Austerum,Red wine,14.0,750 ml
+photo-victoria-beer.jpg,Victoria,BEER,4.0,8 FL OZ
 stones-throw-case.png,Stone's Throw,Red Wine,13.5,750 mL
+proof-only.png,CARTWRIGHT & SONS,Tennessee Whiskey,45,750 mL
+unit-mismatch-cl.png,VIGNETO DEL SOLE,Pinot Grigio,12.5,750 mL
 title-case-warning.png,SILVER RIDGE,Vodka,40,750 mL
 wrong-abv.png,COPPER CREEK,Straight Rye Whiskey,45,750 mL
 missing-warning.png,HARBOR LIGHT,India Pale Ale,6.5,12 FL OZ
 reworded-warning.png,JUNIPER & PINE,London Dry Gin,47,750 mL
+wrong-net-contents.png,BLACKWATER BAY,Spiced Rum,35,750 mL
+wrong-brand.png,EAGLE HARBOR,Blended Canadian Whisky,40,750 mL

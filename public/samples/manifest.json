@@ -2,7 +2,7 @@
   "singles": [
     {
       "id": "old-tom-clean",
-      "name": "Old Tom Bourbon — clean label (generated)",
+      "name": "Old Tom Bourbon \u2014 clean label (generated)",
       "image": "/samples/old-tom-clean.png",
       "description": "Everything matches the application. Expected result: Pass.",
       "source": "generated",
@@ -15,7 +15,7 @@
     },
     {
       "id": "real-mb-liquors",
-      "name": "MB Liquors Vodka — real TTB label",
+      "name": "MB Liquors Vodka \u2014 real TTB label",
       "image": "/samples/real-mb-liquors-vodka.jpg",
       "description": "Real approved label from TTB's public COLA registry (TTB ID 18305001000808). Expected result: Pass.",
       "source": "real",
@@ -28,7 +28,7 @@
     },
     {
       "id": "real-iprandi-soave",
-      "name": "i Prandi Soave — real TTB label",
+      "name": "i Prandi Soave \u2014 real TTB label",
       "image": "/samples/real-iprandi-soave.jpg",
       "description": "Real approved wine back label from TTB's public COLA registry (TTB ID 15173001000487). Expected result: Pass or Needs review (real labels word things their own way).",
       "source": "real",
@@ -40,8 +40,242 @@
       }
     },
     {
+      "id": "real-valle-etrusca-rosso",
+      "name": "Valle Etrusca rosso Toscana \u2014 real TTB label",
+      "image": "/samples/real-valle-etrusca-rosso.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 26089001000028). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "Rosso Toscana",
+        "classType": "Red Wine",
+        "alcoholPercent": 12.5,
+        "netContents": "750 ML"
+      }
+    },
+    {
+      "id": "real-garaudet-monthelie",
+      "name": "Garaudet white Burgundy \u2014 real TTB label",
+      "image": "/samples/real-garaudet-monthelie.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25332001000182). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "GARAUDET PERE ET FILS",
+        "classType": "White Table Wine",
+        "alcoholPercent": 13.5,
+        "netContents": "750ml"
+      }
+    },
+    {
+      "id": "real-charlie-henri-pinot",
+      "name": "Charlie et Henri pinot noir \u2014 real TTB label",
+      "image": "/samples/real-charlie-henri-pinot.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 26089001000026). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "CHARLIE et HENRI",
+        "classType": "PINOT NOIR",
+        "alcoholPercent": 12.5,
+        "netContents": "750 ML"
+      }
+    },
+    {
+      "id": "real-beaumes-de-venise",
+      "name": "Fran\u00e7ois Xavier Lambert Beaumes-de-Venise \u2014 real TTB label",
+      "image": "/samples/real-beaumes-de-venise.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25116001000011). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "Fran\u00e7ois Xavier Lambert",
+        "classType": "RED WINE",
+        "alcoholPercent": 14.5,
+        "netContents": "750ml."
+      }
+    },
+    {
+      "id": "real-european-standard-vodka",
+      "name": "European Standard coconut vodka \u2014 real TTB label",
+      "image": "/samples/real-european-standard-vodka.png",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25221001000045). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "EUROPEAN STANDARD",
+        "classType": "HANDCRAFTED VODKA INFUSED WITH ALL - NATURAL COCONUT & VANILLA BEANS",
+        "alcoholPercent": 30.0,
+        "netContents": "1 L"
+      }
+    },
+    {
+      "id": "real-zhenjiu-baijiu",
+      "name": "Zhenjiu 15 sorghum baijiu (100 mL) \u2014 real TTB label",
+      "image": "/samples/real-zhenjiu-baijiu.png",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25225001000521). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "ZHENJIU\u00b7ZHEN 15",
+        "classType": "SPIRITS DISTILLED FROM SORGHUM AND WHEAT",
+        "alcoholPercent": 53.0,
+        "netContents": "100ML"
+      }
+    },
+    {
+      "id": "real-victoria-beer",
+      "name": "Victoria beer (8 fl oz) \u2014 real TTB label",
+      "image": "/samples/real-victoria-beer.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 14251001000304). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "Victoria",
+        "classType": "BEER",
+        "alcoholPercent": 4.0,
+        "netContents": "8 FL OZ"
+      }
+    },
+    {
+      "id": "real-mastri-birrai-ipa",
+      "name": "Mastri Birrai Umbri Italian pale ale \u2014 real TTB label",
+      "image": "/samples/real-mastri-birrai-ipa.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25335001000692). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "MASTRI BIRRAI UMBRI",
+        "classType": "ITALIAN PALE ALE",
+        "alcoholPercent": 6.5,
+        "netContents": "CONTENTS 10.14 FL.OZ."
+      }
+    },
+    {
+      "id": "real-geoffroy-champagne",
+      "name": "Geoffroy Champagne \u2014 real TTB label",
+      "image": "/samples/real-geoffroy-champagne.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25209001000598). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "GEOFFROY",
+        "classType": "CHAMPAGNE",
+        "alcoholPercent": 12.5,
+        "netContents": "750ml"
+      }
+    },
+    {
+      "id": "real-tsarine-champagne",
+      "name": "Tsarine Champagne extra-brut \u2014 real TTB label",
+      "image": "/samples/real-tsarine-champagne.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25064001000113). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "TSARINE",
+        "classType": "CHAMPAGNE EXTRA-BRUT",
+        "alcoholPercent": 12.0,
+        "netContents": "NET CONTENTS 750 ml"
+      }
+    },
+    {
+      "id": "real-mouton-rothschild",
+      "name": "Ch\u00e2teau Mouton Rothschild Bordeaux \u2014 real TTB label",
+      "image": "/samples/real-mouton-rothschild.png",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25223001000361). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "CHATEAU MOUTON ROTHSCHILD",
+        "classType": "RED BORDEAUX WINE",
+        "alcoholPercent": 14.5,
+        "netContents": "NET CONTENTS 750ML"
+      }
+    },
+    {
+      "id": "real-zd-wines-cabernet",
+      "name": "ZD Wines cabernet sauvignon \u2014 real TTB label",
+      "image": "/samples/real-zd-wines-cabernet.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 26099001000822). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "ZD WINES\u00ae",
+        "classType": "Cabernet Sauvignon",
+        "alcoholPercent": 14.5,
+        "netContents": "750mL"
+      }
+    },
+    {
+      "id": "real-allegro-box-wine",
+      "name": "Allegro 18 L box wine \u2014 real TTB label",
+      "image": "/samples/real-allegro-box-wine.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 26026001000272). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "ALLEGRO winery",
+        "classType": "Red Wine",
+        "alcoholPercent": 8.0,
+        "netContents": "18 L"
+      }
+    },
+    {
+      "id": "real-austerum-red",
+      "name": "Austerum red wine \u2014 real TTB label",
+      "image": "/samples/real-austerum-red.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25142001000678). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "Austerum",
+        "classType": "Red wine",
+        "alcoholPercent": 14.0,
+        "netContents": "750 ml"
+      }
+    },
+    {
+      "id": "real-house-of-harvey-sparkling",
+      "name": "House of Harvey sparkling \u2014 real TTB label",
+      "image": "/samples/real-house-of-harvey-sparkling.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25203001000469). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "Thee House of Harvey",
+        "classType": "APPELLATION AMERICAN SPARKLING WINE",
+        "alcoholPercent": 12.0,
+        "netContents": "750 ML"
+      }
+    },
+    {
+      "id": "real-sentada-white",
+      "name": "Sentada vinho branco \u2014 real TTB label",
+      "image": "/samples/real-sentada-white.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 26021001000663). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "SENTADA",
+        "classType": "VINHO BRANCO . WHITE WINE",
+        "alcoholPercent": 11.0,
+        "netContents": "750ML"
+      }
+    },
+    {
+      "id": "photo-austerum-red",
+      "name": "Austerum red \u2014 photo conditions (real label)",
+      "image": "/samples/photo-austerum-red.jpg",
+      "description": "Real TTB label (ID 25142001000678) re-rendered under simulated photo conditions: tilt, glare, uneven light, blur. Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "Austerum",
+        "classType": "Red wine",
+        "alcoholPercent": 14.0,
+        "netContents": "750 ml"
+      }
+    },
+    {
+      "id": "photo-victoria-beer",
+      "name": "Victoria beer \u2014 photo conditions (real label)",
+      "image": "/samples/photo-victoria-beer.jpg",
+      "description": "Real TTB label (ID 14251001000304) re-rendered under simulated photo conditions: tilt, glare, uneven light, blur. Expected result: Pass.",
+      "source": "real",
+      "application": {
+        "brandName": "Victoria",
+        "classType": "BEER",
+        "alcoholPercent": 4.0,
+        "netContents": "8 FL OZ"
+      }
+    },
+    {
       "id": "stones-throw-case",
-      "name": "Stone's Throw — capitalization differs (generated)",
+      "name": "Stone's Throw \u2014 capitalization differs (generated)",
       "image": "/samples/stones-throw-case.png",
       "description": "Label prints STONE'S THROW in caps; the application says Stone's Throw. Expected result: Needs review, not an automatic failure.",
       "source": "generated",
@@ -53,10 +287,36 @@
       }
     },
     {
+      "id": "proof-only",
+      "name": "Cartwright & Sons \u2014 proof only, no percent (generated)",
+      "image": "/samples/proof-only.png",
+      "description": "The label states only \"90 PROOF\" \u2014 no percentage. Proof is twice ABV, so it matches a 45% application. Expected result: Pass.",
+      "source": "generated",
+      "application": {
+        "brandName": "CARTWRIGHT & SONS",
+        "classType": "Tennessee Whiskey",
+        "alcoholPercent": 45,
+        "netContents": "750 mL"
+      }
+    },
+    {
+      "id": "unit-mismatch-cl",
+      "name": "Vigneto del Sole \u2014 75 cl vs 750 mL (generated)",
+      "image": "/samples/unit-mismatch-cl.png",
+      "description": "Label prints 75 cl; the application says 750 mL \u2014 the same volume in different units. Expected result: Needs review, not a failure.",
+      "source": "generated",
+      "application": {
+        "brandName": "VIGNETO DEL SOLE",
+        "classType": "Pinot Grigio",
+        "alcoholPercent": 12.5,
+        "netContents": "750 mL"
+      }
+    },
+    {
       "id": "title-case-warning",
-      "name": "Silver Ridge — warning not in capitals (generated)",
+      "name": "Silver Ridge \u2014 warning not in capitals (generated)",
       "image": "/samples/title-case-warning.png",
-      "description": "The health warning says \"Government Warning:\" in title case — it must be all capitals. Expected result: Issues found.",
+      "description": "The health warning says \"Government Warning:\" in title case \u2014 it must be all capitals. Expected result: Issues found.",
       "source": "generated",
       "application": {
         "brandName": "SILVER RIDGE",
@@ -67,7 +327,7 @@
     },
     {
       "id": "wrong-abv",
-      "name": "Copper Creek — wrong alcohol content (generated)",
+      "name": "Copper Creek \u2014 wrong alcohol content (generated)",
       "image": "/samples/wrong-abv.png",
       "description": "Label shows 40% but the application says 45%. Expected result: Issues found.",
       "source": "generated",
@@ -80,7 +340,7 @@
     },
     {
       "id": "missing-warning",
-      "name": "Harbor Light IPA — missing warning (generated)",
+      "name": "Harbor Light IPA \u2014 missing warning (generated)",
       "image": "/samples/missing-warning.png",
       "description": "No government warning anywhere on the label. Expected result: Issues found.",
       "source": "generated",
@@ -93,7 +353,7 @@
     },
     {
       "id": "reworded-warning",
-      "name": "Juniper & Pine — reworded warning (generated)",
+      "name": "Juniper & Pine \u2014 reworded warning (generated)",
       "image": "/samples/reworded-warning.png",
       "description": "The warning says \"should avoid alcoholic beverages while pregnant\" instead of the required wording. Expected result: Issues found.",
       "source": "generated",
@@ -101,6 +361,32 @@
         "brandName": "JUNIPER & PINE",
         "classType": "London Dry Gin",
         "alcoholPercent": 47,
+        "netContents": "750 mL"
+      }
+    },
+    {
+      "id": "wrong-net-contents",
+      "name": "Blackwater Bay \u2014 wrong net contents (generated)",
+      "image": "/samples/wrong-net-contents.png",
+      "description": "Label shows 375 mL but the application says 750 mL. Expected result: Issues found.",
+      "source": "generated",
+      "application": {
+        "brandName": "BLACKWATER BAY",
+        "classType": "Spiced Rum",
+        "alcoholPercent": 35,
+        "netContents": "750 mL"
+      }
+    },
+    {
+      "id": "wrong-brand",
+      "name": "Eagle Hollow vs Eagle Harbor \u2014 wrong brand (generated)",
+      "image": "/samples/wrong-brand.png",
+      "description": "Label prints EAGLE HOLLOW; the application says EAGLE HARBOR. Expected result: Issues found.",
+      "source": "generated",
+      "application": {
+        "brandName": "EAGLE HARBOR",
+        "classType": "Blended Canadian Whisky",
+        "alcoholPercent": 40,
         "netContents": "750 mL"
       }
     }
@@ -111,11 +397,33 @@
       "/samples/old-tom-clean.png",
       "/samples/real-mb-liquors-vodka.jpg",
       "/samples/real-iprandi-soave.jpg",
+      "/samples/real-valle-etrusca-rosso.jpg",
+      "/samples/real-garaudet-monthelie.jpg",
+      "/samples/real-charlie-henri-pinot.jpg",
+      "/samples/real-beaumes-de-venise.jpg",
+      "/samples/real-european-standard-vodka.png",
+      "/samples/real-zhenjiu-baijiu.png",
+      "/samples/real-victoria-beer.jpg",
+      "/samples/real-mastri-birrai-ipa.jpg",
+      "/samples/real-geoffroy-champagne.jpg",
+      "/samples/real-tsarine-champagne.jpg",
+      "/samples/real-mouton-rothschild.png",
+      "/samples/real-zd-wines-cabernet.jpg",
+      "/samples/real-allegro-box-wine.jpg",
+      "/samples/real-austerum-red.jpg",
+      "/samples/real-house-of-harvey-sparkling.jpg",
+      "/samples/real-sentada-white.jpg",
+      "/samples/photo-austerum-red.jpg",
+      "/samples/photo-victoria-beer.jpg",
       "/samples/stones-throw-case.png",
+      "/samples/proof-only.png",
+      "/samples/unit-mismatch-cl.png",
       "/samples/title-case-warning.png",
       "/samples/wrong-abv.png",
       "/samples/missing-warning.png",
-      "/samples/reworded-warning.png"
+      "/samples/reworded-warning.png",
+      "/samples/wrong-net-contents.png",
+      "/samples/wrong-brand.png"
     ]
   }
 }

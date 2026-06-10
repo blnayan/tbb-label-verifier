@@ -45,14 +45,20 @@ Open http://localhost:3000, pick **“Try a sample label…”**, and press
 | `npm test` | Unit tests (Vitest) — rule engine, input validation, CSV parsing, concurrency pool |
 | `npm run lint` / `npm run typecheck` | ESLint / TypeScript |
 | `node scripts/generate-samples.mjs` | Regenerate the synthetic sample labels |
+| `node scripts/generate-photo-variants.mjs` | Regenerate the photo-condition variants of real labels |
 
 ## Sample dataset
 
-`public/samples/` contains eight labels — six synthetic (each encoding a
-compliance scenario from the stakeholder interviews: case-only brand
-differences, a title-case government warning, a wrong ABV, a missing warning,
-a reworded warning) and **two real approved labels from TTB's public COLA
-registry**. See [public/samples/SOURCES.md](public/samples/SOURCES.md).
+`public/samples/` contains thirty labels: **eighteen real approved labels
+from TTB's public COLA registry** (beer, wine, spirits, imports — each
+paired with application data transcribed from the label), **two of those
+re-rendered under simulated photo conditions** (tilt, glare, blur) to
+exercise robustness, and ten synthetic labels each encoding a compliance
+scenario (case-only brand differences, a title-case government warning, a
+wrong ABV, a missing/reworded warning, wrong net contents, wrong brand, a
+proof-only statement, a cl-vs-mL unit difference). Every sample's expected
+verdict is stated in its description and validated against the live
+pipeline. See [public/samples/SOURCES.md](public/samples/SOURCES.md).
 
 ## Deployment (Docker, any VPS)
 

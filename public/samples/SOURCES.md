@@ -3,22 +3,53 @@
 ## Generated labels (AI-designed, rendered by `scripts/generate-samples.mjs`)
 
 `old-tom-clean.png`, `stones-throw-case.png`, `title-case-warning.png`,
-`wrong-abv.png`, `missing-warning.png`, `reworded-warning.png` are synthetic
-labels for fictional brands. Each encodes a specific compliance scenario from
-the stakeholder interviews (case-only brand differences, a title-case
-government warning, an ABV mismatch, a missing warning, a reworded warning).
-Regenerate with `node scripts/generate-samples.mjs`.
+`wrong-abv.png`, `missing-warning.png`, `reworded-warning.png`,
+`wrong-net-contents.png`, `wrong-brand.png`, `proof-only.png`,
+`unit-mismatch-cl.png` are synthetic labels for fictional brands. Each
+encodes a specific compliance scenario (case-only brand differences, a
+title-case government warning, an ABV mismatch, a missing warning, a
+reworded warning, wrong net contents, wrong brand name, a proof-only
+alcohol statement, a cl-vs-mL unit difference). Regenerate with
+`node scripts/generate-samples.mjs`.
+
+## Photo-condition variants (real labels, simulated photography)
+
+`photo-austerum-red.jpg` and `photo-victoria-beer.jpg` are real TTB label
+images re-rendered under
+simulated hand-held photo conditions (tilt, shear, glare, uneven lighting,
+blur, lossy re-encoding) to exercise verification robustness. Regenerate
+with `node scripts/generate-photo-variants.mjs`.
 
 ## Real labels (TTB public COLA registry)
 
-Both are label images from approved Certificate of Label Approval
+All are label images from approved Certificate of Label Approval
 applications, downloaded from TTB's public COLA registry
 (https://ttbonline.gov/colasonline/publicSearchColasBasic.do):
 
-| File | TTB ID | Brand |
+| File | TTB ID | Brand (as printed) |
 | --- | --- | --- |
-| `real-mb-liquors-vodka.jpg` | 18305001000808 | MB LIQUORS (vodka specialty, CA) |
-| `real-iprandi-soave.jpg` | 15173001000487 | I PRANDI BY MARCATO (Soave, Italy) |
+| `real-mb-liquors-vodka.jpg` | 18305001000808 | MB LIQUORS |
+| `real-iprandi-soave.jpg` | 15173001000487 | i PRANDI |
+| `real-european-standard-vodka.png` | 25221001000045 | EUROPEAN STANDARD |
+| `real-zhenjiu-baijiu.png` | 25225001000521 | ZHENJIU·ZHEN 15 |
+| `real-victoria-beer.jpg` | 14251001000304 | Victoria |
+| `real-mastri-birrai-ipa.jpg` | 25335001000692 | MASTRI BIRRAI UMBRI |
+| `real-geoffroy-champagne.jpg` | 25209001000598 | GEOFFROY |
+| `real-tsarine-champagne.jpg` | 25064001000113 | TSARINE |
+| `real-mouton-rothschild.png` | 25223001000361 | CHATEAU MOUTON ROTHSCHILD |
+| `real-zd-wines-cabernet.jpg` | 26099001000822 | ZD WINES® |
+| `real-allegro-box-wine.jpg` | 26026001000272 | ALLEGRO winery |
+| `real-austerum-red.jpg` | 25142001000678 | Austerum |
+| `real-house-of-harvey-sparkling.jpg` | 25203001000469 | Thee House of Harvey |
+| `real-sentada-white.jpg` | 26021001000663 | SENTADA |
+| `real-valle-etrusca-rosso.jpg` | 26089001000028 | Rosso Toscana |
+| `real-garaudet-monthelie.jpg` | 25332001000182 | GARAUDET PERE ET FILS |
+| `real-charlie-henri-pinot.jpg` | 26089001000026 | CHARLIE et HENRI |
+| `real-beaumes-de-venise.jpg` | 25116001000011 | François Xavier Lambert |
+
+The application data paired with each real label in `manifest.json` was
+transcribed from the label itself (brand, class/type, ABV, net contents),
+so each verifies as Pass or Needs review.
 
 COLA label images are public records published by the U.S. Treasury's
 Alcohol and Tobacco Tax and Trade Bureau. They are included here solely as
