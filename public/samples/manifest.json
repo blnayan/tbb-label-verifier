@@ -144,19 +144,6 @@
       }
     },
     {
-      "id": "real-geoffroy-champagne",
-      "name": "Geoffroy Champagne \u2014 real TTB label",
-      "image": "/samples/real-geoffroy-champagne.jpg",
-      "description": "Real approved label from TTB's public COLA registry (TTB ID 25209001000598). Expected result: Pass or Needs review.",
-      "source": "real",
-      "application": {
-        "brandName": "GEOFFROY",
-        "classType": "CHAMPAGNE",
-        "alcoholPercent": 12.5,
-        "netContents": "750ml"
-      }
-    },
-    {
       "id": "real-tsarine-champagne",
       "name": "Tsarine Champagne extra-brut \u2014 real TTB label",
       "image": "/samples/real-tsarine-champagne.jpg",
@@ -196,19 +183,6 @@
       }
     },
     {
-      "id": "real-allegro-box-wine",
-      "name": "Allegro 18 L box wine \u2014 real TTB label",
-      "image": "/samples/real-allegro-box-wine.jpg",
-      "description": "Real approved label from TTB's public COLA registry (TTB ID 26026001000272). Expected result: Pass or Needs review.",
-      "source": "real",
-      "application": {
-        "brandName": "ALLEGRO winery",
-        "classType": "Red Wine",
-        "alcoholPercent": 8.0,
-        "netContents": "18 L"
-      }
-    },
-    {
       "id": "real-austerum-red",
       "name": "Austerum red wine \u2014 real TTB label",
       "image": "/samples/real-austerum-red.jpg",
@@ -245,6 +219,19 @@
         "classType": "VINHO BRANCO . WHITE WINE",
         "alcoholPercent": 11.0,
         "netContents": "750ML"
+      }
+    },
+    {
+      "id": "real-jack-daniels-rye",
+      "name": "Jack Daniel's Single Barrel Rye \u2014 real TTB label",
+      "image": "/samples/real-jack-daniels-rye.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25052001000168). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "Jack Daniel's",
+        "classType": "Tennessee Rye Whiskey",
+        "alcoholPercent": 47,
+        "netContents": "750 mL"
       }
     },
     {
@@ -389,6 +376,19 @@
         "alcoholPercent": 40,
         "netContents": "750 mL"
       }
+    },
+    {
+      "id": "real-four-loko-shot",
+      "name": "Four Loko Shot \u2014 warning on another panel (real TTB label)",
+      "image": "/samples/real-four-loko-shot.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 24152001000126). This is the front panel of a wrap-around label \u2014 the government warning is printed on the back panel, so a single-image check flags it as missing. Expected result: Issues found (government warning not found).",
+      "source": "real",
+      "application": {
+        "brandName": "Four Loko",
+        "classType": "Alcoholic Beverage",
+        "alcoholPercent": 13.9,
+        "netContents": "6.8 FL OZ"
+      }
     }
   ],
   "batch": {
@@ -405,14 +405,13 @@
       "/samples/real-zhenjiu-baijiu.png",
       "/samples/real-victoria-beer.jpg",
       "/samples/real-mastri-birrai-ipa.jpg",
-      "/samples/real-geoffroy-champagne.jpg",
       "/samples/real-tsarine-champagne.jpg",
       "/samples/real-mouton-rothschild.png",
       "/samples/real-zd-wines-cabernet.jpg",
-      "/samples/real-allegro-box-wine.jpg",
       "/samples/real-austerum-red.jpg",
       "/samples/real-house-of-harvey-sparkling.jpg",
       "/samples/real-sentada-white.jpg",
+      "/samples/real-jack-daniels-rye.jpg",
       "/samples/photo-austerum-red.jpg",
       "/samples/photo-victoria-beer.jpg",
       "/samples/stones-throw-case.png",
@@ -423,7 +422,8 @@
       "/samples/missing-warning.png",
       "/samples/reworded-warning.png",
       "/samples/wrong-net-contents.png",
-      "/samples/wrong-brand.png"
+      "/samples/wrong-brand.png",
+      "/samples/real-four-loko-shot.jpg"
     ]
   }
 }

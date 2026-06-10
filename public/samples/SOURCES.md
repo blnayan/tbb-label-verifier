@@ -34,11 +34,9 @@ applications, downloaded from TTB's public COLA registry
 | `real-zhenjiu-baijiu.png` | 25225001000521 | ZHENJIU·ZHEN 15 |
 | `real-victoria-beer.jpg` | 14251001000304 | Victoria |
 | `real-mastri-birrai-ipa.jpg` | 25335001000692 | MASTRI BIRRAI UMBRI |
-| `real-geoffroy-champagne.jpg` | 25209001000598 | GEOFFROY |
 | `real-tsarine-champagne.jpg` | 25064001000113 | TSARINE |
 | `real-mouton-rothschild.png` | 25223001000361 | CHATEAU MOUTON ROTHSCHILD |
 | `real-zd-wines-cabernet.jpg` | 26099001000822 | ZD WINES® |
-| `real-allegro-box-wine.jpg` | 26026001000272 | ALLEGRO winery |
 | `real-austerum-red.jpg` | 25142001000678 | Austerum |
 | `real-house-of-harvey-sparkling.jpg` | 25203001000469 | Thee House of Harvey |
 | `real-sentada-white.jpg` | 26021001000663 | SENTADA |
@@ -46,10 +44,12 @@ applications, downloaded from TTB's public COLA registry
 | `real-garaudet-monthelie.jpg` | 25332001000182 | GARAUDET PERE ET FILS |
 | `real-charlie-henri-pinot.jpg` | 26089001000026 | CHARLIE et HENRI |
 | `real-beaumes-de-venise.jpg` | 25116001000011 | François Xavier Lambert |
+| `real-jack-daniels-rye.jpg` | 25052001000168 | JACK DANIEL'S (Single Barrel Rye) |
+| `real-four-loko-shot.jpg` | 24152001000126 | FOUR LOKO (Shot, front panel) |
 
 The application data paired with each real label in `manifest.json` was
 transcribed from the label itself (brand, class/type, ABV, net contents),
-so each verifies as Pass or Needs review.
+so each verifies as Pass or Needs review — except `real-four-loko-shot.jpg`, which is the front panel of a wrap-around label whose government warning is printed on the back, so it intentionally verifies as Issues found.
 
 COLA label images are public records published by the U.S. Treasury's
 Alcohol and Tobacco Tax and Trade Bureau. They are included here solely as
