@@ -53,11 +53,16 @@ import {
 } from "@/components/ui/table";
 import { ResultPanel } from "@/components/verifier/result-panel";
 import { OverallBadge } from "@/components/verifier/status";
+import { useObjectUrl } from "@/hooks/use-object-url";
 import { VerifyError, verifyLabelRequest } from "@/lib/client/api";
 import { downscaleImage } from "@/lib/client/downscale";
 import { runPool } from "@/lib/client/pool";
 import { fetchAsFile, fetchSampleManifest } from "@/lib/client/samples";
-import { parseBatchCsv, type BatchRow, type BatchRowError } from "@/lib/verification/batch";
+import {
+  parseBatchCsv,
+  type BatchRow,
+  type BatchRowError,
+} from "@/lib/verification/batch";
 import type { VerificationResult } from "@/lib/verification/types";
 
 /** Keeps a 300-label dump from opening 300 simultaneous requests. */
@@ -93,10 +98,13 @@ export function BatchVerify() {
 
   const ready = useMemo(
     () => items.filter((i) => i.state.phase === "queued").length,
-    [items],
+    [items]
   );
 
-  function attachImages(rows: BatchRow[], files: Map<string, File>): BatchItem[] {
+  function attachImages(
+    rows: BatchRow[],
+    files: Map<string, File>
+  ): BatchItem[] {
     return rows.map((row) => ({
       row,
       state: files.has(row.filename)
@@ -124,8 +132,8 @@ export function BatchVerify() {
     setItems((current) =>
       attachImages(
         current.map((i) => i.row),
-        next,
-      ),
+        next
+      )
     );
   }
 
@@ -163,8 +171,8 @@ export function BatchVerify() {
       current.map((item) =>
         item.state.phase === "queued"
           ? { ...item, state: { phase: "processing" } }
-          : item,
-      ),
+          : item
+      )
     );
 
     await runPool(
@@ -185,11 +193,11 @@ export function BatchVerify() {
           };
         }
         setItems((current) =>
-          current.map((it, i) => (i === index ? { ...it, state } : it)),
+          current.map((it, i) => (i === index ? { ...it, state } : it))
         );
       },
       CONCURRENCY,
-      (done) => setCompleted(done),
+      (done) => setCompleted(done)
     );
 
     setRunning(false);
@@ -203,10 +211,11 @@ export function BatchVerify() {
     setDetailIndex(null);
   }
 
-  const total = items.filter(
-    (i) => i.state.phase !== "missing_image",
-  ).length;
+  const total = items.filter((i) => i.state.phase !== "missing_image").length;
   const detail = detailIndex !== null ? items[detailIndex] : null;
+  const detailImageUrl = useObjectUrl(
+    detail ? (images.get(detail.row.filename) ?? null) : null
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -214,20 +223,25 @@ export function BatchVerify() {
         <CardHeader>
           <CardTitle>Batch upload</CardTitle>
           <CardDescription>
-            Upload a CSV of application data plus the label images it refers
-            to. Columns: filename, brandName, classType, alcoholPercent,
+            Upload a CSV of application data plus the label images it refers to.
+            Columns: filename, brandName, classType, alcoholPercent,
             netContents.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <Field>
-              <FieldLabel htmlFor="batch-csv">Application data (CSV)</FieldLabel>
+              <FieldLabel htmlFor="batch-csv">
+                Application data (CSV)
+              </FieldLabel>
               <label
                 htmlFor="batch-csv"
                 className="flex cursor-pointer items-center gap-2 rounded-lg border-2 border-dashed p-4 hover:bg-accent/50"
               >
-                <FileSpreadsheetIcon aria-hidden className="size-5 text-muted-foreground" />
+                <FileSpreadsheetIcon
+                  aria-hidden
+                  className="size-5 text-muted-foreground"
+                />
                 <span className="text-sm">Choose a CSV file</span>
               </label>
               <input
@@ -245,7 +259,10 @@ export function BatchVerify() {
                 htmlFor="batch-images"
                 className="flex cursor-pointer items-center gap-2 rounded-lg border-2 border-dashed p-4 hover:bg-accent/50"
               >
-                <ImagesIcon aria-hidden className="size-5 text-muted-foreground" />
+                <ImagesIcon
+                  aria-hidden
+                  className="size-5 text-muted-foreground"
+                />
                 <span className="text-sm">
                   {images.size > 0
                     ? `${images.size} image${images.size === 1 ? "" : "s"} added`
@@ -270,7 +287,8 @@ export function BatchVerify() {
           {csvErrors.length > 0 && items.length > 0 && (
             <Alert variant="warning">
               <AlertTitle>
-                {csvErrors.length} CSV row{csvErrors.length === 1 ? "" : "s"} skipped
+                {csvErrors.length} CSV row{csvErrors.length === 1 ? "" : "s"}{" "}
+                skipped
               </AlertTitle>
               <AlertDescription>
                 <ul>
@@ -279,14 +297,20 @@ export function BatchVerify() {
                       Line {e.line}: {e.message}
                     </li>
                   ))}
-                  {csvErrors.length > 5 && <li>…and {csvErrors.length - 5} more.</li>}
+                  {csvErrors.length > 5 && (
+                    <li>…and {csvErrors.length - 5} more.</li>
+                  )}
                 </ul>
               </AlertDescription>
             </Alert>
           )}
 
           <div className="flex flex-wrap items-center gap-3">
-            <Button size="lg" onClick={() => void run()} disabled={running || ready === 0}>
+            <Button
+              size="lg"
+              onClick={() => void run()}
+              disabled={running || ready === 0}
+            >
               {running ? (
                 <Spinner data-icon="inline-start" />
               ) : (
@@ -296,7 +320,12 @@ export function BatchVerify() {
                 ? `Checking ${completed} of ${total}…`
                 : `Verify ${ready > 0 ? ready : ""} label${ready === 1 ? "" : "s"}`}
             </Button>
-            <Button variant="outline" size="lg" onClick={reset} disabled={running}>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={reset}
+              disabled={running}
+            >
               <RotateCcwIcon data-icon="inline-start" />
               Clear
             </Button>
@@ -317,7 +346,10 @@ export function BatchVerify() {
             )}
             {running && total > 0 && (
               <div className="min-w-48 flex-1">
-                <Progress value={(completed / total) * 100} aria-label="Batch progress" />
+                <Progress
+                  value={(completed / total) * 100}
+                  aria-label="Batch progress"
+                />
               </div>
             )}
           </div>
@@ -389,7 +421,7 @@ export function BatchVerify() {
         open={detail !== null}
         onOpenChange={(open) => !open && setDetailIndex(null)}
       >
-        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-5xl">
           <DialogHeader>
             <DialogTitle>
               {detail?.row.application.brandName ?? "Verification report"}
@@ -397,7 +429,10 @@ export function BatchVerify() {
             <DialogDescription>{detail?.row.filename}</DialogDescription>
           </DialogHeader>
           {detail?.state.phase === "done" && (
-            <ResultPanel result={detail.state.result} />
+            <ResultPanel
+              result={detail.state.result}
+              imageUrl={detailImageUrl}
+            />
           )}
         </DialogContent>
       </Dialog>
@@ -411,7 +446,9 @@ function ItemStatus({ state }: { state: ItemState }) {
       return <span className="text-sm text-muted-foreground">Queued</span>;
     case "missing_image":
       return (
-        <span className="text-sm text-destructive">Image file not uploaded</span>
+        <span className="text-sm text-destructive">
+          Image file not uploaded
+        </span>
       );
     case "processing":
       return (

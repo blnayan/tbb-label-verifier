@@ -49,6 +49,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { ImageDrop } from "@/components/verifier/image-drop";
 import { ResultPanel } from "@/components/verifier/result-panel";
+import { useObjectUrl } from "@/hooks/use-object-url";
 import { VerifyError, verifyLabelRequest } from "@/lib/client/api";
 import { downscaleImage } from "@/lib/client/downscale";
 import {
@@ -79,6 +80,10 @@ export function SingleVerify() {
   const [sampleId, setSampleId] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<VerificationResult | null>(null);
+  // The exact file the result was produced from, so the displayed image
+  // never drifts when the agent picks a different one afterwards.
+  const [verifiedFile, setVerifiedFile] = useState<File | null>(null);
+  const verifiedImageUrl = useObjectUrl(verifiedFile);
 
   useEffect(() => {
     fetchSampleManifest()
@@ -117,6 +122,7 @@ export function SingleVerify() {
     }
     setPending(true);
     setResult(null);
+    setVerifiedFile(null);
     try {
       const upload = await downscaleImage(file);
       const verification = await verifyLabelRequest(
@@ -126,9 +132,10 @@ export function SingleVerify() {
           alcoholPercent: Number(form.alcoholPercent.replace(/%$/, "")),
           netContents: form.netContents,
         },
-        upload,
+        upload
       );
       setResult(verification);
+      setVerifiedFile(upload);
     } catch (error) {
       const message =
         error instanceof VerifyError
@@ -144,168 +151,207 @@ export function SingleVerify() {
     setForm(EMPTY_FORM);
     setFile(null);
     setResult(null);
+    setVerifiedFile(null);
     setSampleId(null);
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
-      <Card>
-        <CardHeader>
-          <CardTitle>Application details</CardTitle>
-          <CardDescription>
-            Enter the values from the COLA application, then add the label
-            image.
-          </CardDescription>
-          {samples.length > 0 && (
-            <div className="flex items-center gap-2 pt-1">
-              <FlaskConicalIcon aria-hidden className="size-4 text-muted-foreground" />
-              <Select
-                value={sampleId}
-                onValueChange={(value) => {
-                  if (typeof value === "string") void loadSample(value);
-                }}
-              >
-                <SelectTrigger
-                  className="w-full"
-                  aria-label="Load a sample label"
-                  disabled={pending}
+    <div className="flex flex-col gap-6">
+      {/* The report takes the full width once a verdict exists, so the label
+          image can sit large beside the field-by-field results. */}
+      {result && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Verification report</CardTitle>
+            <CardDescription>
+              Each required label element, checked against the application —
+              shown beside the label image for manual review.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResultPanel result={result} imageUrl={verifiedImageUrl} />
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Application details</CardTitle>
+            <CardDescription>
+              Enter the values from the COLA application, then add the label
+              image.
+            </CardDescription>
+            {samples.length > 0 && (
+              <div className="flex items-center gap-2 pt-1">
+                <FlaskConicalIcon
+                  aria-hidden
+                  className="size-4 text-muted-foreground"
+                />
+                <Select
+                  value={sampleId}
+                  onValueChange={(value) => {
+                    if (typeof value === "string") void loadSample(value);
+                  }}
                 >
-                  <SelectValue placeholder="Try a sample label…" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {samples.map((sample) => (
-                      <SelectItem key={sample.id} value={sample.id}>
-                        {sample.name}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={onSubmit}>
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="brandName">Brand name</FieldLabel>
-                <Input
-                  id="brandName"
-                  value={form.brandName}
-                  onChange={(e) => set("brandName")(e.target.value)}
-                  placeholder="OLD TOM DISTILLERY"
-                  required
-                  disabled={pending}
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="classType">Class / type designation</FieldLabel>
-                <Input
-                  id="classType"
-                  value={form.classType}
-                  onChange={(e) => set("classType")(e.target.value)}
-                  placeholder="Kentucky Straight Bourbon Whiskey"
-                  required
-                  disabled={pending}
-                />
-              </Field>
-              <div className="grid gap-4 sm:grid-cols-2">
+                  <SelectTrigger
+                    className="w-full"
+                    aria-label="Load a sample label"
+                    disabled={pending}
+                  >
+                    <SelectValue placeholder="Try a sample label…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {samples.map((sample) => (
+                        <SelectItem key={sample.id} value={sample.id}>
+                          {sample.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={onSubmit}>
+              <FieldGroup>
                 <Field>
-                  <FieldLabel htmlFor="alcoholPercent">Alcohol content</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput
-                      id="alcoholPercent"
-                      value={form.alcoholPercent}
-                      onChange={(e) => set("alcoholPercent")(e.target.value)}
-                      placeholder="45"
-                      inputMode="decimal"
-                      required
-                      disabled={pending}
-                    />
-                    <InputGroupAddon align="inline-end">
-                      <InputGroupText>% Alc./Vol.</InputGroupText>
-                    </InputGroupAddon>
-                  </InputGroup>
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="netContents">Net contents</FieldLabel>
+                  <FieldLabel htmlFor="brandName">Brand name</FieldLabel>
                   <Input
-                    id="netContents"
-                    value={form.netContents}
-                    onChange={(e) => set("netContents")(e.target.value)}
-                    placeholder="750 mL"
+                    id="brandName"
+                    value={form.brandName}
+                    onChange={(e) => set("brandName")(e.target.value)}
+                    placeholder="OLD TOM DISTILLERY"
                     required
                     disabled={pending}
                   />
                 </Field>
-              </div>
-              <Field>
-                <FieldLabel>Label image</FieldLabel>
-                <ImageDrop file={file} onFileChange={setFile} disabled={pending} />
-                <FieldDescription>
-                  The government warning is checked automatically — it must
-                  match the required text word-for-word.
-                </FieldDescription>
-              </Field>
-              <div className="flex items-center gap-3">
-                <Button type="submit" size="lg" disabled={pending} className="flex-1">
-                  {pending ? (
-                    <Spinner data-icon="inline-start" />
-                  ) : (
-                    <ScanSearchIcon data-icon="inline-start" />
-                  )}
-                  {pending ? "Checking label…" : "Verify label"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="lg"
-                  onClick={reset}
-                  disabled={pending}
-                >
-                  <RotateCcwIcon data-icon="inline-start" />
-                  Clear
-                </Button>
-              </div>
-            </FieldGroup>
-          </form>
-        </CardContent>
-      </Card>
+                <Field>
+                  <FieldLabel htmlFor="classType">
+                    Class / type designation
+                  </FieldLabel>
+                  <Input
+                    id="classType"
+                    value={form.classType}
+                    onChange={(e) => set("classType")(e.target.value)}
+                    placeholder="Kentucky Straight Bourbon Whiskey"
+                    required
+                    disabled={pending}
+                  />
+                </Field>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field>
+                    <FieldLabel htmlFor="alcoholPercent">
+                      Alcohol content
+                    </FieldLabel>
+                    <InputGroup>
+                      <InputGroupInput
+                        id="alcoholPercent"
+                        value={form.alcoholPercent}
+                        onChange={(e) => set("alcoholPercent")(e.target.value)}
+                        placeholder="45"
+                        inputMode="decimal"
+                        required
+                        disabled={pending}
+                      />
+                      <InputGroupAddon align="inline-end">
+                        <InputGroupText>% Alc./Vol.</InputGroupText>
+                      </InputGroupAddon>
+                    </InputGroup>
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="netContents">Net contents</FieldLabel>
+                    <Input
+                      id="netContents"
+                      value={form.netContents}
+                      onChange={(e) => set("netContents")(e.target.value)}
+                      placeholder="750 mL"
+                      required
+                      disabled={pending}
+                    />
+                  </Field>
+                </div>
+                <Field>
+                  <FieldLabel>Label image</FieldLabel>
+                  <ImageDrop
+                    file={file}
+                    onFileChange={setFile}
+                    disabled={pending}
+                  />
+                  <FieldDescription>
+                    The government warning is checked automatically — it must
+                    match the required text word-for-word.
+                  </FieldDescription>
+                </Field>
+                <div className="flex items-center gap-3">
+                  <Button
+                    type="submit"
+                    size="lg"
+                    disabled={pending}
+                    className="flex-1"
+                  >
+                    {pending ? (
+                      <Spinner data-icon="inline-start" />
+                    ) : (
+                      <ScanSearchIcon data-icon="inline-start" />
+                    )}
+                    {pending ? "Checking label…" : "Verify label"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="lg"
+                    onClick={reset}
+                    disabled={pending}
+                  >
+                    <RotateCcwIcon data-icon="inline-start" />
+                    Clear
+                  </Button>
+                </div>
+              </FieldGroup>
+            </form>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Verification report</CardTitle>
-          <CardDescription>
-            Each required label element, checked against the application.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {pending ? (
-            <div className="flex flex-col gap-3" aria-label="Checking the label">
-              <Skeleton className="h-7 w-32" />
-              <Skeleton className="h-20 w-full" />
-              <Skeleton className="h-20 w-full" />
-              <Skeleton className="h-20 w-full" />
-            </div>
-          ) : result ? (
-            <ResultPanel result={result} />
-          ) : (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <ScanSearchIcon />
-                </EmptyMedia>
-                <EmptyTitle>No label checked yet</EmptyTitle>
-                <EmptyDescription>
-                  Fill in the application details, add the label image, and
-                  select “Verify label”. Results arrive in a few seconds.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          )}
-        </CardContent>
-      </Card>
+        {!result && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Verification report</CardTitle>
+              <CardDescription>
+                Each required label element, checked against the application.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {pending ? (
+                <div
+                  className="flex flex-col gap-3"
+                  aria-label="Checking the label"
+                >
+                  <Skeleton className="h-7 w-32" />
+                  <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-20 w-full" />
+                </div>
+              ) : (
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <ScanSearchIcon />
+                    </EmptyMedia>
+                    <EmptyTitle>No label checked yet</EmptyTitle>
+                    <EmptyDescription>
+                      Fill in the application details, add the label image, and
+                      select “Verify label”. Results arrive in a few seconds.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
