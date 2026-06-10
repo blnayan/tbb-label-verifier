@@ -200,6 +200,54 @@ const SAMPLES = [
       accent: "#2e5f5c",
     }),
   },
+  {
+    file: "wrong-net-contents.png",
+    svg: labelSvg({
+      brand: "BLACKWATER BAY",
+      classType: "Spiced Rum",
+      abvText: "35% Alc./Vol. (70 Proof)",
+      netText: "375 mL", // application will say 750 mL
+      warning: WARNING,
+      bg: "#efe6f0",
+      accent: "#5e3a6e",
+    }),
+  },
+  {
+    file: "wrong-brand.png",
+    svg: labelSvg({
+      brand: "EAGLE HOLLOW", // application will say EAGLE HARBOR
+      classType: "Blended Canadian Whisky",
+      abvText: "40% Alc./Vol. (80 Proof)",
+      netText: "750 mL",
+      warning: WARNING,
+      bg: "#f0ece2",
+      accent: "#6e5a2e",
+    }),
+  },
+  {
+    file: "proof-only.png",
+    svg: labelSvg({
+      brand: "CARTWRIGHT & SONS",
+      classType: "Tennessee Whiskey",
+      abvText: "90 PROOF", // no percentage printed — proof = 2 x ABV
+      netText: "750 mL",
+      warning: WARNING,
+      bg: "#f1e8da",
+      accent: "#8a5a2e",
+    }),
+  },
+  {
+    file: "unit-mismatch-cl.png",
+    svg: labelSvg({
+      brand: "VIGNETO DEL SOLE",
+      classType: "Pinot Grigio",
+      abvText: "12.5% Alc./Vol.",
+      netText: "75 cl", // application will say 750 mL — same volume
+      warning: WARNING,
+      bg: "#eef2e6",
+      accent: "#5a7a3a",
+    }),
+  },
 ];
 
 await mkdir(OUT_DIR, { recursive: true });
