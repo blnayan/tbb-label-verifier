@@ -25,6 +25,17 @@ export function extractionModel(): string {
   return process.env.ANTHROPIC_MODEL || DEFAULT_MODEL;
 }
 
+/**
+ * Transcription should be as deterministic as the API allows, so the same
+ * photo gives the same reading on every run. Opus 4.7+ and Fable removed
+ * sampling parameters entirely (sending temperature returns a 400), so the
+ * pin only applies to models that still accept it.
+ */
+export function temperatureFor(model: string): number | undefined {
+  if (/opus-4-[7-9]|fable/.test(model)) return undefined;
+  return 0;
+}
+
 const labelExtractionSchema = z.object({
   isAlcoholLabel: z
     .boolean()
@@ -44,7 +55,7 @@ const labelExtractionSchema = z.object({
     .string()
     .nullable()
     .describe(
-      'The class/type designation exactly as printed, e.g. "Kentucky Straight Bourbon Whiskey".',
+      'The beverage class/type designation exactly as printed, e.g. "Kentucky Straight Bourbon Whiskey", "Vodka With Natural Flavors", "White Wine", "India Pale Ale". When several candidates appear, return the explicit beverage class statement — not appellations, varietals, or fanciful names (for a wine printed with both "SOAVE" and "WHITE WINE", return "WHITE WINE").',
     ),
   alcoholStatement: z
     .string()
@@ -120,9 +131,11 @@ function getClient(): Anthropic {
 export async function extractLabel(
   input: ExtractionInput,
 ): Promise<LabelExtraction> {
+  const model = extractionModel();
   const response = await getClient().messages.parse({
-    model: extractionModel(),
+    model,
     max_tokens: 2048,
+    temperature: temperatureFor(model),
     system: SYSTEM_PROMPT,
     messages: [
       {
