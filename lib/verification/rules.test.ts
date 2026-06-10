@@ -85,6 +85,10 @@ describe("parseAbv", () => {
   it("handles mixed-number fractions", () => {
     expect(parseAbv("4 3/8% BY VOLUME")).toBe(4.375);
   });
+
+  it("rejects a zero-denominator fraction instead of returning Infinity", () => {
+    expect(parseAbv("5/0% ALC. BY VOL.")).toBeNull();
+  });
 });
 
 describe("compareAbv", () => {

@@ -111,8 +111,11 @@ export function parseAbv(text: string): number | null {
   const candidates: { value: number; context: string }[] = [];
   const pctRe = /(\d+(?:\.\d+)?(?:\s+\d+\/\d+)?|\d+\/\d+)\s*%/g;
   for (const m of t.matchAll(pctRe)) {
+    const value = parseNumberWithFraction(m[1]);
+    // Guards against degenerate fractions like "5/0%" reading as Infinity.
+    if (!Number.isFinite(value)) continue;
     candidates.push({
-      value: parseNumberWithFraction(m[1]),
+      value,
       context: t.slice(m.index + m[0].length, m.index + m[0].length + 24),
     });
   }

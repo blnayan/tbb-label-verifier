@@ -39,5 +39,8 @@ export async function verifyLabelRequest(
         : `Verification failed (HTTP ${response.status}).`;
     throw new VerifyError(message, Boolean(body?.retryable));
   }
+  if (!body || typeof body !== "object") {
+    throw new VerifyError("The server returned an invalid response.", true);
+  }
   return body as VerificationResult;
 }
