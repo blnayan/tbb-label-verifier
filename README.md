@@ -1,0 +1,94 @@
+# TTB Label Verifier
+
+AI-assisted verification of alcohol beverage labels against COLA application
+data, built as a take-home prototype for the TTB Compliance Division.
+
+An agent enters what the application says (brand name, class/type, alcohol
+content, net contents), adds the label image, and gets a field-by-field
+report in a few seconds — including a word-for-word check of the mandatory
+government health warning (27 CFR part 16). A batch mode verifies a CSV of
+applications plus their label images in parallel.
+
+**How it works in one sentence:** Claude vision *transcribes* the label into
+structured JSON; deterministic TypeScript rules *decide* pass/fail. The AI
+never makes a compliance judgment — see [ARCHITECTURE.md](ARCHITECTURE.md).
+
+## Quick start
+
+Requirements: Node.js 20+ and an Anthropic API key.
+
+```bash
+npm install
+cp .env.example .env.local   # then put your ANTHROPIC_API_KEY in .env.local
+npm run dev
+```
+
+Open http://localhost:3000, pick **“Try a sample label…”**, and press
+**Verify label**. Or switch to **Batch upload** and press
+**Load sample batch**.
+
+## Environment variables
+
+| Variable | Required | Default | Purpose |
+| --- | --- | --- | --- |
+| `ANTHROPIC_API_KEY` | yes | — | Auth for the Claude API (label extraction). |
+| `ANTHROPIC_MODEL` | no | `claude-haiku-4-5` | Vision model used for extraction. Haiku 4.5 is the default because results must come back in ~5 seconds. |
+
+## Scripts
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Dev server on :3000 |
+| `npm run build` / `npm start` | Production build / serve |
+| `npm test` | Unit tests (Vitest) — rule engine, input validation, CSV parsing, concurrency pool |
+| `npm run lint` / `npm run typecheck` | ESLint / TypeScript |
+| `node scripts/generate-samples.mjs` | Regenerate the synthetic sample labels |
+
+## Sample dataset
+
+`public/samples/` contains eight labels — six synthetic (each encoding a
+compliance scenario from the stakeholder interviews: case-only brand
+differences, a title-case government warning, a wrong ABV, a missing warning,
+a reworded warning) and **two real approved labels from TTB's public COLA
+registry**. See [public/samples/SOURCES.md](public/samples/SOURCES.md).
+
+## Deployment (Docker, any VPS)
+
+The app is a single stateless container — no database, no volumes.
+
+```bash
+docker build -t tbb-label-verifier .
+docker run -d --name label-verifier \
+  -p 3000:3000 \
+  -e ANTHROPIC_API_KEY=sk-ant-... \
+  --restart unless-stopped \
+  tbb-label-verifier
+```
+
+Put your usual reverse proxy (Caddy/nginx/Traefik) in front for TLS. The
+container exposes port 3000 and needs outbound HTTPS to
+`api.anthropic.com` only.
+
+## Documentation
+
+| Document | Contents |
+| --- | --- |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | System design and the reasoning behind each decision |
+| [ASSUMPTIONS.md](ASSUMPTIONS.md) | Everything assumed that the requirements didn't spell out |
+| [docs/design/](docs/design/) | Design philosophy, one file per principle |
+
+## Approach, tools, trade-offs (summary)
+
+- **Stack:** Next.js 16 (App Router) + TypeScript + Tailwind v4 + shadcn/ui;
+  Claude Haiku 4.5 via the official Anthropic SDK with structured outputs
+  (zod-validated); Vitest. One deployable, no database.
+- **Core trade-off:** the AI is confined to transcription; all pass/fail
+  logic is deterministic, unit-tested TypeScript (78 tests). This makes
+  compliance behavior auditable and lets the model be swapped via env var.
+- **Latency:** fastest vision-capable model + client-side image downscaling
+  + one API call per label keeps verification inside the ~5s budget; batch
+  mode runs four labels concurrently.
+- **Known limitations** are listed at the end of
+  [ASSUMPTIONS.md](ASSUMPTIONS.md) — notably: five checked fields (not the
+  full mandatory set), one image per label, and bold-type detection is
+  advisory because it can't be judged reliably from a photo.
