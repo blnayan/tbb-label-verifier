@@ -36,14 +36,14 @@ One request per label. No database, no queue, no session state.
 The pipeline is split into two stages with a typed contract
 (`LabelExtraction`) between them:
 
-1. **Extraction** (`lib/verification/extract.ts`) — Claude reads the image
+1. **Extraction** (`src/lib/verification/extract.ts`) — Claude reads the image
    and returns verbatim transcriptions: brand name as printed, the complete
    alcohol statement, the warning text exactly as it appears (explicitly
    instructed *not* to autocorrect it to the statutory wording), plus
    readability and image-quality observations. Structured outputs with a
    zod schema make the response shape guaranteed-parseable.
 
-2. **Rules** (`lib/verification/rules.ts`) — pure TypeScript compares the
+2. **Rules** (`src/lib/verification/rules.ts`) — pure TypeScript compares the
    extraction against the application: statutory-text matching for the
    warning, caps check on the heading, normalized comparison for brand and
    class/type, unit-aware parsing for ABV (%, proof, by-weight vs by-volume,
@@ -134,16 +134,16 @@ percentage of any team is colorblind.
 
 | Path | Responsibility |
 | --- | --- |
-| `lib/verification/types.ts` | Domain types; the extraction/rules contract |
-| `lib/verification/extract.ts` | Claude vision call, zod schema, prompt |
-| `lib/verification/rules.ts` | All compliance logic (pure, tested) |
-| `lib/verification/verify.ts` | Orchestrator: extract → rules |
-| `lib/verification/input.ts` | Request validation (pure, tested) |
-| `lib/verification/batch.ts` | CSV parsing (pure, tested) |
-| `lib/client/pool.ts` | Browser-side concurrency pool (tested) |
-| `lib/client/downscale.ts` | Canvas downscale before upload |
-| `app/api/verify/route.ts` | HTTP shell: validate → verify → typed errors |
-| `components/verifier/*` | Single view, batch view, shared report panel |
+| `src/lib/verification/types.ts` | Domain types; the extraction/rules contract |
+| `src/lib/verification/extract.ts` | Claude vision call, zod schema, prompt |
+| `src/lib/verification/rules.ts` | All compliance logic (pure, tested) |
+| `src/lib/verification/verify.ts` | Orchestrator: extract → rules |
+| `src/lib/verification/input.ts` | Request validation (pure, tested) |
+| `src/lib/verification/batch.ts` | CSV parsing (pure, tested) |
+| `src/lib/client/pool.ts` | Browser-side concurrency pool (tested) |
+| `src/lib/client/downscale.ts` | Canvas downscale before upload |
+| `src/app/api/verify/route.ts` | HTTP shell: validate → verify → typed errors |
+| `src/components/verifier/*` | Single view, batch view, shared report panel |
 | `scripts/generate-samples.mjs` | Synthetic sample-label generator |
 
 ## Testing strategy
