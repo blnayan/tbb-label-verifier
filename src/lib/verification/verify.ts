@@ -1,5 +1,5 @@
 /**
- * Pipeline orchestrator: one Claude extraction call, then the deterministic
+ * Pipeline orchestrator: one vision-extraction call, then the deterministic
  * rule engine. Kept separate from the route handler so it can be reused
  * (CLI, batch workers) without HTTP.
  */

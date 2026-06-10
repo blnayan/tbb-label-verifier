@@ -2,7 +2,8 @@
  * Core domain types for label verification.
  *
  * The pipeline has two stages:
- *  1. Extraction — Claude vision reads the label image into a LabelExtraction.
+ *  1. Extraction — an OpenAI vision model reads the label image into a
+ *     LabelExtraction.
  *  2. Rules — deterministic TypeScript compares the extraction against the
  *     ApplicationData and produces a VerificationResult.
  */
@@ -19,7 +20,7 @@ export interface ApplicationData {
   netContents: string;
 }
 
-/** Structured output Claude returns after reading the label image. */
+/** Structured output the vision model returns after reading the label image. */
 export interface LabelExtraction {
   /** False if the image clearly isn't an alcohol beverage label. */
   isAlcoholLabel: boolean;
@@ -81,7 +82,7 @@ export interface VerificationResult {
   overall: OverallStatus;
   fields: FieldResult[];
   extraction: LabelExtraction;
-  /** Wall-clock milliseconds spent on the Claude extraction call. */
+  /** Wall-clock milliseconds spent on the vision extraction call. */
   extractionMs: number;
   /** Model that performed the extraction (for the audit trail). */
   model: string;

@@ -1,5 +1,5 @@
 /**
- * Claude vision extraction — the only AI-touching module in the pipeline.
+ * OpenAI vision extraction — the only AI-touching module in the pipeline.
  *
  * The model's job is narrow on purpose: transcribe what is physically printed
  * on the label into structured JSON. It does not decide pass/fail — that is
@@ -7,33 +7,36 @@
  * testable and the model is never asked to exercise regulatory judgment.
  */
 
-import Anthropic from "@anthropic-ai/sdk";
-import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
+import OpenAI from "openai";
+import { zodTextFormat } from "openai/helpers/zod";
 import { z } from "zod";
 
 import type { LabelExtraction } from "./types";
 
 /**
- * Haiku 4.5 by default: the assignment has a hard ~5 second budget per label
- * ("If we can't get results back in about 5 seconds, nobody's going to use
- * it") and extraction output is small, so the fastest vision-capable model
- * is the right default. Override with ANTHROPIC_MODEL for accuracy testing.
+ * gpt-5.4-mini by default. The assignment has a hard ~5 second budget per
+ * label ("If we can't get results back in about 5 seconds, nobody's going to
+ * use it"), which pointed at gpt-5.4-nano — but measured live, nano misreads
+ * the fine-print government warning on real labels (0/4 stable) while mini
+ * reads it 4/4 AND returns faster (~2.3–3.2s vs ~3.1–3.5s). Fastest model
+ * on paper isn't fastest in practice. Override with OPENAI_MODEL.
  */
-export const DEFAULT_MODEL = "claude-haiku-4-5";
+export const DEFAULT_MODEL = "gpt-5.4-mini";
 
 export function extractionModel(): string {
-  return process.env.ANTHROPIC_MODEL || DEFAULT_MODEL;
+  return process.env.OPENAI_MODEL || DEFAULT_MODEL;
 }
 
 /**
- * Transcription should be as deterministic as the API allows, so the same
- * photo gives the same reading on every run. Opus 4.7+ and Fable removed
- * sampling parameters entirely (sending temperature returns a 400), so the
- * pin only applies to models that still accept it.
+ * GPT-5.4 models are reasoning models; transcription needs no deliberation,
+ * and "none" measured ~1s faster than "low" with identical extractions.
+ * Override with OPENAI_REASONING_EFFORT — e.g. newer tiers (gpt-5.5) drop
+ * "none" and want "low".
  */
-export function temperatureFor(model: string): number | undefined {
-  if (/opus-4-[7-9]|fable/.test(model)) return undefined;
-  return 0;
+export const DEFAULT_REASONING_EFFORT = "none";
+
+export function reasoningEffort(): string {
+  return process.env.OPENAI_REASONING_EFFORT || DEFAULT_REASONING_EFFORT;
 }
 
 const labelExtractionSchema = z.object({
@@ -75,7 +78,7 @@ const labelExtractionSchema = z.object({
       .string()
       .nullable()
       .describe(
-        "The warning transcribed exactly as printed: preserve capitalization, punctuation, and the (1)/(2) numbering. Do NOT correct it to the standard wording — transcribe what is actually printed.",
+        'The warning transcribed exactly as printed: preserve capitalization, punctuation, and the (1)/(2) numbering. Start at the first word of the warning — if a "GOVERNMENT WARNING" heading is printed, it is part of the text and must be included. Do NOT correct it to the standard wording — transcribe what is actually printed.',
       ),
     headingAllCaps: z
       .boolean()
@@ -106,7 +109,7 @@ Rules:
 - Transcribe verbatim. Preserve capitalization, punctuation, apostrophes, and numbering exactly as printed. Never normalize, correct, or autocomplete text to what it "should" say.
 - Labels are often photographed at an angle, with glare, curvature, or poor lighting. Read carefully through these artifacts, and reflect genuine uncertainty in the readability field rather than guessing.
 - If a field is absent or illegible, return null for it rather than inventing a value.
-- The government warning matters most: transcribe every word of it exactly as printed, including any deviations from the standard wording.`;
+- The government warning matters most: transcribe every word of it exactly as printed, including any deviations from the standard wording. Include its heading (e.g. "GOVERNMENT WARNING:") in the transcription when one is printed — never drop it.`;
 
 export type SupportedImageMediaType =
   | "image/jpeg"
@@ -119,49 +122,52 @@ export interface ExtractionInput {
   mediaType: SupportedImageMediaType;
 }
 
-let client: Anthropic | null = null;
-function getClient(): Anthropic {
+/** The Responses API takes images as data URLs rather than raw base64. */
+export function imageDataUrl(input: ExtractionInput): string {
+  return `data:${input.mediaType};base64,${input.imageBase64}`;
+}
+
+let client: OpenAI | null = null;
+function getClient(): OpenAI {
   if (!client) {
-    client = new Anthropic({ maxRetries: 1, timeout: 30_000 });
+    client = new OpenAI({ maxRetries: 1, timeout: 30_000 });
   }
   return client;
 }
 
-/** Read the label image into a structured LabelExtraction via Claude vision. */
+/** Read the label image into a structured LabelExtraction via OpenAI vision. */
 export async function extractLabel(
   input: ExtractionInput,
 ): Promise<LabelExtraction> {
-  const model = extractionModel();
-  const response = await getClient().messages.parse({
-    model,
-    max_tokens: 2048,
-    temperature: temperatureFor(model),
-    system: SYSTEM_PROMPT,
-    messages: [
+  const response = await getClient().responses.parse({
+    model: extractionModel(),
+    reasoning: { effort: reasoningEffort() as "low" },
+    max_output_tokens: 4096,
+    instructions: SYSTEM_PROMPT,
+    input: [
       {
         role: "user",
         content: [
           {
-            type: "image",
-            source: {
-              type: "base64",
-              media_type: input.mediaType,
-              data: input.imageBase64,
-            },
+            type: "input_image",
+            image_url: imageDataUrl(input),
+            // Fine print (the government warning) needs full resolution —
+            // "auto" can sample the image down below legibility.
+            detail: "high",
           },
           {
-            type: "text",
+            type: "input_text",
             text: "Transcribe this alcohol beverage label into the requested structure.",
           },
         ],
       },
     ],
-    output_config: {
-      format: zodOutputFormat(labelExtractionSchema),
+    text: {
+      format: zodTextFormat(labelExtractionSchema, "label_extraction"),
     },
   });
 
-  const parsed = response.parsed_output;
+  const parsed = response.output_parsed;
   if (!parsed) {
     throw new Error("The model did not return a valid extraction.");
   }

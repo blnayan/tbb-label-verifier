@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { NextResponse } from "next/server";
 
 import { parseApplicationFields, validateImage } from "@/lib/verification/input";
@@ -18,9 +18,9 @@ export const maxDuration = 60;
  * stays stateless and per-label latency stays inside the 5s budget.
  */
 export async function POST(request: Request) {
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.OPENAI_API_KEY) {
     return NextResponse.json(
-      { error: "Server is missing the ANTHROPIC_API_KEY environment variable." },
+      { error: "Server is missing the OPENAI_API_KEY environment variable." },
       { status: 500 },
     );
   }
@@ -66,25 +66,25 @@ export async function POST(request: Request) {
     });
     return NextResponse.json(result);
   } catch (error) {
-    if (error instanceof Anthropic.AuthenticationError) {
+    if (error instanceof OpenAI.AuthenticationError) {
       return NextResponse.json(
-        { error: "The configured Anthropic API key was rejected." },
+        { error: "The configured OpenAI API key was rejected." },
         { status: 500 },
       );
     }
-    if (error instanceof Anthropic.RateLimitError) {
+    if (error instanceof OpenAI.RateLimitError) {
       return NextResponse.json(
         { error: "The AI service is rate limited — try again in a moment.", retryable: true },
         { status: 429 },
       );
     }
-    if (error instanceof Anthropic.APIConnectionError) {
+    if (error instanceof OpenAI.APIConnectionError) {
       return NextResponse.json(
         { error: "Could not reach the AI service — check the network and retry.", retryable: true },
         { status: 502 },
       );
     }
-    if (error instanceof Anthropic.APIError) {
+    if (error instanceof OpenAI.APIError) {
       return NextResponse.json(
         { error: `AI service error (${error.status}). Please retry.`, retryable: true },
         { status: 502 },
