@@ -20,7 +20,7 @@
 │      ▼                                                           │
 │   verify.ts ── orchestrator                                      │
 │      │                                                           │
-│      ├─► extract.ts ──► Claude (Haiku 4.5, vision +              │
+│      ├─► extract.ts ──► OpenAI (GPT-5.4 mini, vision +           │
 │      │                  zod structured output)                   │
 │      │       returns LabelExtraction (verbatim transcription)    │
 │      │                                                           │
@@ -36,12 +36,12 @@ One request per label. No database, no queue, no session state.
 The pipeline is split into two stages with a typed contract
 (`LabelExtraction`) between them:
 
-1. **Extraction** (`src/lib/verification/extract.ts`) — Claude reads the image
-   and returns verbatim transcriptions: brand name as printed, the complete
-   alcohol statement, the warning text exactly as it appears (explicitly
-   instructed *not* to autocorrect it to the statutory wording), plus
-   readability and image-quality observations. Structured outputs with a
-   zod schema make the response shape guaranteed-parseable.
+1. **Extraction** (`src/lib/verification/extract.ts`) — the vision model
+   reads the image and returns verbatim transcriptions: brand name as
+   printed, the complete alcohol statement, the warning text exactly as it
+   appears (explicitly instructed *not* to autocorrect it to the statutory
+   wording), plus readability and image-quality observations. Structured
+   outputs with a zod schema make the response shape guaranteed-parseable.
 
 2. **Rules** (`src/lib/verification/rules.ts`) — pure TypeScript compares the
    extraction against the application: statutory-text matching for the
@@ -63,7 +63,7 @@ Why this split, rather than asking the model "does this label match?":
   bug (fixable, testable). There is no "the AI just decided differently
   today."
 - **Model independence.** The model is a swappable transcriber
-  (`ANTHROPIC_MODEL` env var), not the owner of the compliance logic.
+  (`OPENAI_MODEL` env var), not the owner of the compliance logic.
 
 The same reasoning drives the trust UI: every field shows *expected*,
 *found*, and *why*, so the agent confirms in seconds instead of re-doing the
@@ -78,14 +78,18 @@ Next.js gives the API route, static sample assets, and the React UI in one
 stateless container — which also keeps the FedRAMP-flavored conversation
 simple if this ever moves toward a government environment.
 
-### Claude Haiku 4.5 with structured outputs
+### GPT-5.4 mini with structured outputs
 Sarah's interview sets a hard product constraint: ~5 seconds or agents fall
-back to eyeballing. Extraction output is small (~500 tokens), so latency is
-dominated by model speed; the fastest vision-capable model is the correct
-default, and accuracy on "read this label" is a transcription task, not a
-reasoning task. Structured outputs (zod schema, validated by the SDK) remove
-an entire class of parse-and-retry failure. The choice lives in one env var
-— evaluating Sonnet for accuracy is a config change, not a refactor.
+back to eyeballing. The default was chosen by measuring, not by spec sheet:
+gpt-5.4-nano is billed as the lowest-latency vision model, but live testing
+showed it misreads the fine-print government warning on real labels (0/4
+stable on a real TTB photo) *and* returns no faster than mini in practice
+(~3.1–3.5s vs mini's ~2.3–3.2s). gpt-5.4-mini reads the same label 4/4.
+Reasoning effort is pinned to "none" — transcription needs no deliberation,
+and "none" measured ~1s faster than "low" with identical output. Structured
+outputs (zod schema, validated by the SDK) remove an entire class of
+parse-and-retry failure. The choice lives in one env var — model swaps are a
+config change, not a refactor.
 
 ### Latency budget, end to end
 - Client downscales images to ≤1568px before upload (the API would downscale
@@ -135,7 +139,7 @@ percentage of any team is colorblind.
 | Path | Responsibility |
 | --- | --- |
 | `src/lib/verification/types.ts` | Domain types; the extraction/rules contract |
-| `src/lib/verification/extract.ts` | Claude vision call, zod schema, prompt |
+| `src/lib/verification/extract.ts` | OpenAI vision call, zod schema, prompt |
 | `src/lib/verification/rules.ts` | All compliance logic (pure, tested) |
 | `src/lib/verification/verify.ts` | Orchestrator: extract → rules |
 | `src/lib/verification/input.ts` | Request validation (pure, tested) |

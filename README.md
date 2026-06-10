@@ -9,17 +9,18 @@ report in a few seconds — including a word-for-word check of the mandatory
 government health warning (27 CFR part 16). A batch mode verifies a CSV of
 applications plus their label images in parallel.
 
-**How it works in one sentence:** Claude vision *transcribes* the label into
-structured JSON; deterministic TypeScript rules *decide* pass/fail. The AI
-never makes a compliance judgment — see [ARCHITECTURE.md](ARCHITECTURE.md).
+**How it works in one sentence:** an OpenAI vision model *transcribes* the
+label into structured JSON; deterministic TypeScript rules *decide*
+pass/fail. The AI never makes a compliance judgment — see
+[ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Quick start
 
-Requirements: Node.js 20+ and an Anthropic API key.
+Requirements: Node.js 20+ and an OpenAI API key.
 
 ```bash
 npm install
-cp .env.example .env.local   # then put your ANTHROPIC_API_KEY in .env.local
+cp .env.example .env.local   # then put your OPENAI_API_KEY in .env.local
 npm run dev
 ```
 
@@ -31,8 +32,9 @@ Open http://localhost:3000, pick **“Try a sample label…”**, and press
 
 | Variable | Required | Default | Purpose |
 | --- | --- | --- | --- |
-| `ANTHROPIC_API_KEY` | yes | — | Auth for the Claude API (label extraction). |
-| `ANTHROPIC_MODEL` | no | `claude-haiku-4-5` | Vision model used for extraction. Haiku 4.5 is the default because results must come back in ~5 seconds. |
+| `OPENAI_API_KEY` | yes | — | Auth for the OpenAI API (label extraction). |
+| `OPENAI_MODEL` | no | `gpt-5.4-mini` | Vision model used for extraction. Chosen by live measurement: reads real-label fine print reliably and came back faster than `gpt-5.4-nano`. |
+| `OPENAI_REASONING_EFFORT` | no | `none` | Reasoning effort for the extraction call — transcription needs no deliberation. Set to `low` for model tiers that don't accept `none` (e.g. gpt-5.5). |
 
 ## Scripts
 
@@ -60,14 +62,14 @@ The app is a single stateless container — no database, no volumes.
 docker build -t tbb-label-verifier .
 docker run -d --name label-verifier \
   -p 3000:3000 \
-  -e ANTHROPIC_API_KEY=sk-ant-... \
+  -e OPENAI_API_KEY=sk-... \
   --restart unless-stopped \
   tbb-label-verifier
 ```
 
 Put your usual reverse proxy (Caddy/nginx/Traefik) in front for TLS. The
 container exposes port 3000 and needs outbound HTTPS to
-`api.anthropic.com` only.
+`api.openai.com` only.
 
 ## Documentation
 
@@ -80,7 +82,7 @@ container exposes port 3000 and needs outbound HTTPS to
 ## Approach, tools, trade-offs (summary)
 
 - **Stack:** Next.js 16 (App Router) + TypeScript + Tailwind v4 + shadcn/ui;
-  Claude Haiku 4.5 via the official Anthropic SDK with structured outputs
+  GPT-5.4 mini via the official OpenAI SDK with structured outputs
   (zod-validated); Vitest. One deployable, no database.
 - **Core trade-off:** the AI is confined to transcription; all pass/fail
   logic is deterministic, unit-tested TypeScript (78 tests). This makes

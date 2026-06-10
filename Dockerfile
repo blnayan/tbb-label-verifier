@@ -1,7 +1,7 @@
 # Production image for any Docker host (VPS, etc.).
 #
 #   docker build -t tbb-label-verifier .
-#   docker run -d -p 3000:3000 -e ANTHROPIC_API_KEY=sk-ant-... tbb-label-verifier
+#   docker run -d -p 3000:3000 -e OPENAI_API_KEY=sk-... tbb-label-verifier
 
 FROM node:22-alpine AS deps
 WORKDIR /app

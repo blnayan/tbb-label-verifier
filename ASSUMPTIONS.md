@@ -76,10 +76,10 @@ Each entry says what was assumed, and why that reading was chosen.
     [ARCHITECTURE.md](ARCHITECTURE.md) and
     [docs/design/02-ai-boundary.md](docs/design/02-ai-boundary.md).
 
-13. **Claude Haiku 4.5 is the default model.** Sarah's 5-second requirement
+13. **GPT-5.4 mini is the default model.** Sarah's 5-second requirement
     is a hard product constraint ("nobody's going to use it"), and label
     transcription is a narrow task the fastest vision model handles well.
-    `ANTHROPIC_MODEL` overrides it without a code change.
+    `OPENAI_MODEL` overrides it without a code change.
 
 14. **No accounts, no persistence.** Marcus: "we're not storing anything
     sensitive for this exercise." Images are processed in memory and

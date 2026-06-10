@@ -1,7 +1,7 @@
 # The AI boundary: transcribe, don't judge
 
 The single most important line in this system is the one between the model
-and the rules. Claude answers exactly one question — *"what is physically
+and the rules. The vision model answers exactly one question — *"what is physically
 printed on this label?"* — and deterministic TypeScript answers the other —
 *"does that comply?"*.
 

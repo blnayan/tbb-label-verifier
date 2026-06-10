@@ -11,7 +11,7 @@ budget and spent it deliberately:
 
 | Budget item | Decision |
 | --- | --- |
-| Model inference | Haiku 4.5 — the fastest vision-capable Claude model. Extraction is transcription, not reasoning; paying Opus latency here buys nothing. |
+| Model inference | GPT-5.4 mini with reasoning effort "none" — chosen by measurement, not by spec sheet: nano is billed as fastest but misread real-label fine print and returned slower; mini reads it reliably in ~2-3s. Extraction is transcription, not reasoning; paying frontier-model latency here buys nothing. |
 | Upload time | Images are downscaled in the browser to 1568px before upload. The API would discard the extra pixels anyway; we just stop paying to ship them. |
 | Round trips | Exactly one model call per label. No OCR-then-LLM chains, no follow-up calls, no thinking mode. |
 | Parse failures | Structured outputs (zod schema) — the response is valid by construction, so there is no retry-on-bad-JSON tax. |
