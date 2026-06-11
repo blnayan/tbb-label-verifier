@@ -2,7 +2,9 @@
  * Generates the AI-designed portion of the sample dataset: synthetic alcohol
  * labels rendered from SVG to PNG, including deliberate compliance errors
  * drawn from the stakeholder interviews (title-case warning, ABV mismatch,
- * missing warning, reworded warning, case-only brand differences).
+ * missing warning, reworded warning, case-only brand differences) plus the
+ * mandatory-elements checks (a missing bottler statement; an imported
+ * Canadian whisky with importer and country-of-origin statements).
  *
  * Run: node scripts/generate-samples.mjs
  */
@@ -63,6 +65,8 @@ function labelSvg({
   classType,
   abvText,
   netText,
+  bottlerText = null,
+  originText = null,
   warning,
   warningHeadingBold = true,
   bg = "#f5efdf",
@@ -125,6 +129,8 @@ function labelSvg({
   <line x1="200" y1="${cursor + 10}" x2="700" y2="${cursor + 10}" stroke="${accent}" stroke-width="3"/>
   <text x="450" y="870" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="36" fill="${ink}">${escapeXml(abvText)}</text>
   <text x="450" y="925" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="36" fill="${ink}">${escapeXml(netText)}</text>
+  ${bottlerText ? `<text x="450" y="958" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="19" fill="${ink}">${escapeXml(bottlerText)}</text>` : ""}
+  ${originText ? `<text x="450" y="985" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="19" fill="${ink}">${escapeXml(originText)}</text>` : ""}
   ${warningBlock}
 </svg>`;
 }
@@ -137,6 +143,7 @@ const SAMPLES = [
       classType: "Kentucky Straight Bourbon Whiskey",
       abvText: "45% Alc./Vol. (90 Proof)",
       netText: "750 mL",
+      bottlerText: "BOTTLED BY OLD TOM DISTILLERY, BARDSTOWN, KY",
       warning: WARNING,
     }),
   },
@@ -147,6 +154,7 @@ const SAMPLES = [
       classType: "Red Wine",
       abvText: "13.5% Alc./Vol.",
       netText: "750 mL",
+      bottlerText: "VINTED AND BOTTLED BY STONE'S THROW CELLARS, WALLA WALLA, WA",
       warning: WARNING,
       bg: "#f2e9e4",
       accent: "#5b3a5e",
@@ -159,6 +167,7 @@ const SAMPLES = [
       classType: "Vodka",
       abvText: "40% Alc./Vol. (80 Proof)",
       netText: "750 mL",
+      bottlerText: "DISTILLED AND BOTTLED BY SILVER RIDGE DISTILLING CO., BOISE, ID",
       warning: TITLE_CASE_WARNING,
       bg: "#eef1f4",
       accent: "#32556e",
@@ -171,6 +180,7 @@ const SAMPLES = [
       classType: "Straight Rye Whiskey",
       abvText: "40% Alc./Vol. (80 Proof)", // application will say 45%
       netText: "750 mL",
+      bottlerText: "DISTILLED AND BOTTLED BY COPPER CREEK DISTILLERY, DENVER, CO",
       warning: WARNING,
       bg: "#f3ead8",
       accent: "#7a4b21",
@@ -183,6 +193,7 @@ const SAMPLES = [
       classType: "India Pale Ale",
       abvText: "6.5% Alc./Vol.",
       netText: "12 FL OZ",
+      bottlerText: "BREWED AND BOTTLED BY HARBOR LIGHT BREWING CO., PORTLAND, ME",
       warning: null,
       bg: "#e9f0e6",
       accent: "#3f6b3a",
@@ -195,6 +206,7 @@ const SAMPLES = [
       classType: "London Dry Gin",
       abvText: "47% Alc./Vol. (94 Proof)",
       netText: "750 mL",
+      bottlerText: "DISTILLED AND BOTTLED BY JUNIPER & PINE DISTILLERY, SEATTLE, WA",
       warning: REWORDED_WARNING,
       bg: "#eaf0ef",
       accent: "#2e5f5c",
@@ -207,6 +219,7 @@ const SAMPLES = [
       classType: "Spiced Rum",
       abvText: "35% Alc./Vol. (70 Proof)",
       netText: "375 mL", // application will say 750 mL
+      bottlerText: "BOTTLED BY BLACKWATER BAY RUM CO., SAVANNAH, GA",
       warning: WARNING,
       bg: "#efe6f0",
       accent: "#5e3a6e",
@@ -219,6 +232,8 @@ const SAMPLES = [
       classType: "Blended Canadian Whisky",
       abvText: "40% Alc./Vol. (80 Proof)",
       netText: "750 mL",
+      bottlerText: "IMPORTED BY EAGLE HARBOR IMPORTS, BUFFALO, NY",
+      originText: "PRODUCT OF CANADA",
       warning: WARNING,
       bg: "#f0ece2",
       accent: "#6e5a2e",
@@ -231,6 +246,7 @@ const SAMPLES = [
       classType: "Tennessee Whiskey",
       abvText: "90 PROOF", // no percentage printed — proof = 2 x ABV
       netText: "750 mL",
+      bottlerText: "DISTILLED AND BOTTLED BY CARTWRIGHT & SONS, LYNCHBURG, TN",
       warning: WARNING,
       bg: "#f1e8da",
       accent: "#8a5a2e",
@@ -243,9 +259,24 @@ const SAMPLES = [
       classType: "Pinot Grigio",
       abvText: "12.5% Alc./Vol.",
       netText: "75 cl", // application will say 750 mL — same volume
+      bottlerText: "PRODUCED AND BOTTLED BY VIGNETO DEL SOLE WINERY, HEALDSBURG, CA",
       warning: WARNING,
       bg: "#eef2e6",
       accent: "#5a7a3a",
+    }),
+  },
+  {
+    file: "no-bottler.png",
+    svg: labelSvg({
+      brand: "GLACIER PEAK",
+      classType: "American Dry Gin",
+      abvText: "42% Alc./Vol. (84 Proof)",
+      netText: "750 mL",
+      // No bottler/importer statement — required on every label, so the
+      // presence check flags this for review.
+      warning: WARNING,
+      bg: "#e8eef2",
+      accent: "#3a5a7a",
     }),
   },
 ];

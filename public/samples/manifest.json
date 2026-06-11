@@ -10,7 +10,8 @@
         "brandName": "OLD TOM DISTILLERY",
         "classType": "Kentucky Straight Bourbon Whiskey",
         "alcoholPercent": 45,
-        "netContents": "750 mL"
+        "netContents": "750 mL",
+        "bottlerNameAddress": "OLD TOM DISTILLERY, BARDSTOWN, KY"
       }
     },
     {
@@ -23,7 +24,8 @@
         "brandName": "MB LIQUORS",
         "classType": "VODKA WITH NATURAL FLAVORS",
         "alcoholPercent": 40,
-        "netContents": "750ML"
+        "netContents": "750ML",
+        "bottlerNameAddress": "UBLENDIT, LLC. SOQUEL, CA"
       }
     },
     {
@@ -34,9 +36,11 @@
       "source": "real",
       "application": {
         "brandName": "i PRANDI",
-        "classType": "White Wine",
+        "classType": "WHITE WINE",
         "alcoholPercent": 12,
-        "netContents": "750 mL"
+        "netContents": "750 mL",
+        "bottlerNameAddress": "MARCATO DIRECT Addison \u2013 IL 60101",
+        "countryOfOrigin": "Italy"
       }
     },
     {
@@ -49,7 +53,9 @@
         "brandName": "Rosso Toscana",
         "classType": "Red Wine",
         "alcoholPercent": 12.5,
-        "netContents": "750 ML"
+        "netContents": "750 ML",
+        "bottlerNameAddress": "LANTERNA Distributors, BALTIMORE, MD.",
+        "countryOfOrigin": "Italy"
       }
     },
     {
@@ -62,7 +68,9 @@
         "brandName": "GARAUDET PERE ET FILS",
         "classType": "White Table Wine",
         "alcoholPercent": 13.5,
-        "netContents": "750ml"
+        "netContents": "750ml",
+        "bottlerNameAddress": "Fass Selections, Inc. Irvine, California",
+        "countryOfOrigin": "France"
       }
     },
     {
@@ -75,7 +83,9 @@
         "brandName": "CHARLIE et HENRI",
         "classType": "PINOT NOIR",
         "alcoholPercent": 12.5,
-        "netContents": "750 ML"
+        "netContents": "750 ML",
+        "bottlerNameAddress": "LANTERNA Distributors, BALTIMORE, MD.",
+        "countryOfOrigin": "France"
       }
     },
     {
@@ -88,7 +98,9 @@
         "brandName": "Fran\u00e7ois Xavier Lambert",
         "classType": "RED WINE",
         "alcoholPercent": 14.5,
-        "netContents": "750ml."
+        "netContents": "750ml.",
+        "bottlerNameAddress": "VineCraft Selections, Troy, OH 45373",
+        "countryOfOrigin": "France"
       }
     },
     {
@@ -101,7 +113,8 @@
         "brandName": "EUROPEAN STANDARD",
         "classType": "HANDCRAFTED VODKA INFUSED WITH ALL - NATURAL COCONUT & VANILLA BEANS",
         "alcoholPercent": 30.0,
-        "netContents": "1 L"
+        "netContents": "1 L",
+        "bottlerNameAddress": "HERBESCO INC., WORCESTER, MA"
       }
     },
     {
@@ -114,20 +127,24 @@
         "brandName": "ZHENJIU\u00b7ZHEN 15",
         "classType": "SPIRITS DISTILLED FROM SORGHUM AND WHEAT",
         "alcoholPercent": 53.0,
-        "netContents": "100ML"
+        "netContents": "100ML",
+        "bottlerNameAddress": "CALIFORNIA WINE CELLARS INC. PLAINVIEW, NEW YORK 11803",
+        "countryOfOrigin": "China"
       }
     },
     {
       "id": "real-victoria-beer",
       "name": "Victoria beer (8 fl oz) \u2014 real TTB label",
       "image": "/samples/real-victoria-beer.jpg",
-      "description": "Real approved label from TTB's public COLA registry (TTB ID 14251001000304). Expected result: Pass or Needs review.",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 14251001000304). Imported product \u2014 also checks the importer's name/address and the country of origin statement. Expected result: Pass or Needs review.",
       "source": "real",
       "application": {
         "brandName": "Victoria",
         "classType": "BEER",
         "alcoholPercent": 4.0,
-        "netContents": "8 FL OZ"
+        "netContents": "8 FL OZ",
+        "bottlerNameAddress": "R.R. IMPORTACIONES INC 141 3RD ST, UNIT. # 143 Passaic. N.J. 07055-0000",
+        "countryOfOrigin": "Mexico"
       }
     },
     {
@@ -140,20 +157,24 @@
         "brandName": "MASTRI BIRRAI UMBRI",
         "classType": "ITALIAN PALE ALE",
         "alcoholPercent": 6.5,
-        "netContents": "CONTENTS 10.14 FL.OZ."
+        "netContents": "CONTENTS 10.14 FL.OZ.",
+        "bottlerNameAddress": "TITA ITALIAN IMPORT & EXPORT LLC MIAMI FL 33142",
+        "countryOfOrigin": "Italy"
       }
     },
     {
       "id": "real-tsarine-champagne",
       "name": "Tsarine Champagne extra-brut \u2014 real TTB label",
       "image": "/samples/real-tsarine-champagne.jpg",
-      "description": "Real approved label from TTB's public COLA registry (TTB ID 25064001000113). Expected result: Pass or Needs review.",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25064001000113). Imported product \u2014 also checks the importer's name/address and the country of origin statement. Expected result: Pass or Needs review.",
       "source": "real",
       "application": {
         "brandName": "TSARINE",
         "classType": "CHAMPAGNE EXTRA-BRUT",
         "alcoholPercent": 12.0,
-        "netContents": "NET CONTENTS 750 ml"
+        "netContents": "NET CONTENTS 750 ml",
+        "bottlerNameAddress": "BUFFALO PEAK SELECTIONS NEW YORK, NY",
+        "countryOfOrigin": "France"
       }
     },
     {
@@ -166,7 +187,9 @@
         "brandName": "CHATEAU MOUTON ROTHSCHILD",
         "classType": "RED BORDEAUX WINE",
         "alcoholPercent": 14.5,
-        "netContents": "NET CONTENTS 750ML"
+        "netContents": "NET CONTENTS 750ML",
+        "bottlerNameAddress": "MENDEZ & COMPANY INC., SAN JUAN, PUERTO RICO",
+        "countryOfOrigin": "France"
       }
     },
     {
@@ -179,20 +202,23 @@
         "brandName": "ZD WINES\u00ae",
         "classType": "Cabernet Sauvignon",
         "alcoholPercent": 14.5,
-        "netContents": "750mL"
+        "netContents": "750mL",
+        "bottlerNameAddress": "ZD WINES, LLC, NAPA, CA"
       }
     },
     {
       "id": "real-austerum-red",
       "name": "Austerum red wine \u2014 real TTB label",
       "image": "/samples/real-austerum-red.jpg",
-      "description": "Real approved label from TTB's public COLA registry (TTB ID 25142001000678). Expected result: Pass or Needs review.",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25142001000678). Imported product \u2014 also checks the importer's name/address and the country of origin statement. Expected result: Pass or Needs review.",
       "source": "real",
       "application": {
         "brandName": "Austerum",
         "classType": "Red wine",
         "alcoholPercent": 14.0,
-        "netContents": "750 ml"
+        "netContents": "750 ml",
+        "bottlerNameAddress": "TAVOLO VIGNETO, ST LOUIS MO",
+        "countryOfOrigin": "Italy"
       }
     },
     {
@@ -205,7 +231,8 @@
         "brandName": "Thee House of Harvey",
         "classType": "APPELLATION AMERICAN SPARKLING WINE",
         "alcoholPercent": 12.0,
-        "netContents": "750 ML"
+        "netContents": "750 ML",
+        "bottlerNameAddress": "WILD BLOSSOM MEADERY & WINERY CHICAGO, ILLINOIS"
       }
     },
     {
@@ -218,33 +245,37 @@
         "brandName": "SENTADA",
         "classType": "VINHO BRANCO . WHITE WINE",
         "alcoholPercent": 11.0,
-        "netContents": "750ML"
+        "netContents": "750ML",
+        "bottlerNameAddress": "SILVER LAKE IMPORTS, MIAMI, FL",
+        "countryOfOrigin": "Portugal"
       }
     },
     {
       "id": "real-jack-daniels-rye",
       "name": "Jack Daniel's Single Barrel Rye \u2014 real TTB label",
       "image": "/samples/real-jack-daniels-rye.jpg",
-      "description": "Real approved label from TTB's public COLA registry (TTB ID 25052001000168). Expected result: Pass or Needs review.",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25052001000168). Also checks the \"Distilled & Bottled by\" name/address statement. Expected result: Pass or Needs review.",
       "source": "real",
       "application": {
         "brandName": "Jack Daniel's",
         "classType": "Tennessee Rye Whiskey",
         "alcoholPercent": 47,
-        "netContents": "750 mL"
+        "netContents": "750 mL",
+        "bottlerNameAddress": "JACK DANIEL DISTILLERY, LYNCHBURG, TENN., U.S.A."
       }
     },
     {
       "id": "photo-austerum-red",
       "name": "Austerum red \u2014 photo conditions (real label)",
       "image": "/samples/photo-austerum-red.jpg",
-      "description": "Real TTB label (ID 25142001000678) re-rendered under simulated photo conditions: tilt, glare, uneven light, blur. Expected result: Pass or Needs review.",
+      "description": "Real TTB label (ID 25142001000678) re-rendered under simulated photo conditions: tilt, glare, uneven light, blur. Expected result: Pass or Needs review \u2014 and occasionally Issues found when the script brand lettering is misread, which is exactly the boundary this sample probes.",
       "source": "real",
       "application": {
         "brandName": "Austerum",
         "classType": "Red wine",
         "alcoholPercent": 14.0,
-        "netContents": "750 ml"
+        "netContents": "750 ml",
+        "bottlerNameAddress": "TAVOLO VIGNETO, ST LOUIS MO"
       }
     },
     {
@@ -257,7 +288,8 @@
         "brandName": "Victoria",
         "classType": "BEER",
         "alcoholPercent": 4.0,
-        "netContents": "8 FL OZ"
+        "netContents": "8 FL OZ",
+        "bottlerNameAddress": "R.R. IMPORTACIONES INC 141 3RD ST, UNIT. # 143 Passaic. N.J. 07055-0000"
       }
     },
     {
@@ -270,7 +302,8 @@
         "brandName": "Stone's Throw",
         "classType": "Red Wine",
         "alcoholPercent": 13.5,
-        "netContents": "750 mL"
+        "netContents": "750 mL",
+        "bottlerNameAddress": "STONE'S THROW CELLARS, WALLA WALLA, WA"
       }
     },
     {
@@ -283,7 +316,8 @@
         "brandName": "CARTWRIGHT & SONS",
         "classType": "Tennessee Whiskey",
         "alcoholPercent": 45,
-        "netContents": "750 mL"
+        "netContents": "750 mL",
+        "bottlerNameAddress": "CARTWRIGHT & SONS, LYNCHBURG, TN"
       }
     },
     {
@@ -296,7 +330,22 @@
         "brandName": "VIGNETO DEL SOLE",
         "classType": "Pinot Grigio",
         "alcoholPercent": 12.5,
-        "netContents": "750 mL"
+        "netContents": "750 mL",
+        "bottlerNameAddress": "VIGNETO DEL SOLE WINERY, HEALDSBURG, CA"
+      }
+    },
+    {
+      "id": "no-bottler",
+      "name": "Glacier Peak \u2014 no bottler statement (generated)",
+      "image": "/samples/no-bottler.png",
+      "description": "The application carries the bottler statement (it is required on TTB F 5100.31), but the label prints none \u2014 a name and address statement is mandatory on every label (27 CFR 5.66). Expected result: Issues found.",
+      "source": "generated",
+      "application": {
+        "brandName": "GLACIER PEAK",
+        "classType": "American Dry Gin",
+        "alcoholPercent": 42,
+        "netContents": "750 mL",
+        "bottlerNameAddress": "GLACIER PEAK DISTILLERY, LEAVENWORTH, WA"
       }
     },
     {
@@ -309,7 +358,8 @@
         "brandName": "SILVER RIDGE",
         "classType": "Vodka",
         "alcoholPercent": 40,
-        "netContents": "750 mL"
+        "netContents": "750 mL",
+        "bottlerNameAddress": "SILVER RIDGE DISTILLING CO., BOISE, ID"
       }
     },
     {
@@ -322,7 +372,8 @@
         "brandName": "COPPER CREEK",
         "classType": "Straight Rye Whiskey",
         "alcoholPercent": 45,
-        "netContents": "750 mL"
+        "netContents": "750 mL",
+        "bottlerNameAddress": "COPPER CREEK DISTILLERY, DENVER, CO"
       }
     },
     {
@@ -335,7 +386,8 @@
         "brandName": "HARBOR LIGHT",
         "classType": "India Pale Ale",
         "alcoholPercent": 6.5,
-        "netContents": "12 FL OZ"
+        "netContents": "12 FL OZ",
+        "bottlerNameAddress": "HARBOR LIGHT BREWING CO., PORTLAND, ME"
       }
     },
     {
@@ -348,7 +400,8 @@
         "brandName": "JUNIPER & PINE",
         "classType": "London Dry Gin",
         "alcoholPercent": 47,
-        "netContents": "750 mL"
+        "netContents": "750 mL",
+        "bottlerNameAddress": "JUNIPER & PINE DISTILLERY, SEATTLE, WA"
       }
     },
     {
@@ -361,20 +414,23 @@
         "brandName": "BLACKWATER BAY",
         "classType": "Spiced Rum",
         "alcoholPercent": 35,
-        "netContents": "750 mL"
+        "netContents": "750 mL",
+        "bottlerNameAddress": "BLACKWATER BAY RUM CO., SAVANNAH, GA"
       }
     },
     {
       "id": "wrong-brand",
       "name": "Eagle Hollow vs Eagle Harbor \u2014 wrong brand (generated)",
       "image": "/samples/wrong-brand.png",
-      "description": "Label prints EAGLE HOLLOW; the application says EAGLE HARBOR. Expected result: Issues found.",
+      "description": "Label prints EAGLE HOLLOW; the application says EAGLE HARBOR. Canadian whisky is a distinctive product of Canada, so the label is an import carrying \"IMPORTED BY\" and \"PRODUCT OF CANADA\" statements \u2014 both correct; only the brand is wrong. Expected result: Issues found.",
       "source": "generated",
       "application": {
         "brandName": "EAGLE HARBOR",
         "classType": "Blended Canadian Whisky",
         "alcoholPercent": 40,
-        "netContents": "750 mL"
+        "netContents": "750 mL",
+        "bottlerNameAddress": "EAGLE HARBOR IMPORTS, BUFFALO, NY",
+        "countryOfOrigin": "Canada"
       }
     },
     {
@@ -387,7 +443,8 @@
         "brandName": "Four Loko",
         "classType": "Alcoholic Beverage",
         "alcoholPercent": 13.9,
-        "netContents": "6.8 FL OZ"
+        "netContents": "6.8 FL OZ",
+        "bottlerNameAddress": "UNITED STATES DISTILLED PRODUCTS CO., PRINCETON, MN FOR PHUSION PROJECTS, LLC."
       }
     }
   ],
@@ -423,6 +480,7 @@
       "/samples/reworded-warning.png",
       "/samples/wrong-net-contents.png",
       "/samples/wrong-brand.png",
+      "/samples/no-bottler.png",
       "/samples/real-four-loko-shot.jpg"
     ]
   }

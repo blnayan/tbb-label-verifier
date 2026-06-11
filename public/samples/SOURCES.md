@@ -5,11 +5,12 @@
 `old-tom-clean.png`, `stones-throw-case.png`, `title-case-warning.png`,
 `wrong-abv.png`, `missing-warning.png`, `reworded-warning.png`,
 `wrong-net-contents.png`, `wrong-brand.png`, `proof-only.png`,
-`unit-mismatch-cl.png` are synthetic labels for fictional brands. Each
-encodes a specific compliance scenario (case-only brand differences, a
-title-case government warning, an ABV mismatch, a missing warning, a
-reworded warning, wrong net contents, wrong brand name, a proof-only
-alcohol statement, a cl-vs-mL unit difference). Regenerate with
+`unit-mismatch-cl.png`, `no-bottler.png` are synthetic labels for fictional
+brands. Each encodes a specific compliance scenario (case-only brand
+differences, a title-case government warning, an ABV mismatch, a missing
+warning, a reworded warning, wrong net contents, a wrong brand name on an
+imported Canadian whisky, a proof-only alcohol statement, a cl-vs-mL unit
+difference, a missing bottler statement). Regenerate with
 `node scripts/generate-samples.mjs`.
 
 ## Photo-condition variants (real labels, simulated photography)

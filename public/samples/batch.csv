@@ -1,31 +1,32 @@
-filename,brandName,classType,alcoholPercent,netContents
-old-tom-clean.png,OLD TOM DISTILLERY,Kentucky Straight Bourbon Whiskey,45,750 mL
-real-mb-liquors-vodka.jpg,MB LIQUORS,VODKA WITH NATURAL FLAVORS,40,750ML
-real-iprandi-soave.jpg,i PRANDI,White Wine,12,750 mL
-real-valle-etrusca-rosso.jpg,Rosso Toscana,Red Wine,12.5,750 ML
-real-garaudet-monthelie.jpg,GARAUDET PERE ET FILS,White Table Wine,13.5,750ml
-real-charlie-henri-pinot.jpg,CHARLIE et HENRI,PINOT NOIR,12.5,750 ML
-real-beaumes-de-venise.jpg,François Xavier Lambert,RED WINE,14.5,750ml.
-real-european-standard-vodka.png,EUROPEAN STANDARD,HANDCRAFTED VODKA INFUSED WITH ALL - NATURAL COCONUT & VANILLA BEANS,30.0,1 L
-real-zhenjiu-baijiu.png,ZHENJIU·ZHEN 15,SPIRITS DISTILLED FROM SORGHUM AND WHEAT,53.0,100ML
-real-victoria-beer.jpg,Victoria,BEER,4.0,8 FL OZ
-real-mastri-birrai-ipa.jpg,MASTRI BIRRAI UMBRI,ITALIAN PALE ALE,6.5,CONTENTS 10.14 FL.OZ.
-real-tsarine-champagne.jpg,TSARINE,CHAMPAGNE EXTRA-BRUT,12.0,NET CONTENTS 750 ml
-real-mouton-rothschild.png,CHATEAU MOUTON ROTHSCHILD,RED BORDEAUX WINE,14.5,NET CONTENTS 750ML
-real-zd-wines-cabernet.jpg,ZD WINES®,Cabernet Sauvignon,14.5,750mL
-real-austerum-red.jpg,Austerum,Red wine,14.0,750 ml
-real-house-of-harvey-sparkling.jpg,Thee House of Harvey,APPELLATION AMERICAN SPARKLING WINE,12.0,750 ML
-real-sentada-white.jpg,SENTADA,VINHO BRANCO . WHITE WINE,11.0,750ML
-real-jack-daniels-rye.jpg,Jack Daniel's,Tennessee Rye Whiskey,47,750 mL
-photo-austerum-red.jpg,Austerum,Red wine,14.0,750 ml
-photo-victoria-beer.jpg,Victoria,BEER,4.0,8 FL OZ
-stones-throw-case.png,Stone's Throw,Red Wine,13.5,750 mL
-proof-only.png,CARTWRIGHT & SONS,Tennessee Whiskey,45,750 mL
-unit-mismatch-cl.png,VIGNETO DEL SOLE,Pinot Grigio,12.5,750 mL
-title-case-warning.png,SILVER RIDGE,Vodka,40,750 mL
-wrong-abv.png,COPPER CREEK,Straight Rye Whiskey,45,750 mL
-missing-warning.png,HARBOR LIGHT,India Pale Ale,6.5,12 FL OZ
-reworded-warning.png,JUNIPER & PINE,London Dry Gin,47,750 mL
-wrong-net-contents.png,BLACKWATER BAY,Spiced Rum,35,750 mL
-wrong-brand.png,EAGLE HARBOR,Blended Canadian Whisky,40,750 mL
-real-four-loko-shot.jpg,Four Loko,Alcoholic Beverage,13.9,6.8 FL OZ
+filename,brandName,classType,alcoholPercent,netContents,bottlerNameAddress,imported,countryOfOrigin
+old-tom-clean.png,OLD TOM DISTILLERY,Kentucky Straight Bourbon Whiskey,45,750 mL,"OLD TOM DISTILLERY, BARDSTOWN, KY",no,
+real-mb-liquors-vodka.jpg,MB LIQUORS,VODKA WITH NATURAL FLAVORS,40,750ML,"UBLENDIT, LLC. SOQUEL, CA",no,
+real-iprandi-soave.jpg,i PRANDI,WHITE WINE,12,750 mL,MARCATO DIRECT Addison – IL 60101,yes,Italy
+real-valle-etrusca-rosso.jpg,Rosso Toscana,Red Wine,12.5,750 ML,"LANTERNA Distributors, BALTIMORE, MD.",yes,Italy
+real-garaudet-monthelie.jpg,GARAUDET PERE ET FILS,White Table Wine,13.5,750ml,"Fass Selections, Inc. Irvine, California",yes,France
+real-charlie-henri-pinot.jpg,CHARLIE et HENRI,PINOT NOIR,12.5,750 ML,"LANTERNA Distributors, BALTIMORE, MD.",yes,France
+real-beaumes-de-venise.jpg,François Xavier Lambert,RED WINE,14.5,750ml.,"VineCraft Selections, Troy, OH 45373",yes,France
+real-european-standard-vodka.png,EUROPEAN STANDARD,HANDCRAFTED VODKA INFUSED WITH ALL - NATURAL COCONUT & VANILLA BEANS,30.0,1 L,"HERBESCO INC., WORCESTER, MA",no,
+real-zhenjiu-baijiu.png,ZHENJIU·ZHEN 15,SPIRITS DISTILLED FROM SORGHUM AND WHEAT,53.0,100ML,"CALIFORNIA WINE CELLARS INC. PLAINVIEW, NEW YORK 11803",yes,China
+real-victoria-beer.jpg,Victoria,BEER,4.0,8 FL OZ,"R.R. IMPORTACIONES INC 141 3RD ST, UNIT. # 143 Passaic. N.J. 07055-0000",yes,Mexico
+real-mastri-birrai-ipa.jpg,MASTRI BIRRAI UMBRI,ITALIAN PALE ALE,6.5,CONTENTS 10.14 FL.OZ.,TITA ITALIAN IMPORT & EXPORT LLC MIAMI FL 33142,yes,Italy
+real-tsarine-champagne.jpg,TSARINE,CHAMPAGNE EXTRA-BRUT,12.0,NET CONTENTS 750 ml,"BUFFALO PEAK SELECTIONS NEW YORK, NY",yes,France
+real-mouton-rothschild.png,CHATEAU MOUTON ROTHSCHILD,RED BORDEAUX WINE,14.5,NET CONTENTS 750ML,"MENDEZ & COMPANY INC., SAN JUAN, PUERTO RICO",yes,France
+real-zd-wines-cabernet.jpg,ZD WINES®,Cabernet Sauvignon,14.5,750mL,"ZD WINES, LLC, NAPA, CA",no,
+real-austerum-red.jpg,Austerum,Red wine,14.0,750 ml,"TAVOLO VIGNETO, ST LOUIS MO",yes,Italy
+real-house-of-harvey-sparkling.jpg,Thee House of Harvey,APPELLATION AMERICAN SPARKLING WINE,12.0,750 ML,"WILD BLOSSOM MEADERY & WINERY CHICAGO, ILLINOIS",no,
+real-sentada-white.jpg,SENTADA,VINHO BRANCO . WHITE WINE,11.0,750ML,"SILVER LAKE IMPORTS, MIAMI, FL",yes,Portugal
+real-jack-daniels-rye.jpg,Jack Daniel's,Tennessee Rye Whiskey,47,750 mL,"JACK DANIEL DISTILLERY, LYNCHBURG, TENN., U.S.A.",no,
+photo-austerum-red.jpg,Austerum,Red wine,14.0,750 ml,"TAVOLO VIGNETO, ST LOUIS MO",,
+photo-victoria-beer.jpg,Victoria,BEER,4.0,8 FL OZ,"R.R. IMPORTACIONES INC 141 3RD ST, UNIT. # 143 Passaic. N.J. 07055-0000",,
+stones-throw-case.png,Stone's Throw,Red Wine,13.5,750 mL,"STONE'S THROW CELLARS, WALLA WALLA, WA",no,
+proof-only.png,CARTWRIGHT & SONS,Tennessee Whiskey,45,750 mL,"CARTWRIGHT & SONS, LYNCHBURG, TN",no,
+unit-mismatch-cl.png,VIGNETO DEL SOLE,Pinot Grigio,12.5,750 mL,"VIGNETO DEL SOLE WINERY, HEALDSBURG, CA",no,
+title-case-warning.png,SILVER RIDGE,Vodka,40,750 mL,"SILVER RIDGE DISTILLING CO., BOISE, ID",no,
+wrong-abv.png,COPPER CREEK,Straight Rye Whiskey,45,750 mL,"COPPER CREEK DISTILLERY, DENVER, CO",no,
+missing-warning.png,HARBOR LIGHT,India Pale Ale,6.5,12 FL OZ,"HARBOR LIGHT BREWING CO., PORTLAND, ME",no,
+reworded-warning.png,JUNIPER & PINE,London Dry Gin,47,750 mL,"JUNIPER & PINE DISTILLERY, SEATTLE, WA",no,
+wrong-net-contents.png,BLACKWATER BAY,Spiced Rum,35,750 mL,"BLACKWATER BAY RUM CO., SAVANNAH, GA",no,
+wrong-brand.png,EAGLE HARBOR,Blended Canadian Whisky,40,750 mL,"EAGLE HARBOR IMPORTS, BUFFALO, NY",yes,Canada
+no-bottler.png,GLACIER PEAK,American Dry Gin,42,750 mL,"GLACIER PEAK DISTILLERY, LEAVENWORTH, WA",no,
+real-four-loko-shot.jpg,Four Loko,Alcoholic Beverage,13.9,6.8 FL OZ,"UNITED STATES DISTILLED PRODUCTS CO., PRINCETON, MN FOR PHUSION PROJECTS, LLC.",no,
