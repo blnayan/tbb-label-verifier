@@ -295,6 +295,20 @@
       }
     },
     {
+      "id": "real-stillwater-debutante",
+      "name": "Stillwater Artisanal Debutante keg collar — arc-wrapped warning (real TTB label)",
+      "image": "/samples/real-stillwater-debutante.png",
+      "description": "Real round keg collar from a filled-out TTB F 5100.31 application (TTB ID 11364001000181). The government warning curves around the collar's arc with a keg-rupture CAUTION interleaved, and net contents are an unticked checkbox list of four keg sizes. Expected result: Issues found — the checkbox net contents go unread and the arc transcription drops a comma at its line break, so the warning reads as deviating. A hard-mode test of non-linear label text.",
+      "source": "real",
+      "application": {
+        "brandName": "Stillwater Artisanal",
+        "classType": "Ale",
+        "alcoholPercent": 6.8,
+        "netContents": "5.17 gal.",
+        "bottlerNameAddress": "Twelve Percent, Westminster, MD"
+      }
+    },
+    {
       "id": "photo-austerum-red",
       "name": "Austerum red \u2014 photo conditions (real label)",
       "image": "/samples/photo-austerum-red.jpg",
@@ -515,6 +529,7 @@
       "/samples/real-jack-daniels-rye.jpg",
       "/samples/real-barenjager-honey.png",
       "/samples/real-brouwerij-ipa.jpg",
+      "/samples/real-stillwater-debutante.png",
       "/samples/photo-austerum-red.jpg",
       "/samples/photo-victoria-beer.jpg",
       "/samples/stones-throw-case.png",

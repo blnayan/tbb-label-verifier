@@ -169,7 +169,7 @@ describe("parseBatchCsv", () => {
     )
     const { rows, errors } = parseBatchCsv(csv)
     expect(errors).toHaveLength(0)
-    expect(rows).toHaveLength(34)
+    expect(rows).toHaveLength(35)
     // Every application carries its bottler statement; the dataset must
     // also exercise the country-of-origin check.
     expect(rows.every((r) => r.application.bottlerNameAddress)).toBe(true)

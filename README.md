@@ -61,8 +61,8 @@ Results stream into the **Verifications** page live.
 
 ## Sample dataset
 
-`public/samples/` contains thirty-four labels: **twenty real labels**
-(beer, wine, spirits, imports — nineteen from TTB's public COLA registry
+`public/samples/` contains thirty-five labels: **twenty-one real labels**
+(beer, wine, spirits, imports — twenty from TTB's public COLA registry
 plus a brewery's keg-collar artwork; each paired with application data
 transcribed from the label, and one — Bärenjäger — with the entries from
 its actual application form), **two of

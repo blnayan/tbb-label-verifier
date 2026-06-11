@@ -49,6 +49,7 @@ applications, downloaded from TTB's public COLA registry
 | `real-jack-daniels-rye.jpg` | 25052001000168 | JACK DANIEL'S (Single Barrel Rye) |
 | `real-four-loko-shot.jpg` | 24152001000126 | FOUR LOKO (Shot, front panel) |
 | `real-barenjager-honey.png` | 11038001000725 | Bärenjäger (front + back panels) |
+| `real-stillwater-debutante.png` | 11364001000181 | Stillwater Artisanal (Debutante keg collar) |
 
 The application data paired with each real label in `manifest.json` was
 transcribed from the label itself (brand, class/type, ABV, net contents),
@@ -63,6 +64,18 @@ the form's own entries — brand `BARENJAGER`, net contents `50 MILLILITERS`
 diacritic folding and unit-wording differences against real form data.
 (The registry classifies it as "OTHER HERB & SEED CORDIALS/LIQUEURS"; the
 class/type designation printed on the label is "HONEY LIQUEUR".)
+
+`real-stillwater-debutante.png` also comes from a COLA application
+printout (TTB ID 11364001000181): a round 5.5-inch keg collar whose
+government warning curves around the arc with a keg-rupture CAUTION
+interleaved, and whose net contents are an unticked checkbox list of four
+keg sizes. The form's own entries differ from the manifest's: the form
+types STILLWATER ARTISANAL, fanciful name DEBUTANTE, all four keg sizes
+in box 12, and the trade name "Twelve Percent (Used on label)"; the
+manifest carries label-transcribed values so the stable failure is the
+hard-to-read arc, not data entry. It verifies as Issues found: the
+checkbox contents go unread and the arc transcription drops a comma at
+its line break.
 
 ## Other real labels
 
