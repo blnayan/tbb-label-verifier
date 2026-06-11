@@ -64,6 +64,13 @@ describe("compareText (brand name / class type)", () => {
     expect(result.status).toBe("close_match")
   })
 
+  it("punctuation without a following space is a close match, not a failure", () => {
+    // Real label prints "PLAINVIEW,NEW YORK" — stripping the comma must not
+    // glue the words together and turn a styling quirk into a mismatch.
+    const result = compareText("PLAINVIEW, NEW YORK 11803", "PLAINVIEW,NEW YORK 11803")
+    expect(result.status).toBe("close_match")
+  })
+
   it("missing label value reports not_found", () => {
     expect(compareText("OLD TOM", null).status).toBe("not_found")
   })
@@ -243,6 +250,16 @@ describe("compareNameAddress (bottler/producer/importer, 27 CFR 5.66 / 4.35 / 7.
         "US IMPORTER: TITA ITALIAN IMPORT & EXPORT LLC MIAMI FL 33142"
       ).status
     ).toBe("match")
+  })
+
+  it("missing space after a comma is a close match, not a failure", () => {
+    // Real COLA 25225001000521: the label prints "PLAINVIEW,NEW YORK 11803".
+    expect(
+      compareNameAddress(
+        "CALIFORNIA WINE CELLARS INC. PLAINVIEW, NEW YORK 11803",
+        "IMPORTED BY: CALIFORNIA WINE CELLARS INC. PLAINVIEW,NEW YORK 11803"
+      ).status
+    ).toBe("close_match")
   })
 
   it('tolerates a spaced colon after the phrase, as printed on real labels ("IMPORTED BY : …")', () => {

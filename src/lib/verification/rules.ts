@@ -73,6 +73,18 @@ export function compareText(
       note: "Same wording — differs only in capitalization or punctuation.",
     }
   }
+  // Compare characters alone — catches labels that drop the space after
+  // punctuation ("PLAINVIEW,NEW YORK"), where stripping the comma above
+  // glues the words together and a styling quirk would read as a mismatch.
+  if (
+    normalizeLoose(expected).replace(/ /g, "") ===
+    normalizeLoose(found).replace(/ /g, "")
+  ) {
+    return {
+      status: "close_match",
+      note: "Same characters — differs only in spacing or punctuation.",
+    }
+  }
   return {
     status: "mismatch",
     note: "Label text does not match the application.",
