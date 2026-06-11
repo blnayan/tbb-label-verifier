@@ -86,13 +86,13 @@ const labelExtractionSchema = z.object({
     present: z
       .boolean()
       .describe(
-        "Whether a government health warning statement appears anywhere on the label."
+        'Whether the government health warning statement — the one whose heading reads "GOVERNMENT WARNING" — appears anywhere on the label. Other caution or safety notices (keg-pressure CAUTION text, sulfite or allergen declarations) are NOT the government warning.'
       ),
     verbatimText: z
       .string()
       .nullable()
       .describe(
-        'The warning transcribed exactly as printed: preserve capitalization, punctuation, and the (1)/(2) numbering. Start at the first word of the warning — if a "GOVERNMENT WARNING" heading is printed, it is part of the text and must be included. Do NOT correct it to the standard wording — transcribe what is actually printed.'
+        'The government warning transcribed exactly as printed: preserve capitalization, punctuation, and the (1)/(2) numbering. Start at the first word of the warning — if a "GOVERNMENT WARNING" heading is printed, it is part of the text and must be included. Do NOT correct it to the standard wording — transcribe what is actually printed. If the label also prints other caution or safety text (e.g. "CAUTION: This keg…"), exclude it — transcribe only the government warning statement.'
       ),
     headingAllCaps: z
       .boolean()
@@ -123,7 +123,8 @@ Rules:
 - Transcribe verbatim. Preserve capitalization, punctuation, apostrophes, and numbering exactly as printed. Never normalize, correct, or autocomplete text to what it "should" say.
 - Labels are often photographed at an angle, with glare, curvature, or poor lighting. Read carefully through these artifacts, and reflect genuine uncertainty in the readability field rather than guessing.
 - If a field is absent or illegible, return null for it rather than inventing a value.
-- The government warning matters most: transcribe every word of it exactly as printed, including any deviations from the standard wording. Include its heading (e.g. "GOVERNMENT WARNING:") in the transcription when one is printed — never drop it.`
+- The government warning matters most: transcribe every word of it exactly as printed, including any deviations from the standard wording. Include its heading (e.g. "GOVERNMENT WARNING:") in the transcription when one is printed — never drop it.
+- Labels may print other caution or safety notices alongside it (keg-pressure CAUTION text, sulfite or allergen declarations). Those are NOT the government warning — report only the statement whose heading reads "GOVERNMENT WARNING", and never substitute another notice for it.`
 
 export type SupportedImageMediaType =
   | "image/jpeg"
