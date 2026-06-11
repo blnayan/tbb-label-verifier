@@ -1,48 +1,43 @@
-"use client";
+"use client"
 
 /**
- * Batch workflow ("Janet's feature"): a CSV pairs application data with image
+ * Batch upload ("Janet's feature"): a CSV pairs application data with image
  * filenames; the agent drops both in and the queue verifies in parallel —
- * four at a time, each label still inside the ~5 second budget.
+ * four at a time, each label still inside the ~5 second budget. The queue
+ * table is progress feedback only; the reports are worked on the Review
+ * page.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 import {
   FileSpreadsheetIcon,
   FlaskConicalIcon,
   ImagesIcon,
-  PlayIcon,
   RotateCcwIcon,
-  SearchIcon,
-} from "lucide-react";
-import { toast } from "sonner";
+  UploadIcon,
+} from "lucide-react"
+import { toast } from "sonner"
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui/card"
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/ui/empty";
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
-import { Progress } from "@/components/ui/progress";
-import { Spinner } from "@/components/ui/spinner";
+} from "@/components/ui/empty"
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
+import { Progress } from "@/components/ui/progress"
+import { Spinner } from "@/components/ui/spinner"
 import {
   Table,
   TableBody,
@@ -50,56 +45,56 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { ResultPanel } from "@/components/verifier/result-panel";
-import { OverallBadge } from "@/components/verifier/status";
-import { useObjectUrl } from "@/hooks/use-object-url";
-import { VerifyError, verifyLabelRequest } from "@/lib/client/api";
-import { downscaleImage } from "@/lib/client/downscale";
-import { runPool } from "@/lib/client/pool";
-import { fetchAsFile, fetchSampleManifest } from "@/lib/client/samples";
+} from "@/components/ui/table"
+import { OverallBadge } from "@/components/verifier/status"
+import { VerifyError, verifyLabelRequest } from "@/lib/client/api"
+import { downscaleImage } from "@/lib/client/downscale"
+import { saveVerification } from "@/lib/client/history"
+import { runPool } from "@/lib/client/pool"
+import { finishUpload, startUpload } from "@/lib/client/uploads"
+import { fetchAsFile, fetchSampleManifest } from "@/lib/client/samples"
 import {
   parseBatchCsv,
   type BatchRow,
   type BatchRowError,
-} from "@/lib/verification/batch";
-import type { VerificationResult } from "@/lib/verification/types";
+} from "@/lib/verification/batch"
+import type { VerificationResult } from "@/lib/verification/types"
 
 /** Keeps a 300-label dump from opening 300 simultaneous requests. */
-const CONCURRENCY = 4;
+const CONCURRENCY = 4
 
 type ItemState =
   | { phase: "queued" }
   | { phase: "missing_image" }
   | { phase: "processing" }
   | { phase: "done"; result: VerificationResult }
-  | { phase: "error"; message: string };
+  | { phase: "error"; message: string }
 
 interface BatchItem {
-  row: BatchRow;
-  state: ItemState;
+  row: BatchRow
+  state: ItemState
 }
 
 export function BatchVerify() {
-  const [items, setItems] = useState<BatchItem[]>([]);
-  const [csvErrors, setCsvErrors] = useState<BatchRowError[]>([]);
-  const [images, setImages] = useState<Map<string, File>>(new Map());
-  const [running, setRunning] = useState(false);
-  const [completed, setCompleted] = useState(0);
-  const [detailIndex, setDetailIndex] = useState<number | null>(null);
-  const [sampleAvailable, setSampleAvailable] = useState(false);
-  const [loadingSample, setLoadingSample] = useState(false);
+  const router = useRouter()
+  const [items, setItems] = useState<BatchItem[]>([])
+  const [csvErrors, setCsvErrors] = useState<BatchRowError[]>([])
+  const [images, setImages] = useState<Map<string, File>>(new Map())
+  const [running, setRunning] = useState(false)
+  const [completed, setCompleted] = useState(0)
+  const [sampleAvailable, setSampleAvailable] = useState(false)
+  const [loadingSample, setLoadingSample] = useState(false)
 
   useEffect(() => {
     fetchSampleManifest()
       .then((m) => setSampleAvailable(m.batch.images.length > 0))
-      .catch(() => {});
-  }, []);
+      .catch(() => {})
+  }, [])
 
   const ready = useMemo(
     () => items.filter((i) => i.state.phase === "queued").length,
     [items]
-  );
+  )
 
   function attachImages(
     rows: BatchRow[],
@@ -110,112 +105,131 @@ export function BatchVerify() {
       state: files.has(row.filename)
         ? { phase: "queued" }
         : { phase: "missing_image" },
-    }));
+    }))
   }
 
   async function onCsvChosen(file: File | undefined | null) {
-    if (!file) return;
-    const { rows, errors } = parseBatchCsv(await file.text());
-    setCsvErrors(errors);
-    setItems(attachImages(rows, images));
-    setCompleted(0);
+    if (!file) return
+    const { rows, errors } = parseBatchCsv(await file.text())
+    setCsvErrors(errors)
+    setItems(attachImages(rows, images))
+    setCompleted(0)
     if (rows.length === 0 && errors.length > 0) {
-      toast.error(errors[0].message);
+      toast.error(errors[0].message)
     }
   }
 
   function onImagesChosen(list: FileList | null) {
-    if (!list || list.length === 0) return;
-    const next = new Map(images);
-    for (const file of Array.from(list)) next.set(file.name, file);
-    setImages(next);
+    if (!list || list.length === 0) return
+    const next = new Map(images)
+    for (const file of Array.from(list)) next.set(file.name, file)
+    setImages(next)
     setItems((current) =>
       attachImages(
         current.map((i) => i.row),
         next
       )
-    );
+    )
   }
 
   async function loadSampleBatch() {
-    setLoadingSample(true);
+    setLoadingSample(true)
     try {
-      const manifest = await fetchSampleManifest();
+      const manifest = await fetchSampleManifest()
       const [csvFile, ...imageFiles] = await Promise.all([
         fetchAsFile(manifest.batch.csv),
         ...manifest.batch.images.map((url) => fetchAsFile(url)),
-      ]);
-      const next = new Map<string, File>();
-      for (const file of imageFiles) next.set(file.name, file);
-      setImages(next);
-      const { rows, errors } = parseBatchCsv(await csvFile.text());
-      setCsvErrors(errors);
-      setItems(attachImages(rows, next));
-      setCompleted(0);
+      ])
+      const next = new Map<string, File>()
+      for (const file of imageFiles) next.set(file.name, file)
+      setImages(next)
+      const { rows, errors } = parseBatchCsv(await csvFile.text())
+      setCsvErrors(errors)
+      setItems(attachImages(rows, next))
+      setCompleted(0)
     } catch {
-      toast.error("Could not load the sample batch.");
+      toast.error("Could not load the sample batch.")
     } finally {
-      setLoadingSample(false);
+      setLoadingSample(false)
     }
   }
 
   async function run() {
     const queue = items
       .map((item, index) => ({ item, index }))
-      .filter(({ item }) => item.state.phase === "queued");
-    if (queue.length === 0) return;
+      .filter(({ item }) => item.state.phase === "queued")
+    if (queue.length === 0) return
 
-    setRunning(true);
-    setCompleted(0);
+    setRunning(true)
+    setCompleted(0)
     setItems((current) =>
       current.map((item) =>
         item.state.phase === "queued"
           ? { ...item, state: { phase: "processing" } }
           : item
       )
-    );
+    )
 
     await runPool(
       queue,
       async ({ item, index }) => {
-        let state: ItemState;
+        const uploadId = startUpload({
+          source: "batch",
+          filename: item.row.filename,
+          application: item.row.application,
+        })
+        let state: ItemState
         try {
-          const original = images.get(item.row.filename);
-          if (!original) throw new VerifyError("Image file not found.");
-          const upload = await downscaleImage(original);
-          const result = await verifyLabelRequest(item.row.application, upload);
-          state = { phase: "done", result };
+          const original = images.get(item.row.filename)
+          if (!original) throw new VerifyError("Image file not found.")
+          const upload = await downscaleImage(original)
+          const result = await verifyLabelRequest(item.row.application, upload)
+          state = { phase: "done", result }
+          // History is a convenience — a storage failure must not fail the row.
+          await saveVerification({
+            source: "batch",
+            filename: item.row.filename,
+            application: item.row.application,
+            result,
+            image: upload,
+          }).catch(() => {})
         } catch (error) {
           state = {
             phase: "error",
             message:
               error instanceof Error ? error.message : "Verification failed.",
-          };
+          }
+        } finally {
+          finishUpload(uploadId)
         }
         setItems((current) =>
           current.map((it, i) => (i === index ? { ...it, state } : it))
-        );
+        )
       },
       CONCURRENCY,
       (done) => setCompleted(done)
-    );
+    )
 
-    setRunning(false);
+    setRunning(false)
+    toast.success(
+      `Batch finished — ${queue.length} label${queue.length === 1 ? "" : "s"} saved to Verifications.`,
+      {
+        action: {
+          label: "View",
+          onClick: () => router.push("/verifications"),
+        },
+      }
+    )
   }
 
   function reset() {
-    setItems([]);
-    setCsvErrors([]);
-    setImages(new Map());
-    setCompleted(0);
-    setDetailIndex(null);
+    setItems([])
+    setCsvErrors([])
+    setImages(new Map())
+    setCompleted(0)
   }
 
-  const total = items.filter((i) => i.state.phase !== "missing_image").length;
-  const detail = detailIndex !== null ? items[detailIndex] : null;
-  const detailImageUrl = useObjectUrl(
-    detail ? (images.get(detail.row.filename) ?? null) : null
-  );
+  const total = items.filter((i) => i.state.phase !== "missing_image").length
 
   return (
     <div className="flex flex-col gap-6">
@@ -225,7 +239,8 @@ export function BatchVerify() {
           <CardDescription>
             Upload a CSV of application data plus the label images it refers to.
             Columns: filename, brandName, classType, alcoholPercent,
-            netContents.
+            netContents, bottlerNameAddress — plus optional imported (yes/no)
+            and countryOfOrigin (required when imported is yes).
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
@@ -314,11 +329,11 @@ export function BatchVerify() {
               {running ? (
                 <Spinner data-icon="inline-start" />
               ) : (
-                <PlayIcon data-icon="inline-start" />
+                <UploadIcon data-icon="inline-start" />
               )}
               {running
-                ? `Checking ${completed} of ${total}…`
-                : `Verify ${ready > 0 ? ready : ""} label${ready === 1 ? "" : "s"}`}
+                ? `Verifying ${completed} of ${total}…`
+                : `Upload ${ready > 0 ? ready : ""} label${ready === 1 ? "" : "s"}`}
             </Button>
             <Button
               variant="outline"
@@ -374,7 +389,8 @@ export function BatchVerify() {
           <CardHeader>
             <CardTitle>Queue</CardTitle>
             <CardDescription>
-              Select a row to see its full verification report.
+              Progress for this batch. Completed verifications are saved to the
+              Verifications page, where reports are worked.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -384,7 +400,6 @@ export function BatchVerify() {
                   <TableHead>Image</TableHead>
                   <TableHead>Brand name</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Report</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -397,18 +412,6 @@ export function BatchVerify() {
                     <TableCell>
                       <ItemStatus state={item.state} />
                     </TableCell>
-                    <TableCell className="text-right">
-                      {item.state.phase === "done" && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setDetailIndex(index)}
-                        >
-                          <SearchIcon data-icon="inline-start" />
-                          View
-                        </Button>
-                      )}
-                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -416,49 +419,29 @@ export function BatchVerify() {
           </CardContent>
         </Card>
       )}
-
-      <Dialog
-        open={detail !== null}
-        onOpenChange={(open) => !open && setDetailIndex(null)}
-      >
-        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-5xl">
-          <DialogHeader>
-            <DialogTitle>
-              {detail?.row.application.brandName ?? "Verification report"}
-            </DialogTitle>
-            <DialogDescription>{detail?.row.filename}</DialogDescription>
-          </DialogHeader>
-          {detail?.state.phase === "done" && (
-            <ResultPanel
-              result={detail.state.result}
-              imageUrl={detailImageUrl}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
-  );
+  )
 }
 
 function ItemStatus({ state }: { state: ItemState }) {
   switch (state.phase) {
     case "queued":
-      return <span className="text-sm text-muted-foreground">Queued</span>;
+      return <span className="text-sm text-muted-foreground">Queued</span>
     case "missing_image":
       return (
         <span className="text-sm text-destructive">
           Image file not uploaded
         </span>
-      );
+      )
     case "processing":
       return (
         <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
           <Spinner className="size-4" /> Checking…
         </span>
-      );
+      )
     case "done":
-      return <OverallBadge status={state.result.overall} />;
+      return <OverallBadge status={state.result.overall} />
     case "error":
-      return <span className="text-sm text-destructive">{state.message}</span>;
+      return <span className="text-sm text-destructive">{state.message}</span>
   }
 }
