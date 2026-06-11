@@ -265,6 +265,21 @@
       }
     },
     {
+      "id": "real-barenjager-honey",
+      "name": "Bärenjäger honey liqueur — real COLA application (front + back)",
+      "image": "/samples/real-barenjager-honey.png",
+      "description": "Both label panels from a real filled-out TTB F 5100.31 application (TTB ID 11038001000725), extracted from the COLA PDF. The application data is the form's own entries: it types BARENJAGER and 50 MILLILITERS where the label prints Bärenjäger and 50ML. Expected result: Needs review (same content, different styling), not a failure.",
+      "source": "real",
+      "application": {
+        "brandName": "BARENJAGER",
+        "classType": "HONEY LIQUEUR",
+        "alcoholPercent": 35,
+        "netContents": "50 MILLILITERS",
+        "bottlerNameAddress": "SIDNEY FRANK IMPORTING CO., INC. NEW ROCHELLE, NY",
+        "countryOfOrigin": "Germany"
+      }
+    },
+    {
       "id": "photo-austerum-red",
       "name": "Austerum red \u2014 photo conditions (real label)",
       "image": "/samples/photo-austerum-red.jpg",
@@ -469,6 +484,7 @@
       "/samples/real-house-of-harvey-sparkling.jpg",
       "/samples/real-sentada-white.jpg",
       "/samples/real-jack-daniels-rye.jpg",
+      "/samples/real-barenjager-honey.png",
       "/samples/photo-austerum-red.jpg",
       "/samples/photo-victoria-beer.jpg",
       "/samples/stones-throw-case.png",

@@ -47,10 +47,21 @@ applications, downloaded from TTB's public COLA registry
 | `real-beaumes-de-venise.jpg` | 25116001000011 | François Xavier Lambert |
 | `real-jack-daniels-rye.jpg` | 25052001000168 | JACK DANIEL'S (Single Barrel Rye) |
 | `real-four-loko-shot.jpg` | 24152001000126 | FOUR LOKO (Shot, front panel) |
+| `real-barenjager-honey.png` | 11038001000725 | Bärenjäger (front + back panels) |
 
 The application data paired with each real label in `manifest.json` was
 transcribed from the label itself (brand, class/type, ABV, net contents),
 so each verifies as Pass or Needs review — except `real-four-loko-shot.jpg`, which is the front panel of a wrap-around label whose government warning is printed on the back, so it intentionally verifies as Issues found.
+
+`real-barenjager-honey.png` is different: its images AND application data
+come from the same filled-out TTB F 5100.31 application (a public COLA
+registry printout, TTB ID 11038001000725). The front and back label panels
+embedded in the PDF are composited side by side, and the manifest carries
+the form's own entries — brand `BARENJAGER`, net contents `50 MILLILITERS`
+— where the label prints `Bärenjäger` and `50ML`, so it exercises
+diacritic folding and unit-wording differences against real form data.
+(The registry classifies it as "OTHER HERB & SEED CORDIALS/LIQUEURS"; the
+class/type designation printed on the label is "HONEY LIQUEUR".)
 
 COLA label images are public records published by the U.S. Treasury's
 Alcohol and Tobacco Tax and Trade Bureau. They are included here solely as
