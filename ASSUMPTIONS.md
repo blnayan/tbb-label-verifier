@@ -5,14 +5,32 @@ Each entry says what was assumed, and why that reading was chosen.
 
 ## Scope of verification
 
-1. **Five fields are checked, not the full mandatory set.** The brief lists
-   seven common mandatory elements, but the "Sample Label Fields" section
-   defines the concrete data the app receives: brand name, class/type,
-   alcohol content, net contents, and the government warning. Those five are
-   what the prototype verifies. Bottler name/address and country of origin
-   are extracted-adjacent (the model sees them) but not compared, because
-   the application-side data model in the brief doesn't include them.
-   Adding a field is one entry in the extraction schema plus one rule.
+1. **Six fields are always checked; country of origin is added for
+   imports.** The "Sample Label Fields" section defines the concrete data
+   every application carries: brand name, class/type, alcohol content, net
+   contents, and the government warning. The brief's TTB-requirements list
+   (and ttb.gov) adds two more mandatory elements, which the brief's
+   application data model doesn't include:
+   - **Bottler/producer/importer name and address** (27 CFR 5.66 for
+     spirits, 4.35 for wine, 7.66 for malt beverages; for imports the U.S.
+     importer's statement, 5.69/7.69). Mandatory on every label — and on
+     the application itself (TTB F 5100.31 requires the applicant's name
+     and address) — so it is a required input and always compared. The regs
+     require a qualifying phrase ("Bottled by", "Imported by", noun-style
+     "US Importer:", …) before the name, so the comparison strips it; extra
+     address detail on the label (street, ZIP — permitted but not required)
+     downgrades to "Needs review" rather than failing. A label with no
+     statement at all fails. State abbreviation variants ("KY" vs
+     "Kentucky") are not normalized — they surface as a close match for
+     human judgment.
+   - **Country of origin** for imports (CBP regs, 19 CFR 134; TTB's 2020
+     modernization rule confirmed it applies to all imported commodities).
+     Several phrasings are acceptable ("Product of France", "Produced in
+     France"), so the check is that the label's statement names the expected
+     country. The application marks each product domestic or imported:
+     imports must name a country (refusing to silently skip a mandatory
+     check), domestic products skip it. Where the flag isn't given (older
+     CSVs, direct API calls), a present country implies an import.
 
 2. **The application data is keyed in by the agent (or supplied via CSV).**
    Marcus was explicit that this prototype must not integrate with COLA, so
@@ -56,7 +74,10 @@ Each entry says what was assumed, and why that reading was chosen.
    transparency.** Dave's "STONE'S THROW vs Stone's Throw" example is
    treated as a close match: flagged for review with an explanatory note,
    never silently passed and never auto-failed. Substantive word differences
-   fail.
+   fail. Class/type gets one extra tolerance: labels often print an
+   appellation with the class designation ("Barbera d'Asti D.O.C.G. Red
+   wine" for an application's "Red wine"), so a class line that contains the
+   expected designation is a close match for review, not a failure.
 
 10. **ABV must match the application exactly** (no tolerance beyond float
     rounding). TTB tolerances govern label-vs-product, not
@@ -66,8 +87,9 @@ Each entry says what was assumed, and why that reading was chosen.
 
 11. **Net contents are compared by volume, not by string.** "75 cl" vs
     "750 mL" is the same quantity — that passes with a note rather than
-    failing. Standard-of-fill validation (whether 750 mL is an authorized
-    size) is out of scope.
+    failing. A boilerplate "Net Contents" / "Net. Cont." prefix on the label
+    is ignored entirely. Standard-of-fill validation (whether 750 mL is an
+    authorized size) is out of scope.
 
 ## Product decisions
 
@@ -106,7 +128,9 @@ Each entry says what was assumed, and why that reading was chosen.
 
 ## Known limitations (deliberate trade-offs)
 
-- Five checked fields, not the full mandatory set (see #1).
+- Country of origin is checked only for products marked imported; the app
+  cannot detect an import whose application wrongly marks it domestic
+  (see #1).
 - One image per application (see #3).
 - Bold detection is advisory; type-size rules unchecked (see #7, #8).
 - The "same field of vision" placement rule (brand name, class/type, and

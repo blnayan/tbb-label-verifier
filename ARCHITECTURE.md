@@ -4,13 +4,19 @@
 
 ```
 ┌──────────────────────────── Browser ────────────────────────────┐
+│  Sidebar dashboard: an Upload page that only uploads, a          │
+│  Verifications page where every verification is worked           │
 │                                                                  │
-│  Single label view                Batch view                     │
-│  (form + image + report)          (CSV + images + queue table)   │
+│  Single label upload              Batch upload                   │
+│  (form + image)                   (CSV + images + progress)      │
 │         │                              │                         │
 │         │ downscale image (≤1568px)    │ parse CSV, pair files   │
 │         │                              │ pool: 4 concurrent      │
-│         └──────────────┬───────────────┘                         │
+│         ├──────────────┬───────────────┤                         │
+│         ▼              │               ▼                         │
+│   IndexedDB history (history.ts): result + image blob + review   │
+│   state. Pass ⇒ auto-approved, fail ⇒ auto-rejected; ambiguity  │
+│   queues on /verifications for a manual decision (revisitable)   │
 └────────────────────────┼─────────────────────────────────────────┘
                          │  POST /api/verify (multipart, 1 label)
 ┌────────────────────────┼─────────────────────────────────────────┐
@@ -29,7 +35,8 @@
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-One request per label. No database, no queue, no session state.
+One request per label. No server-side database, queue, or session state;
+verification history persists in the browser's IndexedDB.
 
 ## The load-bearing decision: AI transcribes, rules decide
 
@@ -115,12 +122,60 @@ The trade-off: a closed tab abandons an in-flight batch. For a prototype
 that's acceptable; the production path is a server-side job store, which
 this architecture doesn't preclude.
 
-### No database
-Nothing requires persistence: no accounts (per Marcus), results are
-ephemeral by design, samples are static files. Every piece of state the app
-needs lives in the request or the browser. This was a deliberate
-subtraction — a prototype with a database is a prototype with migrations,
-backups, and PII questions.
+### Upload and review are separate jobs
+The Upload page only uploads: submitting frees the form immediately for the
+next label, and the verdict is announced in a toast; the full report is
+never shown inline. Every verification lands on the Verifications page
+carrying a review state, derived from the rule verdict: **pass ⇒
+auto-approved** and **fail ⇒ auto-rejected** — the deterministic rules
+already did that work — while genuine ambiguity (**needs review /
+unreadable**) waits in a queue until an agent records an approve/reject
+decision. Every decision, automatic or manual, is revisitable and
+changeable.
+
+Each verification gets its own report page (`/verifications/[id]`) rather
+than a dialog — reviewing is the core job, so it gets the whole screen,
+literally: the page steps outside the dashboard shell (no sidebar) and fits
+everything in one viewport. The label image sits center stage sized to the
+screen, the application (what the label must show) on its left, and what
+was read off the label — each field with its match status — on its right,
+with Approve/Reject in the header. A long panel scrolls internally; the
+page itself never scrolls, so the agent compares image, application, and
+findings without losing sight of any of them.
+
+The Verifications page is live: it subscribes to history changes (local
+listeners in-tab, a BroadcastChannel across tabs) and to the in-flight
+upload registry (`src/lib/client/uploads.ts`), so results stream in from
+either upload flow without a reload. In-flight uploads show as a live
+strip above the tabs — ambient status visible from any tab, gone when
+idle — rather than a tab of their own, because "verifying" is a transient
+condition, not a review status a record can hold. They are deliberately
+in-memory, not persisted — a reload aborts the underlying request, so a
+persisted "verifying" row would spin forever.
+
+Records group by review status — Needs review / Approved /
+Rejected / All — because that is the one axis on which every record has
+exactly one value, so the tabs are mutually exclusive and their counts add
+up. One consolidated Status column tells the story per row: a pending
+record shows the rule verdict (the *reason* it waits), a decided record
+shows the decision and how it was made, and an "Override" marker flags the
+audit-critical case where a human contradicted the rules. This mirrors how
+the compliance team actually works: clerks feed the queue, reviewers work
+it.
+
+### No server database — history lives in the browser
+Nothing requires server-side persistence: no accounts (per Marcus), samples
+are static files, and the server stays a stateless container. Results,
+however, are worth keeping: every completed verification (the result JSON,
+the exact downscaled image the model saw, and its review state) is saved to
+IndexedDB (`src/lib/client/history.ts`), surviving refreshes and restarts on
+that device. The store's primary key is an auto-incremented sequence, so
+insertion order *is* chronological order; a unique index on the record id
+supports review-decision updates, and versioned migrations backfill and
+upgrade review states without touching manual decisions (tested). A guarded "Clear history" action deletes everything. This
+keeps the migrations/backups/PII questions out of the prototype while still
+giving agents a workable queue; the production path is the same server-side
+job store mentioned above.
 
 ### Hand-rolled CSV parser and promise pool (no dependencies)
 Both are ~60 lines, fully unit-tested, and the alternative is a dependency
@@ -146,15 +201,19 @@ percentage of any team is colorblind.
 | `src/lib/verification/batch.ts` | CSV parsing (pure, tested) |
 | `src/lib/client/pool.ts` | Browser-side concurrency pool (tested) |
 | `src/lib/client/downscale.ts` | Canvas downscale before upload |
+| `src/lib/client/history.ts` | IndexedDB history + review states + change events (tested) |
+| `src/lib/client/uploads.ts` | In-memory in-flight upload registry (tested) |
 | `src/app/api/verify/route.ts` | HTTP shell: validate → verify → typed errors |
-| `src/components/verifier/*` | Single view, batch view, shared report panel |
+| `src/app/(dashboard)/*` | Sidebar shell; Upload (`/`) and Verifications (`/verifications`) pages |
+| `src/components/verifier/*` | Upload views, review queue, full-page review report |
 | `scripts/generate-samples.mjs` | Synthetic sample-label generator |
 
 ## Testing strategy
 
 TDD on every pure module: rule engine (including the regulatory edge cases
-from the interviews), input validation, CSV parsing, and the concurrency
-pool — 78 tests, no network. The AI boundary is deliberately thin and typed;
+from the interviews), input validation, CSV parsing, the concurrency pool,
+and the IndexedDB history layer with its review states and schema migration
+(against `fake-indexeddb`) — 171 tests, no network. The AI boundary is deliberately thin and typed;
 the route handler is glue. The sample dataset doubles as a live end-to-end
 suite: each sample's description states its expected verdict, so a reviewer
 can validate the whole pipeline from the UI in two minutes.
