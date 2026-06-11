@@ -7,43 +7,43 @@
  * which is how we protect the ~5 second budget on slow connections.
  */
 
-const MAX_DIMENSION = 1568;
+const MAX_DIMENSION = 1568
 
 export async function downscaleImage(file: File): Promise<File> {
   // GIFs may animate and canvas would flatten them; send small files as-is.
-  if (file.type === "image/gif") return file;
+  if (file.type === "image/gif") return file
 
-  let bitmap: ImageBitmap;
+  let bitmap: ImageBitmap
   try {
-    bitmap = await createImageBitmap(file);
+    bitmap = await createImageBitmap(file)
   } catch {
     // Not decodable here — let the server/model report a proper error.
-    return file;
+    return file
   }
 
-  const { width, height } = bitmap;
+  const { width, height } = bitmap
   if (Math.max(width, height) <= MAX_DIMENSION) {
-    bitmap.close();
-    return file;
+    bitmap.close()
+    return file
   }
 
-  const scale = MAX_DIMENSION / Math.max(width, height);
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.round(width * scale);
-  canvas.height = Math.round(height * scale);
-  const ctx = canvas.getContext("2d");
+  const scale = MAX_DIMENSION / Math.max(width, height)
+  const canvas = document.createElement("canvas")
+  canvas.width = Math.round(width * scale)
+  canvas.height = Math.round(height * scale)
+  const ctx = canvas.getContext("2d")
   if (!ctx) {
-    bitmap.close();
-    return file;
+    bitmap.close()
+    return file
   }
-  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  bitmap.close();
+  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+  bitmap.close()
 
   const blob = await new Promise<Blob | null>((resolve) =>
-    canvas.toBlob(resolve, "image/jpeg", 0.9),
-  );
-  if (!blob) return file;
+    canvas.toBlob(resolve, "image/jpeg", 0.9)
+  )
+  if (!blob) return file
 
-  const name = file.name.replace(/\.[^.]+$/, "") + ".jpg";
-  return new File([blob], name, { type: "image/jpeg" });
+  const name = file.name.replace(/\.[^.]+$/, "") + ".jpg"
+  return new File([blob], name, { type: "image/jpeg" })
 }

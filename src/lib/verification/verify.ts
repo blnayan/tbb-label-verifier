@@ -4,19 +4,19 @@
  * (CLI, batch workers) without HTTP.
  */
 
-import { extractLabel, extractionModel, type ExtractionInput } from "./extract";
-import { runRules } from "./rules";
-import type { ApplicationData, VerificationResult } from "./types";
+import { extractLabel, extractionModel, type ExtractionInput } from "./extract"
+import { runRules } from "./rules"
+import type { ApplicationData, VerificationResult } from "./types"
 
 export async function verifyLabel(
   application: ApplicationData,
-  image: ExtractionInput,
+  image: ExtractionInput
 ): Promise<VerificationResult> {
-  const startedAt = Date.now();
-  const extraction = await extractLabel(image);
-  const extractionMs = Date.now() - startedAt;
+  const startedAt = Date.now()
+  const extraction = await extractLabel(image)
+  const extractionMs = Date.now() - startedAt
 
-  const { overall, fields } = runRules(application, extraction);
+  const { overall, fields } = runRules(application, extraction)
 
   return {
     overall,
@@ -24,5 +24,5 @@ export async function verifyLabel(
     extraction,
     extractionMs,
     model: extractionModel(),
-  };
+  }
 }

@@ -7,11 +7,11 @@
  * testable and the model is never asked to exercise regulatory judgment.
  */
 
-import OpenAI from "openai";
-import { zodTextFormat } from "openai/helpers/zod";
-import { z } from "zod";
+import OpenAI from "openai"
+import { zodTextFormat } from "openai/helpers/zod"
+import { z } from "zod"
 
-import type { LabelExtraction } from "./types";
+import type { LabelExtraction } from "./types"
 
 /**
  * gpt-5.4-mini by default. The assignment has a hard ~5 second budget per
@@ -21,10 +21,10 @@ import type { LabelExtraction } from "./types";
  * reads it 4/4 AND returns faster (~2.3–3.2s vs ~3.1–3.5s). Fastest model
  * on paper isn't fastest in practice. Override with OPENAI_MODEL.
  */
-export const DEFAULT_MODEL = "gpt-5.4-mini";
+export const DEFAULT_MODEL = "gpt-5.4-mini"
 
 export function extractionModel(): string {
-  return process.env.OPENAI_MODEL || DEFAULT_MODEL;
+  return process.env.OPENAI_MODEL || DEFAULT_MODEL
 }
 
 /**
@@ -33,10 +33,10 @@ export function extractionModel(): string {
  * Override with OPENAI_REASONING_EFFORT — e.g. newer tiers (gpt-5.5) drop
  * "none" and want "low".
  */
-export const DEFAULT_REASONING_EFFORT = "none";
+export const DEFAULT_REASONING_EFFORT = "none"
 
 export function reasoningEffort(): string {
-  return process.env.OPENAI_REASONING_EFFORT || DEFAULT_REASONING_EFFORT;
+  return process.env.OPENAI_REASONING_EFFORT || DEFAULT_REASONING_EFFORT
 }
 
 const labelExtractionSchema = z.object({
@@ -46,60 +46,74 @@ const labelExtractionSchema = z.object({
   readability: z
     .enum(["clear", "partially_readable", "unreadable"])
     .describe(
-      "clear = all required text legible; partially_readable = some text obscured by glare/angle/blur; unreadable = cannot reliably read the label.",
+      "clear = all required text legible; partially_readable = some text obscured by glare/angle/blur; unreadable = cannot reliably read the label."
     ),
   brandName: z
     .string()
     .nullable()
     .describe(
-      "The brand name exactly as printed, preserving capitalization and punctuation. Null if absent or unreadable.",
+      "The brand name exactly as printed, preserving capitalization and punctuation. Null if absent or unreadable."
     ),
   classType: z
     .string()
     .nullable()
     .describe(
-      'The beverage class/type designation exactly as printed, e.g. "Kentucky Straight Bourbon Whiskey", "Vodka With Natural Flavors", "White Wine", "India Pale Ale". When several candidates appear, return the explicit beverage class statement — not appellations, varietals, or fanciful names (for a wine printed with both "SOAVE" and "WHITE WINE", return "WHITE WINE").',
+      'The beverage class/type designation exactly as printed, e.g. "Kentucky Straight Bourbon Whiskey", "Vodka With Natural Flavors", "White Wine", "India Pale Ale". When several candidates appear, return the explicit beverage class statement — not appellations, varietals, or fanciful names (for a wine printed with both "SOAVE" and "WHITE WINE", return "WHITE WINE"; for an appellation line like "Barbera d\'Asti D.O.C.G." printed above a "Red wine" line, return only "Red wine").'
     ),
   alcoholStatement: z
     .string()
     .nullable()
     .describe(
-      'The complete alcohol content statement verbatim, e.g. "45% Alc./Vol. (90 Proof)".',
+      'The complete alcohol content statement verbatim, e.g. "45% Alc./Vol. (90 Proof)".'
     ),
   netContents: z
     .string()
     .nullable()
     .describe('The net contents statement verbatim, e.g. "750 mL".'),
+  nameAndAddress: z
+    .string()
+    .nullable()
+    .describe(
+      'The bottler/producer/importer name-and-address statement verbatim, including its qualifying phrase, e.g. "BOTTLED BY OLD TOM DISTILLERY, BARDSTOWN, KY" or "IMPORTED BY XYZ IMPORTS, NEW YORK, NY". Usually small print near the bottom of the label. When both a foreign bottler and a US importer are printed, return the importer statement (phrased "IMPORTED BY ..." or "US IMPORTER: ..."). Null if absent or unreadable.'
+    ),
+  countryOfOrigin: z
+    .string()
+    .nullable()
+    .describe(
+      'The country of origin statement verbatim, e.g. "PRODUCT OF FRANCE" or "PRODUCED IN MEXICO". Null if none is printed (typical for domestic products).'
+    ),
   governmentWarning: z.object({
     present: z
       .boolean()
-      .describe("Whether a government health warning statement appears anywhere on the label."),
+      .describe(
+        "Whether a government health warning statement appears anywhere on the label."
+      ),
     verbatimText: z
       .string()
       .nullable()
       .describe(
-        'The warning transcribed exactly as printed: preserve capitalization, punctuation, and the (1)/(2) numbering. Start at the first word of the warning — if a "GOVERNMENT WARNING" heading is printed, it is part of the text and must be included. Do NOT correct it to the standard wording — transcribe what is actually printed.',
+        'The warning transcribed exactly as printed: preserve capitalization, punctuation, and the (1)/(2) numbering. Start at the first word of the warning — if a "GOVERNMENT WARNING" heading is printed, it is part of the text and must be included. Do NOT correct it to the standard wording — transcribe what is actually printed.'
       ),
     headingAllCaps: z
       .boolean()
       .nullable()
       .describe(
-        'True only if the words "GOVERNMENT WARNING" are printed entirely in capital letters.',
+        'True only if the words "GOVERNMENT WARNING" are printed entirely in capital letters.'
       ),
     headingAppearsBold: z
       .boolean()
       .nullable()
       .describe(
-        "True if the GOVERNMENT WARNING heading appears bolder than the body text. Null if impossible to judge.",
+        "True if the GOVERNMENT WARNING heading appears bolder than the body text. Null if impossible to judge."
       ),
   }),
   imageQualityNotes: z
     .string()
     .nullable()
     .describe(
-      "Brief note on anything reducing confidence: glare, angle, blur, partial crop. Null if the image is clean.",
+      "Brief note on anything reducing confidence: glare, angle, blur, partial crop. Null if the image is clean."
     ),
-});
+})
 
 const SYSTEM_PROMPT = `You are a transcription assistant for TTB alcohol label compliance review.
 
@@ -109,35 +123,35 @@ Rules:
 - Transcribe verbatim. Preserve capitalization, punctuation, apostrophes, and numbering exactly as printed. Never normalize, correct, or autocomplete text to what it "should" say.
 - Labels are often photographed at an angle, with glare, curvature, or poor lighting. Read carefully through these artifacts, and reflect genuine uncertainty in the readability field rather than guessing.
 - If a field is absent or illegible, return null for it rather than inventing a value.
-- The government warning matters most: transcribe every word of it exactly as printed, including any deviations from the standard wording. Include its heading (e.g. "GOVERNMENT WARNING:") in the transcription when one is printed — never drop it.`;
+- The government warning matters most: transcribe every word of it exactly as printed, including any deviations from the standard wording. Include its heading (e.g. "GOVERNMENT WARNING:") in the transcription when one is printed — never drop it.`
 
 export type SupportedImageMediaType =
   | "image/jpeg"
   | "image/png"
   | "image/gif"
-  | "image/webp";
+  | "image/webp"
 
 export interface ExtractionInput {
-  imageBase64: string;
-  mediaType: SupportedImageMediaType;
+  imageBase64: string
+  mediaType: SupportedImageMediaType
 }
 
 /** The Responses API takes images as data URLs rather than raw base64. */
 export function imageDataUrl(input: ExtractionInput): string {
-  return `data:${input.mediaType};base64,${input.imageBase64}`;
+  return `data:${input.mediaType};base64,${input.imageBase64}`
 }
 
-let client: OpenAI | null = null;
+let client: OpenAI | null = null
 function getClient(): OpenAI {
   if (!client) {
-    client = new OpenAI({ maxRetries: 1, timeout: 30_000 });
+    client = new OpenAI({ maxRetries: 1, timeout: 30_000 })
   }
-  return client;
+  return client
 }
 
 /** Read the label image into a structured LabelExtraction via OpenAI vision. */
 export async function extractLabel(
-  input: ExtractionInput,
+  input: ExtractionInput
 ): Promise<LabelExtraction> {
   const response = await getClient().responses.parse({
     model: extractionModel(),
@@ -165,11 +179,11 @@ export async function extractLabel(
     text: {
       format: zodTextFormat(labelExtractionSchema, "label_extraction"),
     },
-  });
+  })
 
-  const parsed = response.output_parsed;
+  const parsed = response.output_parsed
   if (!parsed) {
-    throw new Error("The model did not return a valid extraction.");
+    throw new Error("The model did not return a valid extraction.")
   }
-  return parsed;
+  return parsed
 }

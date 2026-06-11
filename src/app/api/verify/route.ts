@@ -40,6 +40,9 @@ export async function POST(request: Request) {
     classType: form.get("classType"),
     alcoholPercent: form.get("alcoholPercent"),
     netContents: form.get("netContents"),
+    bottlerNameAddress: form.get("bottlerNameAddress"),
+    countryOfOrigin: form.get("countryOfOrigin"),
+    imported: form.get("imported"),
   });
   if (!application.ok) {
     return NextResponse.json({ error: application.error }, { status: 400 });
