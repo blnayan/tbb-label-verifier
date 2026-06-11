@@ -223,19 +223,17 @@ export function ReviewDetail({ id }: { id: string }) {
           </CardHeader>
           <CardContent className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
             <dl className="flex flex-col gap-3">
-              {/* The government warning is statutory — identical for every
-                  label — so it isn't application data worth repeating here.
-                  Its check still appears under On label. */}
-              {result.fields
-                .filter((field) => field.field !== "governmentWarning")
-                .map((field) => (
-                  <div key={field.field} className="flex flex-col gap-0.5">
-                    <dt className="text-sm font-medium text-muted-foreground">
-                      {fieldLabel(field.field)}
-                    </dt>
-                    <dd className="text-sm break-words">{field.expected}</dd>
-                  </div>
-                ))}
+              {/* Includes the statutory government warning — not application
+                  data, but a reviewer comparing a defective print against the
+                  required wording wants both in view. */}
+              {result.fields.map((field) => (
+                <div key={field.field} className="flex flex-col gap-0.5">
+                  <dt className="text-sm font-medium text-muted-foreground">
+                    {fieldLabel(field.field)}
+                  </dt>
+                  <dd className="text-sm break-words">{field.expected}</dd>
+                </div>
+              ))}
             </dl>
           </CardContent>
         </Card>
