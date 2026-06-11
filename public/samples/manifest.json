@@ -396,7 +396,7 @@
       "id": "unbolded-warning",
       "name": "Meridian Pass — warning heading not bold (generated)",
       "image": "/samples/unbolded-warning.png",
-      "description": "The warning's wording and capitals are exact, but the GOVERNMENT WARNING heading is printed in regular weight — bold type is required (27 CFR 16.22). Type weight can't be judged with certainty from a photo, so the check is advisory. Expected result: Needs review (verify the heading visually).",
+      "description": "The warning's wording and capitals are exact, but the GOVERNMENT WARNING heading is printed in regular weight — bold type is required (27 CFR 16.22). Expected result: Issues found (heading not bold). If the model can't judge the weight it returns null and the label is not penalized.",
       "source": "generated",
       "application": {
         "brandName": "MERIDIAN PASS",

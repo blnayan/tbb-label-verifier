@@ -113,5 +113,5 @@ container exposes port 3000 and needs outbound HTTPS to
   mode runs four labels concurrently.
 - **Known limitations** are listed at the end of
   [ASSUMPTIONS.md](ASSUMPTIONS.md) — notably: country of origin is checked
-  only for products marked imported, one image per label, and bold-type
-  detection is advisory because it can't be judged reliably from a photo.
+  only for products marked imported, one image per label, and an uncertain
+  bold-type read (null) never penalizes a label.

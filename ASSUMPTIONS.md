@@ -57,12 +57,11 @@ Each entry says what was assumed, and why that reading was chosen.
    A title-case heading is an automatic failure — this exact scenario is in
    the sample dataset because Jenny caught one last month.
 
-7. **Bold type on the heading is required by regulation but reported as
-   advisory.** Whether type is "bold" cannot be judged reliably from a
-   photograph (lighting, rendering, font weight ambiguity), so a
-   possibly-not-bold heading downgrades the result to "Needs review" with a
-   note telling the agent to verify visually, rather than auto-failing.
-   False rejections would erode trust faster than asking a human to look.
+7. **Bold type on the heading is enforced when the model can judge it.**
+   27 CFR 16.22 requires the heading in bold type, so a heading the model
+   reads as not bold fails the label. When the model cannot judge the
+   weight (it returns null — glare, rendering, font ambiguity), the check
+   does not penalize the label rather than guessing.
 
 8. **Type-size and characters-per-inch rules (16.22(b)) are not checked.**
    Physical measurements can't be derived from an uncalibrated photo. TTB
@@ -132,7 +131,8 @@ Each entry says what was assumed, and why that reading was chosen.
   cannot detect an import whose application wrongly marks it domestic
   (see #1).
 - One image per application (see #3).
-- Bold detection is advisory; type-size rules unchecked (see #7, #8).
+- Bold detection fails only on a confident not-bold read; type-size rules
+  unchecked (see #7, #8).
 - The "same field of vision" placement rule (brand name, class/type, and
   alcohol content must be viewable simultaneously) is not verified from a
   single photo.

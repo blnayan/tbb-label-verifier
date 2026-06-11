@@ -383,8 +383,9 @@ export function compareCountryOfOrigin(
 
 /**
  * The government warning must match the statutory text word-for-word, and
- * the "GOVERNMENT WARNING:" heading must be in capital letters (and bold —
- * reported as advisory since boldness can't be judged reliably from a photo).
+ * the "GOVERNMENT WARNING:" heading must be in capital letters and bold
+ * type. A heading the model reads as not bold fails; when the model can't
+ * judge the weight (null) the check does not penalize the label.
  */
 export function checkGovernmentWarning(
   warning: LabelExtraction["governmentWarning"]
@@ -427,8 +428,8 @@ export function checkGovernmentWarning(
 
   if (warning.headingAppearsBold === false) {
     return {
-      status: "close_match",
-      note: "Wording is exact, but the heading may not be bold — verify visually (bold type is required).",
+      status: "mismatch",
+      note: '"GOVERNMENT WARNING" must appear in bold type (27 CFR 16.22) — the heading does not appear bold on the label.',
     }
   }
 

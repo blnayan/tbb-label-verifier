@@ -321,6 +321,17 @@ export function ReviewDetail({ id }: { id: string }) {
                       <span className="text-muted-foreground italic">
                         not found
                       </span>
+                    ) : field.field === "governmentWarning" &&
+                      result.extraction.governmentWarning.headingAppearsBold &&
+                      /^government warning/i.test(field.found) ? (
+                      // Mirror the type weight the model reported, so the
+                      // transcription reads the way the label prints it.
+                      <>
+                        <strong>
+                          {field.found.slice(0, "GOVERNMENT WARNING".length)}
+                        </strong>
+                        {field.found.slice("GOVERNMENT WARNING".length)}
+                      </>
                     ) : (
                       field.found
                     )}

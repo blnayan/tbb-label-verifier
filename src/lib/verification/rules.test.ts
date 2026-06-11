@@ -396,12 +396,18 @@ describe("checkGovernmentWarning", () => {
     ).toBe("match")
   })
 
-  it("non-bold heading is flagged for review, not failed", () => {
+  it("non-bold heading fails — bold type is required (27 CFR 16.22)", () => {
     const result = checkGovernmentWarning(
       exactWarning({ headingAppearsBold: false })
     )
-    expect(result.status).toBe("close_match")
+    expect(result.status).toBe("mismatch")
     expect(result.note).toContain("bold")
+  })
+
+  it("uncertain boldness (null) does not fail the label", () => {
+    expect(
+      checkGovernmentWarning(exactWarning({ headingAppearsBold: null })).status
+    ).toBe("match")
   })
 })
 
