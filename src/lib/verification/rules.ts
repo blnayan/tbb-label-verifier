@@ -39,6 +39,8 @@ export function canonicalize(text: string): string {
 /** Aggressive normalization for "same name, different styling" comparisons. */
 export function normalizeLoose(text: string): string {
   return canonicalize(text)
+    .normalize("NFD") // fold diacritics (Bärenjäger → Barenjager), not delete them
+    .replace(/[\u0300-\u036f]/g, "")
     .toUpperCase()
     .replace(/[^A-Z0-9 ]/g, "")
     .replace(/\s+/g, " ")

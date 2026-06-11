@@ -31,6 +31,11 @@ describe("normalizeLoose", () => {
   it("uppercases and strips punctuation", () => {
     expect(normalizeLoose("Stone's Throw")).toBe("STONES THROW")
   })
+
+  it("folds diacritics instead of deleting the letters", () => {
+    expect(normalizeLoose("Bärenjäger")).toBe("BARENJAGER")
+    expect(normalizeLoose("François")).toBe("FRANCOIS")
+  })
 })
 
 describe("compareText (brand name / class type)", () => {
@@ -51,6 +56,12 @@ describe("compareText (brand name / class type)", () => {
 
   it("different names mismatch", () => {
     expect(compareText("OLD TOM", "YOUNG HARRY").status).toBe("mismatch")
+  })
+
+  it("accented label vs ASCII application is a close match, not a failure", () => {
+    // Real COLA 11038001000725: form says BARENJAGER, label prints Bärenjäger.
+    const result = compareText("BARENJAGER", "Bärenjäger")
+    expect(result.status).toBe("close_match")
   })
 
   it("missing label value reports not_found", () => {
