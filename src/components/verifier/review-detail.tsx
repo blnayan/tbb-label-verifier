@@ -231,7 +231,19 @@ export function ReviewDetail({ id }: { id: string }) {
                   <dt className="text-sm font-medium text-muted-foreground">
                     {fieldLabel(field.field)}
                   </dt>
-                  <dd className="text-sm break-words">{field.expected}</dd>
+                  <dd className="text-sm break-words">
+                    {/* 27 CFR 16.22(b): the words "GOVERNMENT WARNING" (not
+                        the colon) must appear in capitals and bold type —
+                        present the required text the way the label must. */}
+                    {field.expected.startsWith("GOVERNMENT WARNING") ? (
+                      <>
+                        <strong>GOVERNMENT WARNING</strong>
+                        {field.expected.slice("GOVERNMENT WARNING".length)}
+                      </>
+                    ) : (
+                      field.expected
+                    )}
+                  </dd>
                 </div>
               ))}
             </dl>
