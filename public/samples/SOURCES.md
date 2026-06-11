@@ -63,6 +63,17 @@ diacritic folding and unit-wording differences against real form data.
 (The registry classifies it as "OTHER HERB & SEED CORDIALS/LIQUEURS"; the
 class/type designation printed on the label is "HONEY LIQUEUR".)
 
+## Other real labels
+
+`real-brouwerij-ipa.jpg` is the production keg-collar artwork for
+Brouwerij 't IJ IPA, an imported Dutch beer (Duvel Moortgat USA,
+Cooperstown NY), supplied directly rather than downloaded from the
+registry. Every application field matches the collar, but the printed
+government warning omits the comma after "machinery" (and misprints
+"ABILIITY"), deviating from the wording 27 CFR Part 16 mandates — so it
+verifies as Issues found. A useful real-world case: the defect is one
+character, and only the warning check catches it.
+
 COLA label images are public records published by the U.S. Treasury's
 Alcohol and Tobacco Tax and Trade Bureau. They are included here solely as
 test fixtures for a label-verification prototype.

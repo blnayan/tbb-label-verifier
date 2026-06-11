@@ -61,10 +61,11 @@ Results stream into the **Verifications** page live.
 
 ## Sample dataset
 
-`public/samples/` contains thirty-two labels: **nineteen real approved
-labels from TTB's public COLA registry** (beer, wine, spirits, imports —
-each paired with application data transcribed from the label, and one —
-Bärenjäger — with the entries from its actual application form), **two of
+`public/samples/` contains thirty-three labels: **twenty real labels**
+(beer, wine, spirits, imports — nineteen from TTB's public COLA registry
+plus a brewery's keg-collar artwork; each paired with application data
+transcribed from the label, and one — Bärenjäger — with the entries from
+its actual application form), **two of
 those re-rendered under simulated photo conditions** (tilt, glare, blur) to
 exercise robustness, and eleven synthetic labels each encoding a compliance
 scenario (case-only brand differences, a title-case government warning, a

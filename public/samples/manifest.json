@@ -280,6 +280,21 @@
       }
     },
     {
+      "id": "real-brouwerij-ipa",
+      "name": "Brouwerij 't IJ IPA keg collar — warning misses a comma (real label)",
+      "image": "/samples/real-brouwerij-ipa.jpg",
+      "description": "Real 20-liter keg collar for an imported Dutch IPA. Brand, class, ABV, net contents, importer, and country all match — but the printed government warning omits the comma after \"machinery\" (and misprints \"ABILIITY\"), deviating from the mandatory wording. Expected result: Issues found (warning text deviates).",
+      "source": "real",
+      "application": {
+        "brandName": "BROUWERIJ 'T IJ",
+        "classType": "INDIA PALE ALE",
+        "alcoholPercent": 6.5,
+        "netContents": "20 LITER",
+        "bottlerNameAddress": "Duvel Moortgat USA, Ltd. Cooperstown NY",
+        "countryOfOrigin": "Netherlands"
+      }
+    },
+    {
       "id": "photo-austerum-red",
       "name": "Austerum red \u2014 photo conditions (real label)",
       "image": "/samples/photo-austerum-red.jpg",
@@ -485,6 +500,7 @@
       "/samples/real-sentada-white.jpg",
       "/samples/real-jack-daniels-rye.jpg",
       "/samples/real-barenjager-honey.png",
+      "/samples/real-brouwerij-ipa.jpg",
       "/samples/photo-austerum-red.jpg",
       "/samples/photo-victoria-beer.jpg",
       "/samples/stones-throw-case.png",
