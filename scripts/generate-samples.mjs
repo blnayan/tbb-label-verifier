@@ -2,9 +2,10 @@
  * Generates the AI-designed portion of the sample dataset: synthetic alcohol
  * labels rendered from SVG to PNG, including deliberate compliance errors
  * drawn from the stakeholder interviews (title-case warning, ABV mismatch,
- * missing warning, reworded warning, case-only brand differences) plus the
- * mandatory-elements checks (a missing bottler statement; an imported
- * Canadian whisky with importer and country-of-origin statements).
+ * missing warning, reworded warning, an unbolded warning heading, case-only
+ * brand differences) plus the mandatory-elements checks (a missing bottler
+ * statement; an imported Canadian whisky with importer and country-of-origin
+ * statements).
  *
  * Run: node scripts/generate-samples.mjs
  */
@@ -263,6 +264,22 @@ const SAMPLES = [
       warning: WARNING,
       bg: "#eef2e6",
       accent: "#5a7a3a",
+    }),
+  },
+  {
+    file: "unbolded-warning.png",
+    svg: labelSvg({
+      brand: "MERIDIAN PASS",
+      classType: "Straight Bourbon Whiskey",
+      abvText: "43% Alc./Vol. (86 Proof)",
+      netText: "750 mL",
+      bottlerText: "DISTILLED AND BOTTLED BY MERIDIAN PASS DISTILLERY, OGDEN, UT",
+      warning: WARNING,
+      // Wording and capitals are exact — only the bold heading is missing,
+      // probing whether the vision model can judge type weight.
+      warningHeadingBold: false,
+      bg: "#f0e9e0",
+      accent: "#7a3a3a",
     }),
   },
   {

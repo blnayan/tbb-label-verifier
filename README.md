@@ -61,17 +61,17 @@ Results stream into the **Verifications** page live.
 
 ## Sample dataset
 
-`public/samples/` contains thirty-three labels: **twenty real labels**
+`public/samples/` contains thirty-four labels: **twenty real labels**
 (beer, wine, spirits, imports — nineteen from TTB's public COLA registry
 plus a brewery's keg-collar artwork; each paired with application data
 transcribed from the label, and one — Bärenjäger — with the entries from
 its actual application form), **two of
 those re-rendered under simulated photo conditions** (tilt, glare, blur) to
-exercise robustness, and eleven synthetic labels each encoding a compliance
+exercise robustness, and twelve synthetic labels each encoding a compliance
 scenario (case-only brand differences, a title-case government warning, a
-wrong ABV, a missing/reworded warning, wrong net contents, a wrong brand on
-an imported whisky, a proof-only statement, a cl-vs-mL unit difference, a
-missing bottler statement). Every sample's expected
+warning heading without bold type, a wrong ABV, a missing/reworded warning,
+wrong net contents, a wrong brand on an imported whisky, a proof-only
+statement, a cl-vs-mL unit difference, a missing bottler statement). Every sample's expected
 verdict is stated in its description and validated against the live
 pipeline. See [public/samples/SOURCES.md](public/samples/SOURCES.md).
 
