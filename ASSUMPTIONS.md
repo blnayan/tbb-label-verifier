@@ -50,14 +50,19 @@ Each entry says what was assumed, and why that reading was chosen.
 
 5. **The government warning must match 27 CFR 16.21 word-for-word.** The
    statutory text embedded in the rule engine was checked against the CFR.
-   Whitespace and line breaks are tolerated (labels wrap text); any word or
-   punctuation difference is a failure, matching Jenny's "it has to be
-   exact". One nuance, measured on a real label: condensed print can make
-   the model drop a space in transcription ("(2) CONSUMPTION" read as
-   "(2)CONSUMPTION"). When the text differs from the statutory wording by
-   whitespace alone — every word and comma intact — the label queues for
-   review instead of auto-failing, because the divergence is more likely
-   the reader than the label.
+   Any word difference is a failure, matching Jenny's "it has to be exact".
+   Whitespace and punctuation get one calibrated tolerance, because the
+   reader is measurably unreliable on exactly those marks: condensed print
+   makes the model drop a space ("(2) CONSUMPTION" read as
+   "(2)CONSUMPTION"), and arc-wrapped print makes it drop a comma
+   (Stillwater's "Surgeon General," loses its comma in roughly half of
+   reads). When every word of the statutory text is present in order and
+   only spacing or punctuation differs, the label queues for review with
+   the divergence pinpointed instead of auto-failing — an auto-reject built
+   on a signal the reader gets wrong half the time would reject compliant
+   labels, and a genuinely missing comma still reaches a human, never a
+   silent pass. Word-level deviations that survive the blind stability
+   re-read (see #12) remain hard failures.
 
 6. **"GOVERNMENT WARNING" must be in capital letters** (27 CFR 16.22(a)).
    A title-case heading is an automatic failure — this exact scenario is in
@@ -79,17 +84,24 @@ Each entry says what was assumed, and why that reading was chosen.
    size — the responsible industry member must ensure it. Same boundary
    here.
 
-9. **Brand-name comparison is case- and punctuation-insensitive, with
-   transparency.** Dave's "STONE'S THROW vs Stone's Throw" example is
-   treated as a close match: flagged for review with an explanatory note,
-   never silently passed and never auto-failed. Substantive word differences
-   fail. Class/type gets one extra tolerance: labels often print an
-   appellation with the class designation ("Barbera d'Asti D.O.C.G. Red
-   wine" for an application's "Red wine"), so a class line that contains the
-   expected designation is a close match for review, not a failure. Brand
-   names get the same containment tolerance for fanciful names printed with
-   the brand ("Stillwater Artisanal Debutante" for an application's
-   "Stillwater Artisanal"). Finally, a near-miss — a couple of stray
+9. **Brand-name comparison is case-insensitive, with transparency.**
+   Dave's "STONE'S THROW vs Stone's Throw" example is a full match —
+   labels routinely set the brand in display caps, and a
+   capitalization-only difference carries no compliance signal — but the
+   result still carries a note saying the case differs. Punctuation,
+   apostrophe, and diacritic differences remain a close match flagged for
+   review: never silently passed and never auto-failed. Substantive word
+   differences fail. Class/type gets one extra tolerance: labels often print
+   an appellation or qualifier with the class designation ("Barbera d'Asti
+   D.O.C.G. Red wine" for an application's "Red wine"), so a class line that
+   contains the expected designation is a full match — the surrounding text
+   carries no compliance signal against the application. The result displays
+   only the portion that matched; the note keeps the full label line for
+   transparency. Brand names get a containment tolerance too, but the
+   conservative kind — a fanciful name printed with the brand ("Stillwater
+   Artisanal Debutante" for an application's "Stillwater Artisanal") is a
+   close match for review, because extra words around a brand can change
+   its identity. Finally, a near-miss — a couple of stray
    characters in an otherwise identical long string (measured: condensed
    "APPELLATION" transcribed as "APPALATION") — queues for review rather
    than auto-rejecting: it is as likely a model misread as a label typo,
@@ -99,9 +111,12 @@ Each entry says what was assumed, and why that reading was chosen.
 
 10. **ABV must match the application exactly** (no tolerance beyond float
     rounding). TTB tolerances govern label-vs-product, not
-    label-vs-application. Proof is accepted as a fallback (proof = 2 × ABV),
-    and when a label prints both by-weight and by-volume percentages, the
-    by-volume figure is the ABV.
+    label-vs-application. The percent-alcohol-by-volume statement is
+    mandatory (27 CFR 5.65): a label that prints proof alone fails, even
+    when the proof is numerically equivalent — proof may only appear in
+    addition to the percentage, never instead of it. When a label prints
+    both by-weight and by-volume percentages, the by-volume figure is the
+    ABV.
 
 11. **Net contents are compared by volume, not by string.** "75 cl" vs
     "750 mL" is the same quantity — that passes with a note rather than
@@ -115,6 +130,40 @@ Each entry says what was assumed, and why that reading was chosen.
     rules decide. This is the central design decision — reasoning in
     [ARCHITECTURE.md](ARCHITECTURE.md) and
     [docs/design/02-ai-boundary.md](docs/design/02-ai-boundary.md).
+    The first extraction is blind — the model never sees what the
+    application claims, so agreement between label and application is
+    independent evidence. One refinement: when a comparison field fails,
+    a single *focused second read* re-examines just the disputed fields,
+    and that call does see the application's claim (it is what lets the
+    model recover text the blind pass garbled — condensed "APPELLATION"
+    reads as APPALATION about half the time). Because the second read is
+    primed, the rules never let it pass a field: agreement with the claim
+    rescues the label into needs_review for a human, and anything else
+    leaves the blind failure standing. Priming can only move a label
+    toward review, never toward pass — measured against the deliberately
+    wrong samples (wrong brand/ABV/net contents/missing bottler), the
+    primed read held the failure in 16 of 16 attempts. The government
+    warning is excluded from the primed read: the model knows the
+    statutory text by heart, and priming there invites normalizing a
+    deviating label back to compliance. The warning instead gets a *blind
+    re-read* — a second independent transcription of just the warning that
+    sees neither the application nor the statutory text — which runs in
+    parallel with the first read on EVERY label, because it is needed on
+    both sides of the verdict. On a failing warning it is the stability
+    check: if it reproduces the first read's deviation word-for-word, the
+    deviation is on the label and the failure stands with the confirmation
+    noted; if the two reads disagree, the transcription is unstable
+    (measured: a degraded image read "IMPAIRS" as "IMPARES") and the label
+    queues for review. On a PASSING warning it is the normalization check:
+    the model autocompletes fine print to the statutory wording it expects
+    (measured 2026-06-12: a label printing "impares" was transcribed as
+    "impairs" in 16 of 16 reads and auto-approved), so a warning
+    auto-passes only when two independent reads agree on it — a re-read
+    that reports a word-level deviation or no warning sends the label to
+    review. Judgments known to wobble without signifying a deviation
+    (punctuation, spacing, boldness) never challenge a pass. Same
+    invariant throughout: a re-read can only move a label toward review,
+    never toward pass.
 
 13. **The model is configuration, not code.** Sarah's 5-second requirement
     is a hard product constraint ("nobody's going to use it"), and label
@@ -163,3 +212,10 @@ Each entry says what was assumed, and why that reading was chosen.
 - Extraction quality is bounded by the model; the readability field and
   image-quality notes are the honesty valve — bad photos are flagged
   "Can't read label" rather than guessed at.
+- A subtle warning misprint can still slip through on a genuinely
+  low-detail photograph: below the resolution where letters are
+  resolvable, the reader reconstructs words from shape and both
+  independent reads can normalize the same typo. The pre-upscale step
+  (see ARCHITECTURE.md) pushes that floor down for small images — on the
+  planted-typo sample the false-pass rate went from 16/16 to 0/24 — but
+  it cannot create detail a photo never captured.

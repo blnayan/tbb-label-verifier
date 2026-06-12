@@ -4,6 +4,7 @@ import {
   GOVERNMENT_WARNING_TEXT,
   applyRecheck,
   canonicalize,
+  applyWarningChallenge,
   applyWarningStability,
   checkGovernmentWarning,
   compareAbv,
@@ -920,6 +921,111 @@ describe("applyWarningStability — blind second read of a failing warning", () 
     const stabilized = applyWarningStability(fields, exactWarning())
     expect(stabilized.find((f) => f.field === "brandName")?.status).toBe(
       "mismatch"
+    )
+  })
+})
+
+describe("applyWarningChallenge — blind second read of a PASSING warning", () => {
+  // Measured (typo-warning sample, 2026-06-12): a label printing "impares"
+  // was transcribed as the statutory "impairs" in 16/16 reads — the reader
+  // normalizes deviations it knows by heart, and the label auto-approved.
+  // A blind second read that DOES report a word-level deviation is the only
+  // signal that the pass may be a normalization; agreement of the two reads
+  // is required for an automatic pass.
+  const typo = GOVERNMENT_WARNING_TEXT.replace("impairs", "impares")
+
+  it("a matching warning challenged by a word-level deviating re-read goes to review", () => {
+    const { fields } = runRules(application, cleanExtraction)
+    const challenged = applyWarningChallenge(
+      fields,
+      exactWarning({ verbatimText: typo })
+    )
+    const row = challenged.find((f) => f.field === "governmentWarning")
+    expect(row?.status).toBe("close_match")
+    expect(row?.note).toContain("disagree")
+    expect(rollUpOverall(challenged, "clear")).toBe("needs_review")
+  })
+
+  it("a re-read agreeing on the statutory text leaves the pass standing", () => {
+    const { fields } = runRules(application, cleanExtraction)
+    const challenged = applyWarningChallenge(fields, exactWarning())
+    expect(
+      challenged.find((f) => f.field === "governmentWarning")?.status
+    ).toBe("match")
+  })
+
+  it("punctuation-only wobble in the re-read does not challenge the pass", () => {
+    const { fields } = runRules(application, cleanExtraction)
+    const noComma = GOVERNMENT_WARNING_TEXT.replace(
+      "machinery, and",
+      "machinery and"
+    )
+    const challenged = applyWarningChallenge(
+      fields,
+      exactWarning({ verbatimText: noComma })
+    )
+    expect(
+      challenged.find((f) => f.field === "governmentWarning")?.status
+    ).toBe("match")
+  })
+
+  it("a not-bold judgment in the re-read does not challenge the pass", () => {
+    const { fields } = runRules(application, cleanExtraction)
+    const challenged = applyWarningChallenge(
+      fields,
+      exactWarning({ headingAppearsBold: false })
+    )
+    expect(
+      challenged.find((f) => f.field === "governmentWarning")?.status
+    ).toBe("match")
+  })
+
+  it("a re-read that finds no warning at all challenges the pass", () => {
+    const { fields } = runRules(application, cleanExtraction)
+    const challenged = applyWarningChallenge(fields, {
+      present: false,
+      verbatimText: null,
+      headingAllCaps: null,
+      headingAppearsBold: null,
+    })
+    expect(
+      challenged.find((f) => f.field === "governmentWarning")?.status
+    ).toBe("close_match")
+  })
+
+  it("a failing warning is untouched — stability, not the challenge, owns failures", () => {
+    const { fields } = runRules(application, {
+      ...cleanExtraction,
+      governmentWarning: exactWarning({ verbatimText: typo }),
+    })
+    const challenged = applyWarningChallenge(fields, exactWarning())
+    expect(
+      challenged.find((f) => f.field === "governmentWarning")?.status
+    ).toBe("mismatch")
+  })
+
+  it("a warning already queued for review (close_match) is untouched", () => {
+    const { fields } = runRules(application, {
+      ...cleanExtraction,
+      governmentWarning: exactWarning({ headingAppearsBold: false }),
+    })
+    const challenged = applyWarningChallenge(
+      fields,
+      exactWarning({ verbatimText: typo })
+    )
+    expect(
+      challenged.find((f) => f.field === "governmentWarning")?.status
+    ).toBe("close_match")
+  })
+
+  it("other fields are never touched", () => {
+    const { fields } = runRules(application, cleanExtraction)
+    const challenged = applyWarningChallenge(
+      fields,
+      exactWarning({ verbatimText: typo })
+    )
+    expect(challenged.find((f) => f.field === "brandName")?.status).toBe(
+      "match"
     )
   })
 })

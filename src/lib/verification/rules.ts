@@ -856,3 +856,44 @@ export function applyWarningStability(
     }
   })
 }
+
+/**
+ * Challenge a PASSING government warning with a blind second read — the
+ * mirror image of applyWarningStability.
+ *
+ * Measured (typo-warning sample, 2026-06-12): a label printing "impares"
+ * was transcribed as the statutory "impairs" in 16/16 reads — the model
+ * autocompletes fine print to the wording it knows by heart, and a
+ * non-compliant label auto-approves. One faithful read is the only signal
+ * that catches this, so a warning passes automatically only when two
+ * independent reads agree on it: a re-read that hard-fails
+ * (word-level deviation or no warning found) sends the label to human
+ * review. Re-read judgments known to wobble without signifying a deviation
+ * — punctuation, spacing, boldness — do NOT challenge. Same invariant as
+ * the other second-read rules: a challenge can only move a label toward
+ * review, never toward pass, and never auto-rejects on its own (the first
+ * read disagrees, so the deviation is not stable evidence).
+ */
+export function applyWarningChallenge(
+  fields: FieldResult[],
+  reread: LabelExtraction["governmentWarning"]
+): FieldResult[] {
+  return fields.map((f) => {
+    if (f.field !== "governmentWarning") return f
+    if (f.status !== "match") return f
+
+    const second = checkGovernmentWarning(reread)
+    if (second.status !== "mismatch" && second.status !== "not_found") return f
+
+    const secondText = reread.present ? reread.verbatimText : null
+    const secondDesc =
+      secondText === null
+        ? "found no government warning"
+        : `read "${secondText}"`
+    return {
+      ...f,
+      status: "close_match",
+      note: `Two independent reads of the warning disagree: the first matched the required wording; the second ${secondDesc}. The reader can autocorrect fine print to the wording it expects, so confirm the printed warning on the image, letter by letter.`,
+    }
+  })
+}

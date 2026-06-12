@@ -21,7 +21,7 @@ It would work impressively in a demo and fail as a product:
    normalization rule (case- and punctuation-insensitive comparison →
    "close match, review"). Encoding it as a rule means it behaves
    identically on label one and label ten thousand.
-4. **Tests.** The entire compliance surface is unit-tested — 78 tests
+4. **Tests.** The entire compliance surface is unit-tested — 118 tests
    covering the statutory text, fraction ABVs, unit conversions, the
    interview edge cases. You cannot unit-test a vibe.
 
@@ -37,6 +37,51 @@ uncertainty (`readability`, `imageQualityNotes`) instead of guessing.
 That last instruction matters most. A model's instinct is to be helpful and
 complete the familiar statutory text; we explicitly want the unhelpful,
 literal reading — the typo is the finding.
+
+Prompting alone does not buy that literal reading, though — it has a
+resolution floor. Measured (2026-06-12): a 900px render with a planted
+"impares" was read as the statutory "impairs" in 0/32 attempts across
+every prompt framing, including "spell it letter by letter" — below the
+size where letters are resolvable, the encoder hands the language prior a
+word shape and the prior fills it in, exactly like a human skim-reading.
+Two countermeasures, both measured: small images are lanczos-upscaled to
+1800px before extraction (same input tokens, ~75% faithful reads), and
+the prompts instruct the model to re-verify each long warning word letter
+by letter after transcribing ("a transcription containing a misspelling
+is often the correct answer"), which lifted the catch rate further. On
+the planted-typo eval sample the combination took the false-pass rate
+from 16/16 to 0/24.
+
+## The reader is a noisy sensor — no verdict rests on one read
+
+A single transcription is one sample from a noisy sensor (measured:
+condensed "APPELLATION" garbles about half the time; an arc-wrapped
+"Surgeon General," loses its comma about as often), and the noise is
+biased in both directions: it garbles compliant labels toward failure,
+and it normalizes deviating warnings toward compliance. So neither
+auto-verdict rests on one read:
+
+- **Comparison fields** (brand, class, ABV, …) about to fail get a
+  *primed* focused re-read that sees the application's claim — that is
+  what lets it recover text the blind pass garbled.
+- **The government warning** gets a *blind* re-read that sees nothing —
+  the model knows the statutory text by heart, so priming there invites
+  normalizing a deviating label back to compliance. It runs in parallel
+  with the first read on every label, because both verdicts need it. On
+  a failing warning it is the stability check: the same deviation twice
+  means it is printed on the label and the failure stands; disagreement
+  means the transcription is unstable and a human decides. On a passing
+  warning it is the normalization check: the warning auto-passes only
+  when both independent reads agree on it, because a single read that
+  "matches" may be the prior autocompleting a misprint (measured: a
+  planted "impares" auto-approved 16/16 before this check). Punctuation,
+  spacing, and boldness wobble between honest reads of the same label,
+  so only word-level disagreement challenges a pass.
+
+One invariant governs all of it: **a second read can only move a label
+toward review, never toward pass.** Agreement with the application is
+grounds for human eyes, not for trusting a read that was given (or knows)
+the answer.
 
 ## The contract
 

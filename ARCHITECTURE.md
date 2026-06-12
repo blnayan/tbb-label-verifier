@@ -10,7 +10,7 @@
 │  Single label upload              Batch upload                   │
 │  (form + image)                   (CSV + images + progress)      │
 │         │                              │                         │
-│         │ downscale image (≤1568px)    │ parse CSV, pair files   │
+│         │ image sent as-is (≤10MB)     │ parse CSV, pair files   │
 │         │                              │ pool: 4 concurrent      │
 │         ├──────────────┬───────────────┤                         │
 │         ▼              │               ▼                         │
@@ -26,12 +26,18 @@
 │      ▼                                                           │
 │   verify.ts ── orchestrator                                      │
 │      │                                                           │
+│      ├─► upscale.ts ── lanczos-upscale small images (<1600px)    │
+│      │                 so fine print outresolves the encoder     │
+│      │                                                           │
 │      ├─► extract.ts ──► OpenAI (GPT-5.4 mini, vision +           │
-│      │                  zod structured output)                   │
+│      │       │          zod structured output)                   │
+│      │       │  full extraction ∥ blind warning re-read          │
+│      │       │  (two parallel calls on every label)              │
 │      │       returns LabelExtraction (verbatim transcription)    │
 │      │                                                           │
 │      └─► rules.ts ──► deterministic comparisons                  │
-│              returns field results + overall verdict             │
+│              returns field results + overall verdict;            │
+│              the warning auto-passes only when both reads agree  │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -61,7 +67,7 @@ Why this split, rather than asking the model "does this label match?":
 - **Auditability.** "Why did this fail?" must have a deterministic answer
   for a compliance tool. Every verdict traces to a rule you can read and a
   transcription you can see on screen.
-- **Testability.** The compliance behavior is 78 unit tests that run in
+- **Testability.** The compliance behavior is 118 unit tests that run in
   milliseconds with no API key. An end-to-end AI judgment can't be tested
   without live calls and tolerance for nondeterminism.
 - **The failure modes match the staff.** Dave doesn't trust black boxes —
@@ -99,10 +105,29 @@ parse-and-retry failure. The choice lives in one env var — model swaps are a
 config change, not a refactor.
 
 ### Latency budget, end to end
-- Client downscales images to ≤1568px before upload (the API would downscale
-  anyway — shrinking client-side saves upload time and tokens, the two
-  costs we control).
-- One model call per label; no chained calls, no thinking mode.
+- Images upload exactly as the user provided them — resample + JPEG
+  re-encode measurably degrades fine print (it flipped a real label's
+  government warning from a reliable match to a misread and auto-rejected
+  a compliant label). The one exception: a file over the server's 10MB
+  limit is shrunk client-side, because that beats rejecting the upload.
+- The server upscales SMALL images (under 1600px wide) to 1800px before
+  any model sees them (`upscale.ts`). Measured on a 900px render with a
+  planted warning typo: at native size the encoder cannot resolve the
+  letters and the language prior autocompletes them — 0/12 faithful reads
+  under any prompt; lanczos-upscaled to 1800px, ~75% faithful, at
+  IDENTICAL input token counts (the API resamples internally either way).
+  This is upscaling, not the degrading downscale above — no information
+  is destroyed, and large photos pass through byte-for-byte.
+- Two parallel model calls per label, no thinking mode: the full
+  extraction and a blind re-read of just the government warning. The
+  re-read serves both sides of the verdict (stability check on a failing
+  warning, normalization check on a passing one — see the AI-boundary
+  design doc) and used to run sequentially after a failure; running it up
+  front costs no wall-clock and removed ~1s from the fail path. Only a
+  label about to auto-fail on a comparison field pays for a third,
+  sequential call — the focused (primed) re-read of the disputed fields.
+- Measured end to end (eval suite, 2026-06-12): ~3.3s for a single
+  uncontended label — within the 5-second budget.
 - Measured extraction time is shown in the report (`extractionMs`), so the
   5-second claim is continuously visible rather than asserted.
 
@@ -167,7 +192,7 @@ it.
 Nothing requires server-side persistence: no accounts (per Marcus), samples
 are static files, and the server stays a stateless container. Results,
 however, are worth keeping: every completed verification (the result JSON,
-the exact downscaled image the model saw, and its review state) is saved to
+the exact image the model saw, and its review state) is saved to
 IndexedDB (`src/lib/client/history.ts`), surviving refreshes and restarts on
 that device. The store's primary key is an auto-incremented sequence, so
 insertion order *is* chronological order; a unique index on the record id
@@ -196,11 +221,12 @@ percentage of any team is colorblind.
 | `src/lib/verification/types.ts` | Domain types; the extraction/rules contract |
 | `src/lib/verification/extract.ts` | OpenAI vision call, zod schema, prompt |
 | `src/lib/verification/rules.ts` | All compliance logic (pure, tested) |
-| `src/lib/verification/verify.ts` | Orchestrator: extract → rules |
+| `src/lib/verification/verify.ts` | Orchestrator: upscale → extract ∥ warning re-read → rules → primed recheck on failure |
+| `src/lib/verification/upscale.ts` | Server-side pre-upscale of small images (tested) |
 | `src/lib/verification/input.ts` | Request validation (pure, tested) |
 | `src/lib/verification/batch.ts` | CSV parsing (pure, tested) |
 | `src/lib/client/pool.ts` | Browser-side concurrency pool (tested) |
-| `src/lib/client/downscale.ts` | Canvas downscale before upload |
+| `src/lib/client/downscale.ts` | Last-resort shrink for files over the 10MB limit (tested) |
 | `src/lib/client/history.ts` | IndexedDB history + review states + change events (tested) |
 | `src/lib/client/uploads.ts` | In-memory in-flight upload registry (tested) |
 | `src/app/api/verify/route.ts` | HTTP shell: validate → verify → typed errors |
@@ -213,7 +239,7 @@ percentage of any team is colorblind.
 TDD on every pure module: rule engine (including the regulatory edge cases
 from the interviews), input validation, CSV parsing, the concurrency pool,
 and the IndexedDB history layer with its review states and schema migration
-(against `fake-indexeddb`) — 171 tests, no network. The AI boundary is deliberately thin and typed;
+(against `fake-indexeddb`) — 232 tests, no network. The AI boundary is deliberately thin and typed;
 the route handler is glue. The sample dataset doubles as a live end-to-end
 suite: each sample's description states its expected verdict, so a reviewer
 can validate the whole pipeline from the UI in two minutes.

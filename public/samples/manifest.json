@@ -538,11 +538,11 @@
       "id": "real-four-loko-shot",
       "name": "Four Loko Shot \u2014 warning on another panel (real TTB label)",
       "image": "/samples/real-four-loko-shot.jpg",
-      "description": "Real approved label from TTB's public COLA registry (TTB ID 24152001000126). This is the front panel of a wrap-around label \u2014 the government warning is printed on the back panel, so a single-image check flags it as missing. Expected result: Issues found (government warning not found).",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 24152001000126). This is the front panel of a wrap-around label \u2014 the government warning is printed on the back panel, so a single-image check flags it as missing. The explicit class statement is the fine print at the bottom, which the reader resolves reliably since the pre-upscale step (2026-06-12). Expected result: Issues found (government warning not found).",
       "source": "real",
       "application": {
         "brandName": "Four Loko",
-        "classType": "Alcoholic Beverage",
+        "classType": "MALT BEVERAGE WITH NATURAL AND ARTIFICIAL FLAVORS, ARTIFICIAL SWEETENER, CERTIFIED COLOR, AND FD&C YELLOW #5",
         "alcoholPercent": 13.9,
         "netContents": "6.8 FL OZ",
         "bottlerNameAddress": "UNITED STATES DISTILLED PRODUCTS CO., PRINCETON, MN FOR PHUSION PROJECTS, LLC."

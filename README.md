@@ -106,11 +106,12 @@ container exposes port 3000 and needs outbound HTTPS to
   GPT-5.4 mini via the official OpenAI SDK with structured outputs
   (zod-validated); Vitest. One deployable, no database.
 - **Core trade-off:** the AI is confined to transcription; all pass/fail
-  logic is deterministic, unit-tested TypeScript (171 tests). This makes
+  logic is deterministic, unit-tested TypeScript (232 tests). This makes
   compliance behavior auditable and lets the model be swapped via env var.
-- **Latency:** fastest vision-capable model + client-side image downscaling
-  + one API call per label keeps verification inside the ~5s budget; batch
-  mode runs four labels concurrently.
+- **Latency:** fastest vision-capable model + two parallel API calls per
+  label (full extraction + a blind warning re-read — the warning
+  auto-passes only when both agree) keeps verification inside the ~5s
+  budget; batch mode runs four labels concurrently.
 - **Known limitations** are listed at the end of
   [ASSUMPTIONS.md](ASSUMPTIONS.md) — notably: country of origin is checked
   only for products marked imported, one image per label, and an uncertain

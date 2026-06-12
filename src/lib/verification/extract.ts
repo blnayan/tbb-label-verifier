@@ -130,6 +130,7 @@ Rules:
 - Labels are often photographed at an angle, with glare, curvature, or poor lighting. Read carefully through these artifacts, and reflect genuine uncertainty in the readability field rather than guessing.
 - If a field is absent or illegible, return null for it rather than inventing a value.
 - The government warning matters most: transcribe every word of it exactly as printed, including any deviations from the standard wording. Include its heading (e.g. "GOVERNMENT WARNING:") in the transcription when one is printed — never drop it.
+- Misprinted warnings are exactly what this review exists to catch, and misprints hide in word shape: a swapped or missing letter inside a long word reads "correctly" unless you verify its letters. After transcribing the warning, re-examine each of its words of 5+ letters in the image letter by letter and correct your transcription to the printed letters, even when that produces a misspelled word. A transcription containing a misspelling is often the correct answer.
 - Labels may print other caution or safety notices alongside it (keg-pressure CAUTION text, sulfite or allergen declarations). Those are NOT the government warning — report only the statement whose heading reads "GOVERNMENT WARNING", and never substitute another notice for it.`
 
 export type SupportedImageMediaType =
@@ -299,6 +300,7 @@ You will be shown a photograph or rendering of an alcohol beverage label. Transc
 Rules:
 - Transcribe verbatim, character by character. Preserve capitalization, punctuation, and the (1)/(2) numbering exactly as printed. Never normalize, correct, or autocomplete the text to what it "should" say — if the printed text deviates from the standard wording, your transcription must show the deviation.
 - The warning is often printed small, curved, or wrapped around the label. Read it through these artifacts with maximum care, character by character.
+- Misprinted warnings are exactly what this review exists to catch, and misprints hide in word shape: a swapped or missing letter inside a long word reads "correctly" unless you verify its letters. After transcribing, re-examine each word of 5+ letters in the image letter by letter and correct your transcription to the printed letters, even when that produces a misspelled word. A transcription containing a misspelling is often the correct answer.
 - Other caution or safety notices (keg-pressure CAUTION text, sulfite or allergen declarations) are NOT the government warning — never substitute one for it.
 - If no government warning is printed anywhere on the label, report it as not present.`
 
