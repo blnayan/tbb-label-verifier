@@ -463,6 +463,49 @@
       }
     },
     {
+      "id": "typo-warning",
+      "name": "North Fork — warning typo (generated)",
+      "image": "/samples/typo-warning.png",
+      "description": "The warning prints \"impares\" instead of \"impairs\" — a single-letter misprint, otherwise statutory. Probes whether the reader silently corrects a deviation it knows by heart. Expected result: Issues found (or Needs review if the two reads disagree).",
+      "source": "generated",
+      "application": {
+        "brandName": "NORTH FORK",
+        "classType": "Single Malt Whiskey",
+        "alcoholPercent": 46,
+        "netContents": "750 mL",
+        "bottlerNameAddress": "NORTH FORK DISTILLERY, BOZEMAN, MT"
+      }
+    },
+    {
+      "id": "dropped-word-warning",
+      "name": "Red Lantern — warning missing a word (generated)",
+      "image": "/samples/dropped-word-warning.png",
+      "description": "The warning reads \"and cause health problems\" — the word \"may\" is missing, otherwise statutory. Expected result: Issues found (or Needs review if the two reads disagree).",
+      "source": "generated",
+      "application": {
+        "brandName": "RED LANTERN",
+        "classType": "Amber Lager",
+        "alcoholPercent": 5.2,
+        "netContents": "12 FL OZ",
+        "bottlerNameAddress": "RED LANTERN BREWING CO., DULUTH, MN"
+      }
+    },
+    {
+      "id": "swapped-words-warning",
+      "name": "Quarry Rock — warning words transposed (generated)",
+      "image": "/samples/swapped-words-warning.png",
+      "description": "The warning reads \"operate a car or drive machinery\" — drive/operate transposed, every word statutory but out of order. Expected result: Issues found (or Needs review if the two reads disagree).",
+      "source": "generated",
+      "application": {
+        "brandName": "QUARRY ROCK",
+        "classType": "Blanco Tequila",
+        "alcoholPercent": 40,
+        "netContents": "750 mL",
+        "bottlerNameAddress": "QUARRY ROCK SPIRITS, EL PASO, TX",
+        "countryOfOrigin": "Mexico"
+      }
+    },
+    {
       "id": "wrong-net-contents",
       "name": "Blackwater Bay \u2014 wrong net contents (generated)",
       "image": "/samples/wrong-net-contents.png",

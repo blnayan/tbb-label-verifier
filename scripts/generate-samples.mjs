@@ -5,7 +5,9 @@
  * missing warning, reworded warning, an unbolded warning heading, case-only
  * brand differences) plus the mandatory-elements checks (a missing bottler
  * statement; an imported Canadian whisky with importer and country-of-origin
- * statements).
+ * statements) and near-miss warning deviations (single-letter typo, dropped
+ * word, transposed words) that probe whether the reader normalizes a
+ * deviating warning back to the statutory text it knows by heart.
  *
  * Run: node scripts/generate-samples.mjs
  */
@@ -30,6 +32,21 @@ const TITLE_CASE_WARNING = WARNING.replace(
 const REWORDED_WARNING = WARNING.replace(
   "women should not drink alcoholic beverages during pregnancy",
   "women should avoid alcoholic beverages while pregnant",
+);
+
+// Near-miss deviations: one word-level change each, otherwise statutory.
+// These probe whether the reader silently normalizes a deviating warning
+// back to the text it knows by heart — which would be a false PASS.
+const TYPO_WARNING = WARNING.replace("impairs", "impares");
+
+const DROPPED_WORD_WARNING = WARNING.replace(
+  "and may cause health problems",
+  "and cause health problems",
+);
+
+const SWAPPED_WORDS_WARNING = WARNING.replace(
+  "drive a car or operate machinery",
+  "operate a car or drive machinery",
 );
 
 /** Greedy word-wrap for SVG <text> lines. */
@@ -280,6 +297,46 @@ const SAMPLES = [
       warningHeadingBold: false,
       bg: "#f0e9e0",
       accent: "#7a3a3a",
+    }),
+  },
+  {
+    file: "typo-warning.png",
+    svg: labelSvg({
+      brand: "NORTH FORK",
+      classType: "Single Malt Whiskey",
+      abvText: "46% Alc./Vol. (92 Proof)",
+      netText: "750 mL",
+      bottlerText: "DISTILLED AND BOTTLED BY NORTH FORK DISTILLERY, BOZEMAN, MT",
+      warning: TYPO_WARNING, // "impares" — single-letter misprint
+      bg: "#ece9f0",
+      accent: "#4a3a6e",
+    }),
+  },
+  {
+    file: "dropped-word-warning.png",
+    svg: labelSvg({
+      brand: "RED LANTERN",
+      classType: "Amber Lager",
+      abvText: "5.2% Alc./Vol.",
+      netText: "12 FL OZ",
+      bottlerText: "BREWED AND BOTTLED BY RED LANTERN BREWING CO., DULUTH, MN",
+      warning: DROPPED_WORD_WARNING, // missing "may"
+      bg: "#f2e8e0",
+      accent: "#a0522d",
+    }),
+  },
+  {
+    file: "swapped-words-warning.png",
+    svg: labelSvg({
+      brand: "QUARRY ROCK",
+      classType: "Blanco Tequila",
+      abvText: "40% Alc./Vol. (80 Proof)",
+      netText: "750 mL",
+      bottlerText: "IMPORTED BY QUARRY ROCK SPIRITS, EL PASO, TX",
+      originText: "PRODUCT OF MEXICO",
+      warning: SWAPPED_WORDS_WARNING, // drive/operate transposed
+      bg: "#e6eef0",
+      accent: "#2e6e6a",
     }),
   },
   {

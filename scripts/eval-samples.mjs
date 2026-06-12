@@ -172,6 +172,29 @@ const EXPECTATIONS = {
     fields: { governmentWarning: ["mismatch"] },
     allowedFailing: ["governmentWarning"],
   },
+  // Near-miss warnings: one word-level deviation each, otherwise statutory.
+  // The catastrophic outcome is PASS — the reader normalizing the deviation
+  // back to the text it knows by heart and the label auto-approving.
+  // needs_review is acceptable (the reads disagreed; a human confirms);
+  // fail is the ideal (both reads reproduced the printed deviation).
+  "typo-warning": {
+    overall: ["fail", "needs_review"],
+    fields: { governmentWarning: ["mismatch", "close_match"] },
+    allowedFailing: ["governmentWarning"],
+    note: '"impares" for "impairs" — single-letter misprint.',
+  },
+  "dropped-word-warning": {
+    overall: ["fail", "needs_review"],
+    fields: { governmentWarning: ["mismatch", "close_match"] },
+    allowedFailing: ["governmentWarning"],
+    note: 'Missing "may" in "and may cause health problems".',
+  },
+  "swapped-words-warning": {
+    overall: ["fail", "needs_review"],
+    fields: { governmentWarning: ["mismatch", "close_match"] },
+    allowedFailing: ["governmentWarning"],
+    note: '"operate a car or drive machinery" — words transposed.',
+  },
   "wrong-net-contents": {
     overall: ["fail"],
     fields: { netContents: ["mismatch"] },
