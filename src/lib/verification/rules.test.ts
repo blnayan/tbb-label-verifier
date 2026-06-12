@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest"
 
 import {
   GOVERNMENT_WARNING_TEXT,
+  applyRecheck,
   canonicalize,
+  applyWarningStability,
   checkGovernmentWarning,
   compareAbv,
   compareBrandName,
@@ -14,6 +16,7 @@ import {
   normalizeLoose,
   parseAbv,
   parseNetContentsMl,
+  rollUpOverall,
   runRules,
 } from "./rules"
 import type { ApplicationData, LabelExtraction } from "./types"
@@ -95,6 +98,23 @@ describe("compareText (brand name / class type)", () => {
 })
 
 describe("compareBrandName", () => {
+  it("a capitalization-only difference is a full match (STONE'S THROW vs Stone's Throw)", () => {
+    const result = compareBrandName("Stone's Throw", "STONE'S THROW")
+    expect(result.status).toBe("match")
+    expect(result.note).toContain("capitalization")
+  })
+
+  it("a punctuation difference is still only a close_match", () => {
+    // Dropping the apostrophe is more than styling — keep human eyes on it.
+    const result = compareBrandName("Stone's Throw", "STONES THROW")
+    expect(result.status).toBe("close_match")
+  })
+
+  it("a diacritic difference is still only a close_match (BARENJAGER vs Bärenjäger)", () => {
+    const result = compareBrandName("BARENJAGER", "Bärenjäger")
+    expect(result.status).toBe("close_match")
+  })
+
   it("extra printed words around the brand are a close_match, not a failure", () => {
     // Stillwater keg collar: the fanciful name "Debutante" is printed
     // directly under the brand and models read them as one line.
@@ -120,7 +140,6 @@ describe("parseAbv", () => {
     ["ALC. 13.5% BY VOL.", 13.5],
     ["ABV 5.2%", 5.2],
     ["40 % vol", 40],
-    ["90 PROOF", 45], // proof fallback: proof = 2 x ABV
     ["ALC 40 BY VOL", 40], // no % sign
   ])("parses %s as %d", (text, expected) => {
     expect(parseAbv(text)).toBe(expected)
@@ -128,6 +147,12 @@ describe("parseAbv", () => {
 
   it("returns null when no number is present", () => {
     expect(parseAbv("Kentucky Bourbon")).toBeNull()
+  })
+
+  it("does NOT treat a proof statement as an ABV percentage", () => {
+    // Proof is permitted only in addition to the mandatory percent-ABV
+    // statement (27 CFR 5.65) — it is not an alcohol content statement.
+    expect(parseAbv("90 PROOF")).toBeNull()
   })
 
   // Real historical/imported labels print both by-weight and by-volume
@@ -164,7 +189,21 @@ describe("compareAbv", () => {
   it("reports not_found for a missing statement", () => {
     expect(compareAbv(45, null).status).toBe("not_found")
   })
+
+  it("a proof-only statement fails even when the proof is numerically right", () => {
+    // User ruling 2026-06-12: the percent-ABV statement is mandatory —
+    // proof may only appear in addition, never instead.
+    const result = compareAbv(45, "90 PROOF")
+    expect(result.status).toBe("mismatch")
+    expect(result.note).toContain("proof")
+    expect(result.note?.toLowerCase()).toContain("percent")
+  })
+
+  it("a proof-only statement that is also numerically wrong still fails", () => {
+    expect(compareAbv(40, "90 PROOF").status).toBe("mismatch")
+  })
 })
+
 
 describe("parseNetContentsMl", () => {
   it.each([
@@ -224,23 +263,38 @@ describe("compareClassType", () => {
     )
   })
 
-  it("an appellation merged into the class line is a close match, not a failure", () => {
+  it("a class line with extra designation text around the expected class is a full match", () => {
     const result = compareClassType(
       "Red wine",
       "Barbera d'Asti D.O.C.G. Red wine"
     )
-    expect(result.status).toBe("close_match")
-    expect(result.note).toContain("designation")
+    expect(result.status).toBe("match")
+    expect(result.note).toContain("Barbera d'Asti D.O.C.G. Red wine")
+  })
+
+  it("returns the matched portion of the label line, in the label's own casing", () => {
+    const result = compareClassType(
+      "Red wine",
+      "Barbera d'Asti D.O.C.G. RED WINE"
+    )
+    expect(result.status).toBe("match")
+    expect(result.matchedText).toBe("RED WINE")
   })
 
   it("collapses line breaks between the appellation and the class", () => {
     expect(
       compareClassType("Red wine", "Barbera d'Asti D.O.C.G.\nRed wine").status
-    ).toBe("close_match")
+    ).toBe("match")
   })
 
   it("a genuinely different class is a mismatch", () => {
     expect(compareClassType("Vodka", "Straight Rye Whiskey").status).toBe(
+      "mismatch"
+    )
+  })
+
+  it("the expected tokens must appear in order — scattered words don't count", () => {
+    expect(compareClassType("Red wine", "Wine made from red grapes").status).toBe(
       "mismatch"
     )
   })
@@ -447,14 +501,55 @@ describe("checkGovernmentWarning", () => {
     expect(result.note).toContain("spacing")
   })
 
-  it("a missing comma is still a hard mismatch even when spacing collapses around it", () => {
+  it("a missing comma is a close_match — the reader drops commas on curved print, so a human decides", () => {
+    // Stillwater, measured live: the label prints "Surgeon General," on an
+    // arc and the model drops the comma in roughly half of its reads.
     const missingComma = GOVERNMENT_WARNING_TEXT.replace(
-      "machinery, and",
-      "machinery and"
+      "Surgeon General,",
+      "Surgeon General"
+    )
+    const result = checkGovernmentWarning(
+      exactWarning({ verbatimText: missingComma })
+    )
+    expect(result.status).toBe("close_match")
+    expect(result.note).toContain("punctuation")
+    expect(result.note).toContain("SURGEON GENERAL")
+  })
+
+  it("an added comma is also a close_match, with the divergence pinpointed", () => {
+    const addedComma = GOVERNMENT_WARNING_TEXT.replace(
+      "machinery, and may",
+      "machinery, and, may"
+    )
+    const result = checkGovernmentWarning(
+      exactWarning({ verbatimText: addedComma })
+    )
+    expect(result.status).toBe("close_match")
+    expect(result.note).toContain("punctuation")
+  })
+
+  it("punctuation tolerance never excuses a word difference", () => {
+    const wordSwap = GOVERNMENT_WARNING_TEXT.replace(
+      "impairs your ability",
+      "impedes your ability"
     )
     expect(
-      checkGovernmentWarning(exactWarning({ verbatimText: missingComma }))
-        .status
+      checkGovernmentWarning(exactWarning({ verbatimText: wordSwap })).status
+    ).toBe("mismatch")
+  })
+
+  it("punctuation tolerance never excuses a non-capitalized heading", () => {
+    const titleCaseMissingComma = GOVERNMENT_WARNING_TEXT.replace(
+      "GOVERNMENT WARNING",
+      "Government Warning"
+    ).replace("Surgeon General,", "Surgeon General")
+    expect(
+      checkGovernmentWarning(
+        exactWarning({
+          verbatimText: titleCaseMissingComma,
+          headingAllCaps: false,
+        })
+      ).status
     ).toBe("mismatch")
   })
 
@@ -502,10 +597,25 @@ describe("runRules — overall verdict", () => {
     expect(fields.every((f) => f.status === "match")).toBe(true)
   })
 
+  it("extra class/type text still passes, and the field shows only the matched portion", () => {
+    const { overall, fields } = runRules(application, {
+      ...cleanExtraction,
+      classType: "Aged 8 Years Kentucky Straight Bourbon Whiskey Small Batch",
+    })
+    expect(overall).toBe("pass")
+    const row = fields.find((f) => f.field === "classType")
+    expect(row?.status).toBe("match")
+    expect(row?.found).toBe("Kentucky Straight Bourbon Whiskey")
+    expect(row?.note).toContain(
+      "Aged 8 Years Kentucky Straight Bourbon Whiskey Small Batch"
+    )
+  })
+
   it("a close match downgrades to needs_review", () => {
+    // Punctuation (not just case) differs, so the brand stays a close_match.
     const { overall } = runRules(application, {
       ...cleanExtraction,
-      brandName: "Old Tom Distillery",
+      brandName: "OLD-TOM DISTILLERY",
     })
     expect(overall).toBe("needs_review")
   })
@@ -608,5 +718,208 @@ describe("runRules — name/address and country of origin checks", () => {
     })
     expect(fields).toHaveLength(7)
     expect(fields.every((f) => f.status === "not_checked")).toBe(true)
+  })
+})
+
+describe("applyRecheck — assisted second read of disputed fields", () => {
+  // House of Harvey, measured live: blind read garbles the condensed
+  // "APPELLATION" (or drops it); a focused re-read recovers it.
+  const hohApplication: ApplicationData = {
+    ...application,
+    classType: "APPELLATION AMERICAN SPARKLING WINE",
+  }
+  const misreadExtraction: LabelExtraction = {
+    ...cleanExtraction,
+    classType: "AMERICAN SPARKLING WINE",
+  }
+
+  it("a re-read agreeing with the application rescues a mismatch into close_match — never match", () => {
+    const { fields } = runRules(hohApplication, misreadExtraction)
+    const rechecked = applyRecheck(hohApplication, fields, {
+      classType: "APPELLATION AMERICAN SPARKLING WINE",
+    })
+    const row = rechecked.find((f) => f.field === "classType")
+    expect(row?.status).toBe("close_match")
+    expect(row?.found).toBe("APPELLATION AMERICAN SPARKLING WINE")
+    expect(row?.note).toContain("AMERICAN SPARKLING WINE")
+    expect(row?.note).toContain("second read")
+  })
+
+  it("the rescued verdict rolls up to needs_review, not pass", () => {
+    const { fields } = runRules(hohApplication, misreadExtraction)
+    const rechecked = applyRecheck(hohApplication, fields, {
+      classType: "APPELLATION AMERICAN SPARKLING WINE",
+    })
+    expect(rollUpOverall(rechecked, "clear")).toBe("needs_review")
+  })
+
+  it("a re-read confirming the first read leaves the failure standing", () => {
+    const wrongBrand = runRules(application, {
+      ...cleanExtraction,
+      brandName: "EAGLE HOLLOW",
+    })
+    const rechecked = applyRecheck(application, wrongBrand.fields, {
+      brandName: "EAGLE HOLLOW",
+    })
+    expect(rechecked.find((f) => f.field === "brandName")?.status).toBe(
+      "mismatch"
+    )
+  })
+
+  it("a null re-read leaves not_found standing", () => {
+    const noBottler = runRules(application, {
+      ...cleanExtraction,
+      nameAndAddress: null,
+    })
+    const rechecked = applyRecheck(application, noBottler.fields, {
+      nameAddress: null,
+    })
+    expect(rechecked.find((f) => f.field === "nameAddress")?.status).toBe(
+      "not_found"
+    )
+  })
+
+  it("a re-read that finds a missing field rescues not_found into close_match", () => {
+    const noBottler = runRules(application, {
+      ...cleanExtraction,
+      nameAndAddress: null,
+    })
+    const rechecked = applyRecheck(application, noBottler.fields, {
+      nameAddress: "Bottled by Old Tom Distillery, Bardstown, KY",
+    })
+    expect(rechecked.find((f) => f.field === "nameAddress")?.status).toBe(
+      "close_match"
+    )
+  })
+
+  it("a re-read that still disagrees with the application leaves the mismatch standing", () => {
+    const wrongAbv = runRules(application, {
+      ...cleanExtraction,
+      alcoholStatement: "40% Alc./Vol.",
+    })
+    const rechecked = applyRecheck(application, wrongAbv.fields, {
+      alcoholContent: "40% Alc./Vol.",
+    })
+    expect(rechecked.find((f) => f.field === "alcoholContent")?.status).toBe(
+      "mismatch"
+    )
+  })
+
+  it("fields that did not fail are untouched even when a re-read is present", () => {
+    const { fields } = runRules(application, cleanExtraction)
+    const rechecked = applyRecheck(application, fields, {
+      brandName: "SOMETHING ELSE",
+    })
+    expect(rechecked.find((f) => f.field === "brandName")?.status).toBe("match")
+    expect(rechecked.find((f) => f.field === "brandName")?.found).toBe(
+      "OLD TOM DISTILLERY"
+    )
+  })
+})
+
+describe("applyWarningStability — blind second read of a failing warning", () => {
+  // European Standard, measured live: a degraded image made the blind read
+  // transcribe "IMPAIRS" as "IMPARES" — a word-level garble of a compliant
+  // label that used to auto-reject.
+  const garbled = GOVERNMENT_WARNING_TEXT.replace("impairs", "impares")
+  const garbledExtraction: LabelExtraction = {
+    ...cleanExtraction,
+    governmentWarning: exactWarning({ verbatimText: garbled }),
+  }
+  const missingExtraction: LabelExtraction = {
+    ...cleanExtraction,
+    governmentWarning: {
+      present: false,
+      verbatimText: null,
+      headingAllCaps: null,
+      headingAppearsBold: null,
+    },
+  }
+
+  it("a re-read that returns the statutory text rescues the failure into close_match — never match", () => {
+    const { fields } = runRules(application, garbledExtraction)
+    const stabilized = applyWarningStability(fields, exactWarning())
+    const row = stabilized.find((f) => f.field === "governmentWarning")
+    expect(row?.status).toBe("close_match")
+    expect(row?.note).toContain("second")
+    expect(rollUpOverall(stabilized, "clear")).toBe("needs_review")
+  })
+
+  it("a re-read reproducing the same deviation leaves the failure standing, with the confirmation noted", () => {
+    const { fields } = runRules(application, garbledExtraction)
+    const stabilized = applyWarningStability(
+      fields,
+      exactWarning({ verbatimText: garbled })
+    )
+    const row = stabilized.find((f) => f.field === "governmentWarning")
+    expect(row?.status).toBe("mismatch")
+    expect(row?.note).toContain("second")
+  })
+
+  it("two reads of the same deviation may differ in punctuation — still reproduced, still failing", () => {
+    const { fields } = runRules(application, garbledExtraction)
+    const garbledNoComma = garbled.replace("machinery, and", "machinery and")
+    const stabilized = applyWarningStability(
+      fields,
+      exactWarning({ verbatimText: garbledNoComma })
+    )
+    expect(
+      stabilized.find((f) => f.field === "governmentWarning")?.status
+    ).toBe("mismatch")
+  })
+
+  it("a warning missing in both reads stays not_found", () => {
+    const { fields } = runRules(application, missingExtraction)
+    const stabilized = applyWarningStability(fields, {
+      present: false,
+      verbatimText: null,
+      headingAllCaps: null,
+      headingAppearsBold: null,
+    })
+    expect(
+      stabilized.find((f) => f.field === "governmentWarning")?.status
+    ).toBe("not_found")
+  })
+
+  it("a warning the first read missed but the re-read found goes to review", () => {
+    const { fields } = runRules(application, missingExtraction)
+    const stabilized = applyWarningStability(fields, exactWarning())
+    expect(
+      stabilized.find((f) => f.field === "governmentWarning")?.status
+    ).toBe("close_match")
+  })
+
+  it("two reads that garble the text differently mean the transcription is unstable — review", () => {
+    const { fields } = runRules(application, garbledExtraction)
+    const otherGarble = GOVERNMENT_WARNING_TEXT.replace("impairs", "imparts")
+    const stabilized = applyWarningStability(
+      fields,
+      exactWarning({ verbatimText: otherGarble })
+    )
+    expect(
+      stabilized.find((f) => f.field === "governmentWarning")?.status
+    ).toBe("close_match")
+  })
+
+  it("a passing warning is untouched", () => {
+    const { fields } = runRules(application, cleanExtraction)
+    const stabilized = applyWarningStability(
+      fields,
+      exactWarning({ verbatimText: garbled })
+    )
+    expect(
+      stabilized.find((f) => f.field === "governmentWarning")?.status
+    ).toBe("match")
+  })
+
+  it("other fields are never touched", () => {
+    const { fields } = runRules(application, {
+      ...garbledExtraction,
+      brandName: "EAGLE HOLLOW",
+    })
+    const stabilized = applyWarningStability(fields, exactWarning())
+    expect(stabilized.find((f) => f.field === "brandName")?.status).toBe(
+      "mismatch"
+    )
   })
 })

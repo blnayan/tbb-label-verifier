@@ -124,7 +124,10 @@ function editDistance(a: string, b: string): number {
 }
 
 /**
- * Compare the brand name. Same semantics as compareText, except a label
+ * Compare the brand name. Same semantics as compareText, with two brand
+ * specific tolerances: a capitalization-only difference is a full match
+ * (labels routinely set the brand in display caps — punctuation,
+ * apostrophes, and diacritics still must agree exactly), and a label
  * that prints additional words around the brand — typically a fanciful
  * name read as part of the same line, e.g. "Stillwater Artisanal
  * Debutante" against an application's "Stillwater Artisanal" — is a close
@@ -135,6 +138,16 @@ export function compareBrandName(
   found: string | null
 ): { status: FieldStatus; note: string | null } {
   const base = compareText(expected, found)
+  if (
+    base.status === "close_match" &&
+    found !== null &&
+    canonicalize(expected).toUpperCase() === canonicalize(found).toUpperCase()
+  ) {
+    return {
+      status: "match",
+      note: "Same name — differs only in capitalization.",
+    }
+  }
   if (base.status !== "mismatch" || found === null) return base
   if (
     isTokenSubsequence(
@@ -154,27 +167,50 @@ export function compareBrandName(
  * Compare the class/type designation. Same semantics as compareText, except
  * a label that prints extra designation text around the expected class — an
  * appellation line read together with it, e.g. "Barbera d'Asti D.O.C.G. Red
- * wine" against an application's "Red wine" — is a close match for human
- * review rather than an automatic failure.
+ * wine" against an application's "Red wine" — is a full match: the expected
+ * designation is on the label, and the surrounding text (appellation, age
+ * statement, fanciful qualifier) carries no compliance signal against the
+ * application. `matchedText` is the portion of the label line that matched,
+ * in the label's own casing, so the result can display exactly what matched;
+ * the note keeps the full line for transparency.
  */
 export function compareClassType(
   expected: string,
   found: string | null
-): { status: FieldStatus; note: string | null } {
+): { status: FieldStatus; note: string | null; matchedText?: string } {
   const base = compareText(expected, found)
   if (base.status !== "mismatch" || found === null) return base
-  if (
-    isTokenSubsequence(
-      normalizeLoose(expected).split(" "),
-      normalizeLoose(found).split(" ")
-    )
-  ) {
+  const matchedText = matchedSubsequenceText(expected, found)
+  if (matchedText !== null) {
     return {
-      status: "close_match",
-      note: "The label prints additional designation text (e.g. an appellation) with the class/type — confirm they agree.",
+      status: "match",
+      note: `The label prints additional designation text with the class/type ("${canonicalize(found)}") — the application's designation appears within it.`,
+      matchedText,
     }
   }
   return base
+}
+
+/**
+ * When every token of `expected` appears, in order, within `found`, return
+ * those tokens as they are printed on the label (original casing and
+ * punctuation). Null when `expected` is not contained in `found`.
+ */
+function matchedSubsequenceText(
+  expected: string,
+  found: string
+): string | null {
+  const needle = normalizeLoose(expected).split(" ").filter(Boolean)
+  const originalTokens = canonicalize(found).split(" ").filter(Boolean)
+  const matched: string[] = []
+  let i = 0
+  for (const token of originalTokens) {
+    if (i < needle.length && normalizeLoose(token) === needle[i]) {
+      matched.push(token)
+      i++
+    }
+  }
+  return i === needle.length ? matched.join(" ") : null
 }
 
 const UNICODE_FRACTIONS: Record<string, string> = {
@@ -202,10 +238,12 @@ function parseNumberWithFraction(text: string): number {
  * Pull an ABV percentage out of a label alcohol statement.
  *
  * Handles the common formats: "45% Alc./Vol.", "ALC. 45% BY VOL.",
- * "ABV 45%", "4½% BY VOLUME", "4 3/8%", and falls back to proof
- * ("90 Proof" -> 45%) when no percentage is printed. Older and imported
- * labels often print both by-weight and by-volume figures — ABV is the
- * by-volume one, so a percentage followed by "VOL" wins.
+ * "ABV 5.2%", "4½% BY VOLUME", "4 3/8%". Older and imported labels often
+ * print both by-weight and by-volume figures — ABV is the by-volume one,
+ * so a percentage followed by "VOL" wins. A proof figure is deliberately
+ * NOT read as ABV: the percent statement is mandatory (27 CFR 5.65) and
+ * proof may only accompany it, so "90 Proof" alone parses to null and
+ * compareAbv reports why.
  */
 export function parseAbv(text: string): number | null {
   let t = canonicalize(text).toUpperCase()
@@ -244,11 +282,15 @@ export function parseAbv(text: string): number | null {
   const alcVol = t.match(/ALC\.?\s*(\d+(?:\.\d+)?)\s*(?:%\s*)?(?:BY\s+)?VOL/)
   if (alcVol) return parseFloat(alcVol[1])
 
-  // Proof only — US proof is exactly twice ABV.
-  const proof = t.match(/(\d+(?:\.\d+)?)\s*PROOF/)
-  if (proof) return parseFloat(proof[1]) / 2
-
   return null
+}
+
+/** US proof is exactly twice ABV; null when no proof figure is printed. */
+export function parseProof(text: string): number | null {
+  const proof = canonicalize(text)
+    .toUpperCase()
+    .match(/(\d+(?:\.\d+)?)\s*PROOF/)
+  return proof ? parseFloat(proof[1]) : null
 }
 
 export function compareAbv(
@@ -260,6 +302,17 @@ export function compareAbv(
   }
   const parsed = parseAbv(found)
   if (parsed === null) {
+    const proof = parseProof(found)
+    if (proof !== null) {
+      const equivalence =
+        Math.abs(proof / 2 - expectedPercent) < 0.01
+          ? `equivalent to the application's ${expectedPercent}%, but the percentage must still be printed`
+          : `equivalent to ${proof / 2}% — the application says ${expectedPercent}%`
+      return {
+        status: "mismatch",
+        note: `The label states alcohol content in proof only ("${found}") — a percent-alcohol-by-volume statement is required; proof may only appear in addition. ${proof} proof is ${equivalence}.`,
+      }
+    }
     return {
       status: "mismatch",
       note: `Could not read a percentage from "${found}".`,
@@ -443,14 +496,17 @@ export function compareCountryOfOrigin(
 /**
  * The government warning must match the statutory text word-for-word, and
  * the "GOVERNMENT WARNING:" heading must be in capital letters and bold
- * type. Wording and caps come from transcription, which the model does
- * reliably, so those are hard fails. Two judgments it does NOT make reliably
- * only queue the label for human review (close_match) instead:
+ * type. Word-level wording and heading caps come from transcription, which
+ * the model does reliably, so those are hard fails. Three judgments it does
+ * NOT make reliably only queue the label for human review (close_match):
  *  - boldness (measured: MB Liquors reads as not bold);
  *  - spacing in tight condensed print (measured: ZD Wines "(2) CONSUMPTION"
- *    transcribed as "(2)CONSUMPTION") — when the text differs from the
- *    statutory wording by whitespace alone, every word is still present, so
- *    a human confirms rather than the label auto-failing.
+ *    transcribed as "(2)CONSUMPTION");
+ *  - punctuation (measured: Stillwater's arc-wrapped "Surgeon General,"
+ *    loses its comma in roughly half of reads) — when every word of the
+ *    statutory text is present in order and only punctuation or spacing
+ *    differs, the divergence is as likely the reader as the label, so a
+ *    human confirms rather than the label auto-failing.
  * A null bold judgment (can't tell) does not penalize the label.
  */
 export function checkGovernmentWarning(
@@ -468,12 +524,16 @@ export function checkGovernmentWarning(
 
   // Wording check is case-insensitive; the caps requirement applies to the
   // heading and is checked separately so the agent sees the precise problem.
-  // A divergence in whitespace alone is deferred below — same characters,
-  // likely a transcription artifact of tight print.
+  // Divergences in whitespace or punctuation alone are deferred below —
+  // every word intact, likely a transcription artifact.
   const spacingOnly =
     found !== required &&
     found.replace(/ /g, "") === required.replace(/ /g, "")
-  if (found !== required && !spacingOnly) {
+  const punctuationOnly =
+    found !== required &&
+    !spacingOnly &&
+    wordStream(found) === wordStream(required)
+  if (found !== required && !spacingOnly && !punctuationOnly) {
     const divergence = firstDivergence(found, required)
     return {
       status: "mismatch",
@@ -504,6 +564,14 @@ export function checkGovernmentWarning(
     }
   }
 
+  if (punctuationOnly) {
+    const divergence = firstDivergence(found, required)
+    return {
+      status: "close_match",
+      note: `Wording matches word-for-word but punctuation differs near: "…${divergence}…" — as likely the reader misreading tight or curved print as the label. Confirm on the image.`,
+    }
+  }
+
   if (spacingOnly) {
     const divergence = firstDivergence(found, required)
     return {
@@ -521,6 +589,14 @@ function firstDivergence(a: string, b: string): string {
   while (i < Math.min(a.length, b.length) && a[i] === b[i]) i++
   const start = Math.max(0, i - 20)
   return a.slice(start, i + 25) || "(start of text)"
+}
+
+/** The word stream alone — punctuation stripped, whitespace collapsed. */
+function wordStream(text: string): string {
+  return text
+    .replace(/[^A-Za-z0-9 ]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
 }
 
 const FIELD_LABELS: Record<string, string> = {
@@ -570,7 +646,7 @@ export function runRules(
   }
 
   const brand = compareBrandName(application.brandName, extraction.brandName)
-  const classType = compareClassType(
+  const { matchedText: classTypeMatched, ...classType } = compareClassType(
     application.classType,
     extraction.classType
   )
@@ -594,7 +670,10 @@ export function runRules(
     {
       field: "classType",
       expected: application.classType,
-      found: extraction.classType,
+      // When the label prints extra designation text around the expected
+      // class, show only the portion that matched — the note keeps the
+      // full line.
+      found: classTypeMatched ?? extraction.classType,
       ...classType,
     },
     {
@@ -642,18 +721,138 @@ export function runRules(
     ...warning,
   })
 
+  return { overall: rollUpOverall(fields, extraction.readability), fields }
+}
+
+/** Roll field results up into the overall verdict. */
+export function rollUpOverall(
+  fields: FieldResult[],
+  readability: LabelExtraction["readability"]
+): OverallStatus {
   const statuses = fields.map((f) => f.status)
-  let overall: OverallStatus
   if (statuses.some((s) => s === "mismatch" || s === "not_found")) {
-    overall = "fail"
-  } else if (
+    return "fail"
+  }
+  if (
     statuses.some((s) => s === "close_match") ||
-    extraction.readability === "partially_readable"
+    readability === "partially_readable"
   ) {
-    overall = "needs_review"
-  } else {
-    overall = "pass"
+    return "needs_review"
+  }
+  return "pass"
+}
+
+/** What a focused second read returned per disputed field (null = absent). */
+export type RecheckReads = Partial<Record<CheckedField, string | null>>
+
+/**
+ * Merge an assisted second read into the field results.
+ *
+ * The second read was primed with the application's claim (that is what
+ * makes it find text the blind pass garbled — measured: House of Harvey's
+ * condensed "APPELLATION"), so it is never allowed to PASS a field: when it
+ * agrees with the application, the failing field is rescued to close_match
+ * and a human confirms against the image. When it confirms the first read
+ * or returns something else entirely, the original failure stands. Priming
+ * can only move a label toward review, never toward pass.
+ */
+export function applyRecheck(
+  application: ApplicationData,
+  fields: FieldResult[],
+  reads: RecheckReads
+): FieldResult[] {
+  const compareForField = (
+    field: CheckedField,
+    secondRead: string
+  ): FieldStatus => {
+    switch (field) {
+      case "brandName":
+        return compareBrandName(application.brandName, secondRead).status
+      case "classType":
+        return compareClassType(application.classType, secondRead).status
+      case "alcoholContent":
+        return compareAbv(application.alcoholPercent, secondRead).status
+      case "netContents":
+        return compareNetContents(application.netContents, secondRead).status
+      case "nameAddress":
+        return compareNameAddress(application.bottlerNameAddress, secondRead)
+          .status
+      case "countryOfOrigin":
+        return application.countryOfOrigin
+          ? compareCountryOfOrigin(application.countryOfOrigin, secondRead)
+              .status
+          : "not_checked"
+      default:
+        return "not_checked"
+    }
   }
 
-  return { overall, fields }
+  return fields.map((f) => {
+    if (f.status !== "mismatch" && f.status !== "not_found") return f
+    const secondRead = reads[f.field]
+    if (secondRead === undefined || secondRead === null) return f
+    const agreement = compareForField(f.field, secondRead)
+    if (agreement !== "match" && agreement !== "close_match") return f
+    const firstRead =
+      f.found === null ? "found nothing" : `read "${f.found}"`
+    return {
+      ...f,
+      status: "close_match",
+      found: secondRead,
+      note: `A focused second read returned "${secondRead}", which agrees with the application — the first read ${firstRead}. The second read knew the expected value, so confirm against the image.`,
+    }
+  })
+}
+
+/**
+ * Merge a blind second read of the government warning into the field
+ * results — the stability check for a warning about to fail.
+ *
+ * The warning is excluded from the primed recheck on purpose (the model
+ * knows the statutory text by heart, so priming invites normalizing a
+ * deviating label back to compliance). This read is blind instead: it never
+ * sees the application or the statutory text, so it is an independent
+ * sample of the same sensor. If it reproduces the first read's deviation
+ * (same words — punctuation may wobble between reads), the deviation is
+ * printed on the label and the failure stands with higher confidence. If
+ * the two reads disagree, the transcription is unstable and the label
+ * queues for human review. Same invariant as applyRecheck: a second read
+ * can only move a label toward review, never toward pass.
+ */
+export function applyWarningStability(
+  fields: FieldResult[],
+  reread: LabelExtraction["governmentWarning"]
+): FieldResult[] {
+  return fields.map((f) => {
+    if (f.field !== "governmentWarning") return f
+    if (f.status !== "mismatch" && f.status !== "not_found") return f
+
+    const second = checkGovernmentWarning(reread)
+    const secondText = reread.present ? reread.verbatimText : null
+    const secondHardFails =
+      second.status === "mismatch" || second.status === "not_found"
+    const sameWords =
+      wordStream(canonicalize(f.found ?? "").toUpperCase()) ===
+      wordStream(canonicalize(secondText ?? "").toUpperCase())
+
+    if (secondHardFails && sameWords) {
+      const confirmation =
+        f.found === null && secondText === null
+          ? "An independent second read also found no government warning."
+          : "An independent second read reproduced the same text — the deviation is printed on the label, not a reading error."
+      return { ...f, note: f.note ? `${f.note} ${confirmation}` : confirmation }
+    }
+
+    const firstDesc =
+      f.found === null ? "found no government warning" : `read "${f.found}"`
+    const secondDesc =
+      secondText === null
+        ? "found no government warning"
+        : `read "${secondText}"`
+    return {
+      ...f,
+      status: "close_match",
+      note: `Two independent reads of the warning disagree: the first ${firstDesc}; the second ${secondDesc}. The transcription is unstable, so the deviation may be a misread — confirm the warning on the image.`,
+    }
+  })
 }

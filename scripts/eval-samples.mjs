@@ -58,9 +58,10 @@ const EXPECTATIONS = {
     note: "Everything matches verbatim; heading clearly bold.",
   },
   "proof-only": {
-    overall: ["pass"],
-    fields: { alcoholContent: ["match"] },
-    note: "90 PROOF must parse to 45%.",
+    overall: ["fail"],
+    fields: { alcoholContent: ["mismatch"] },
+    allowedFailing: ["alcoholContent"],
+    note: "Proof alone is non-compliant — the percent-ABV statement is mandatory (user ruling 2026-06-12).",
   },
 
   // --- real labels: pass, or needs_review on styling/perception ------------
@@ -96,7 +97,7 @@ const EXPECTATIONS = {
   "real-house-of-harvey-sparkling": {
     overall: ["pass", "needs_review"],
     flaky: true,
-    note: "KNOWN-HARD: the condensed 'APPELLATION' is printed correctly (verified by zoom) but both gpt-5-mini and gpt-5.4-mini misread it (~half of runs). Small misreads (APPALATION) now land as near-miss close_match → needs_review; word-scale misreads (APPARITION, or the word dropped) still mismatch → flaky warn.",
+    note: "KNOWN-HARD: the condensed 'APPELLATION' is printed correctly (verified by zoom) but blind reads misread it ~half the time. Near-miss rule catches small garbles; the focused second read recovers the rest (measured 4/4 in-band) — a fail now means both reads missed, which the flaky flag surfaces as a warning.",
   },
   "real-sentada-white": { overall: ["pass", "needs_review"] },
   "real-jack-daniels-rye": {
@@ -112,16 +113,16 @@ const EXPECTATIONS = {
 
   // --- real labels: must fail, and only on the expected fields -------------
   "real-brouwerij-ipa": {
-    overall: ["fail"],
-    fields: { governmentWarning: ["mismatch"] },
+    overall: ["needs_review", "fail"],
+    fields: { governmentWarning: ["close_match", "mismatch"] },
     allowedFailing: ["governmentWarning"],
-    note: "Warning omits the comma after 'machinery' (+ ABILIITY misprint). Everything else, including 20 LITER net contents, is on the collar — gpt-5-mini previously missed the net contents.",
+    note: "Genuinely deviating warning (missing comma after 'machinery' + ABILIITY misprint), but the reader itself normalizes ABILIITY→ABILITY in most reads, so the misprint is not stable evidence — when only the comma survives transcription, the punctuation band (2026-06-12) queues it for review instead of auto-rejecting. fail only when a read reports ABILIITY and the blind stability re-read reproduces it. Never a silent pass. 20 LITER net contents is on the collar — gpt-5-mini previously missed it.",
   },
   "real-stillwater-debutante": {
     overall: ["pass", "needs_review"],
     fields: { governmentWarning: ["match", "close_match"] },
     flaky: true,
-    note: "User-ruled COMPLIANT (2026-06-11): the arc-printed warning is fully correct (zoom-verified) and the class line contains Ale. Any fail here is a model transcription miss — typically a comma dropped on the curve (5.4-mini does this often) or the checkbox net contents returned null. Flaky so known misses warn instead of failing the suite.",
+    note: "User-ruled COMPLIANT (2026-06-11): the arc-printed warning is fully correct (zoom-verified) and the class line contains Ale. The reader's habitual comma drop on the curve is now deterministically a punctuation-band close_match (2026-06-12), so a warning FAIL here is a regression, not flakiness. Still flagged flaky for the other known miss: the checkbox net contents occasionally returns null.",
   },
   "real-four-loko-shot": {
     overall: ["fail"],
@@ -140,9 +141,9 @@ const EXPECTATIONS = {
 
   // --- generated needs_review cases ----------------------------------------
   "stones-throw-case": {
-    overall: ["needs_review"],
-    fields: { brandName: ["close_match"] },
-    note: "Caps-only difference on the brand.",
+    overall: ["pass"],
+    fields: { brandName: ["match"] },
+    note: "Caps-only difference on the brand is a full match (user ruling 2026-06-12).",
   },
   "unit-mismatch-cl": {
     overall: ["needs_review"],

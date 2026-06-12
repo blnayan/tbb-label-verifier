@@ -283,7 +283,7 @@
       "id": "real-brouwerij-ipa",
       "name": "Brouwerij 't IJ IPA keg collar — warning misses a comma (real label)",
       "image": "/samples/real-brouwerij-ipa.jpg",
-      "description": "Real 20-liter keg collar for an imported Dutch IPA. Brand, class, ABV, net contents, importer, and country all match — but the printed government warning omits the comma after \"machinery\" (and misprints \"ABILIITY\"), deviating from the mandatory wording. Expected result: Issues found (warning text deviates).",
+      "description": "Real 20-liter keg collar for an imported Dutch IPA. Brand, class, ABV, net contents, importer, and country all match — but the printed government warning omits the comma after \"machinery\" (and misprints \"ABILIITY\"), deviating from the mandatory wording. The reader normalizes the ABILIITY misprint away in most reads, so the missing comma is usually the only deviation that survives transcription — a punctuation-only divergence that queues for human review rather than auto-rejecting. Expected result: Needs review (or Issues found when a read catches the misprint); never a silent pass.",
       "source": "real",
       "application": {
         "brandName": "BROUWERIJ 'T IJ",
@@ -298,7 +298,7 @@
       "id": "real-stillwater-debutante",
       "name": "Stillwater Artisanal Debutante keg collar — arc-wrapped warning (real TTB label)",
       "image": "/samples/real-stillwater-debutante.png",
-      "description": "Real round keg collar from a filled-out TTB F 5100.31 application (TTB ID 11364001000181). The government warning curves around the collar's arc with a keg-rupture CAUTION interleaved, and net contents are an unticked checkbox list of four keg sizes. The label is fully compliant — the arc-printed warning is word-perfect. Expected result: Pass or Needs review; a model that drops a comma transcribing the curve reports Issues found, which is a transcription miss, not a label defect. A hard-mode test of non-linear label text.",
+      "description": "Real round keg collar from a filled-out TTB F 5100.31 application (TTB ID 11364001000181). The government warning curves around the collar's arc with a keg-rupture CAUTION interleaved, and net contents are an unticked checkbox list of four keg sizes. The label is fully compliant — the arc-printed warning is word-perfect. Expected result: Pass or Needs review — a comma dropped transcribing the curve is a punctuation-only divergence, which queues for review instead of auto-rejecting. A hard-mode test of non-linear label text.",
       "source": "real",
       "application": {
         "brandName": "Stillwater Artisanal",
@@ -340,7 +340,7 @@
       "id": "stones-throw-case",
       "name": "Stone's Throw \u2014 capitalization differs (generated)",
       "image": "/samples/stones-throw-case.png",
-      "description": "Label prints STONE'S THROW in caps; the application says Stone's Throw. Expected result: Needs review, not an automatic failure.",
+      "description": "Label prints STONE'S THROW in caps; the application says Stone's Throw. Expected result: Pass — a capitalization-only difference on the brand is a full match.",
       "source": "generated",
       "application": {
         "brandName": "Stone's Throw",
@@ -354,7 +354,7 @@
       "id": "proof-only",
       "name": "Cartwright & Sons \u2014 proof only, no percent (generated)",
       "image": "/samples/proof-only.png",
-      "description": "The label states only \"90 PROOF\" \u2014 no percentage. Proof is twice ABV, so it matches a 45% application. Expected result: Pass.",
+      "description": "The label states only \"90 PROOF\" \u2014 no percentage. The percent-ABV statement is mandatory and proof may only appear in addition, so this fails even though 90 proof equals the application's 45%. Expected result: Fail.",
       "source": "generated",
       "application": {
         "brandName": "CARTWRIGHT & SONS",
