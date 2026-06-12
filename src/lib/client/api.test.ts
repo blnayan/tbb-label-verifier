@@ -41,7 +41,7 @@ describe("verifyLabelRequest", () => {
     stubFetch(
       Response.json(
         {
-          error: "The AI service is rate limited — try again in a moment.",
+          error: "The AI service is rate limited. Try again in a moment.",
           retryable: true,
         },
         { status: 429 }

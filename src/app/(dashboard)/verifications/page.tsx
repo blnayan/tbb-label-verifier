@@ -8,9 +8,10 @@ export default function VerificationsPage() {
       <header>
         <h1 className="text-xl font-semibold tracking-tight">Verifications</h1>
         <p className="text-sm text-muted-foreground">
-          Clear passes and fails are decided automatically; ambiguous labels
-          wait for your decision. Open a report to compare the application
-          against the label side by side — every decision can be revisited.
+          Clear passes and fails are decided automatically, and ambiguous
+          labels wait for your decision. Open a report to compare the
+          application against the label side by side. Every decision can be
+          revisited.
         </p>
       </header>
       {/* ReviewHistory reads the active tab from ?tab=, and useSearchParams

@@ -38,7 +38,7 @@ export const OVERALL_DISPLAY: Record<
     variant: "warning",
     icon: CircleHelpIcon,
     summary:
-      "Close matches or advisories found — please review the notes below.",
+      "Close matches or advisories found. Please review the notes below.",
   },
   fail: {
     label: "Issues found",
@@ -50,7 +50,7 @@ export const OVERALL_DISPLAY: Record<
     label: "Can't read label",
     variant: "secondary",
     icon: ImageOffIcon,
-    summary: "The image can't be verified — request a clearer photograph.",
+    summary: "The image can't be verified. Request a clearer photograph.",
   },
 }
 

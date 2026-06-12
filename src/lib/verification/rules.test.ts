@@ -72,7 +72,10 @@ describe("compareText (brand name / class type)", () => {
   it("punctuation without a following space is a close match, not a failure", () => {
     // Real label prints "PLAINVIEW,NEW YORK" — stripping the comma must not
     // glue the words together and turn a styling quirk into a mismatch.
-    const result = compareText("PLAINVIEW, NEW YORK 11803", "PLAINVIEW,NEW YORK 11803")
+    const result = compareText(
+      "PLAINVIEW, NEW YORK 11803",
+      "PLAINVIEW,NEW YORK 11803"
+    )
     expect(result.status).toBe("close_match")
   })
 
@@ -205,7 +208,6 @@ describe("compareAbv", () => {
   })
 })
 
-
 describe("parseNetContentsMl", () => {
   it.each([
     ["750 mL", 750],
@@ -295,9 +297,9 @@ describe("compareClassType", () => {
   })
 
   it("the expected tokens must appear in order — scattered words don't count", () => {
-    expect(compareClassType("Red wine", "Wine made from red grapes").status).toBe(
-      "mismatch"
-    )
+    expect(
+      compareClassType("Red wine", "Wine made from red grapes").status
+    ).toBe("mismatch")
   })
 })
 

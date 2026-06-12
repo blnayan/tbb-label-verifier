@@ -70,7 +70,7 @@ export function compareText(
   if (normalizeLoose(expected) === normalizeLoose(found)) {
     return {
       status: "close_match",
-      note: "Same wording — differs only in capitalization or punctuation.",
+      note: "Same wording. Only the capitalization or punctuation differs.",
     }
   }
   // Compare characters alone — catches labels that drop the space after
@@ -82,7 +82,7 @@ export function compareText(
   ) {
     return {
       status: "close_match",
-      note: "Same characters — differs only in spacing or punctuation.",
+      note: "Same characters. Only the spacing or punctuation differs.",
     }
   }
   // Near-miss: a couple of stray characters in a long string (measured:
@@ -97,7 +97,7 @@ export function compareText(
   if (distance <= budget) {
     return {
       status: "close_match",
-      note: `Nearly identical — differs by ${distance} character${distance === 1 ? "" : "s"}, a possible transcription misread. Confirm on the image.`,
+      note: `Nearly identical, off by ${distance} character${distance === 1 ? "" : "s"}. This could be a transcription misread, so confirm on the image.`,
     }
   }
   return {
@@ -145,7 +145,7 @@ export function compareBrandName(
   ) {
     return {
       status: "match",
-      note: "Same name — differs only in capitalization.",
+      note: "Same name. Only the capitalization differs.",
     }
   }
   if (base.status !== "mismatch" || found === null) return base
@@ -157,7 +157,7 @@ export function compareBrandName(
   ) {
     return {
       status: "close_match",
-      note: "The label prints additional words with the brand (e.g. a fanciful name) — confirm they agree.",
+      note: "The label prints additional words with the brand, such as a fanciful name. Confirm they agree.",
     }
   }
   return base
@@ -184,7 +184,7 @@ export function compareClassType(
   if (matchedText !== null) {
     return {
       status: "match",
-      note: `The label prints additional designation text with the class/type ("${canonicalize(found)}") — the application's designation appears within it.`,
+      note: `The label prints additional designation text with the class/type ("${canonicalize(found)}"). The application's designation appears within it.`,
       matchedText,
     }
   }
@@ -307,10 +307,10 @@ export function compareAbv(
       const equivalence =
         Math.abs(proof / 2 - expectedPercent) < 0.01
           ? `equivalent to the application's ${expectedPercent}%, but the percentage must still be printed`
-          : `equivalent to ${proof / 2}% — the application says ${expectedPercent}%`
+          : `equivalent to ${proof / 2}%, while the application says ${expectedPercent}%`
       return {
         status: "mismatch",
-        note: `The label states alcohol content in proof only ("${found}") — a percent-alcohol-by-volume statement is required; proof may only appear in addition. ${proof} proof is ${equivalence}.`,
+        note: `The label states alcohol content in proof only ("${found}"). A percent-alcohol-by-volume statement is required, and proof may only appear in addition. ${proof} proof is ${equivalence}.`,
       }
     }
     return {
@@ -324,7 +324,7 @@ export function compareAbv(
   }
   return {
     status: "mismatch",
-    note: `Label shows ${parsed}% — application says ${expectedPercent}%.`,
+    note: `Label shows ${parsed}%, but the application says ${expectedPercent}%.`,
   }
 }
 
@@ -407,7 +407,7 @@ export function compareNetContents(
   }
   return {
     status: "mismatch",
-    note: `Label shows ${found} — application says ${expected}.`,
+    note: `Label shows ${found}, but the application says ${expected}.`,
   }
 }
 
@@ -444,7 +444,7 @@ export function compareNameAddress(
   if (found === null || canonicalize(found) === "") {
     return {
       status: "not_found",
-      note: 'No name and address statement found — one is required on every label (e.g. "Bottled by Old Tom Distillery, Bardstown, KY").',
+      note: 'No name and address statement found. One is required on every label, e.g. "Bottled by Old Tom Distillery, Bardstown, KY".',
     }
   }
   const stripped = canonicalize(found).replace(QUALIFYING_PHRASE_RE, "")
@@ -459,7 +459,7 @@ export function compareNameAddress(
   ) {
     return {
       status: "close_match",
-      note: "Label shows more address detail than the application — confirm the name and city/state agree.",
+      note: "Label shows more address detail than the application. Confirm the name and city/state agree.",
     }
   }
   return {
@@ -481,7 +481,7 @@ export function compareCountryOfOrigin(
   if (found === null || canonicalize(found) === "") {
     return {
       status: "not_found",
-      note: `No country of origin statement found — required on all imported products (e.g. "Product of ${expected}").`,
+      note: `No country of origin statement found. One is required on all imported products, e.g. "Product of ${expected}".`,
     }
   }
   if (normalizeLoose(found).includes(normalizeLoose(expected))) {
@@ -489,7 +489,7 @@ export function compareCountryOfOrigin(
   }
   return {
     status: "mismatch",
-    note: `Label shows "${found}" — application says ${expected}.`,
+    note: `Label shows "${found}", but the application says ${expected}.`,
   }
 }
 
@@ -515,7 +515,7 @@ export function checkGovernmentWarning(
   if (!warning.present || !warning.verbatimText) {
     return {
       status: "not_found",
-      note: "Government health warning statement is missing — required on all alcohol beverage labels.",
+      note: "Government health warning statement is missing. It is required on all alcohol beverage labels.",
     }
   }
 
@@ -527,8 +527,7 @@ export function checkGovernmentWarning(
   // Divergences in whitespace or punctuation alone are deferred below —
   // every word intact, likely a transcription artifact.
   const spacingOnly =
-    found !== required &&
-    found.replace(/ /g, "") === required.replace(/ /g, "")
+    found !== required && found.replace(/ /g, "") === required.replace(/ /g, "")
   const punctuationOnly =
     found !== required &&
     !spacingOnly &&
@@ -553,14 +552,14 @@ export function checkGovernmentWarning(
   if (!headingIsCaps) {
     return {
       status: "mismatch",
-      note: `"GOVERNMENT WARNING:" must appear in capital letters — label shows "${headingOnLabel}:".`,
+      note: `"GOVERNMENT WARNING:" must appear in capital letters, but the label shows "${headingOnLabel}:".`,
     }
   }
 
   if (warning.headingAppearsBold === false) {
     return {
       status: "close_match",
-      note: '"GOVERNMENT WARNING" must appear in bold type (27 CFR 16.22) — the model read the heading as not bold, a judgment it sometimes gets wrong. Confirm the type weight on the image.',
+      note: '"GOVERNMENT WARNING" must appear in bold type (27 CFR 16.22). The model read the heading as not bold, a judgment it sometimes gets wrong, so confirm the type weight on the image.',
     }
   }
 
@@ -568,7 +567,7 @@ export function checkGovernmentWarning(
     const divergence = firstDivergence(found, required)
     return {
       status: "close_match",
-      note: `Wording matches word-for-word but punctuation differs near: "…${divergence}…" — as likely the reader misreading tight or curved print as the label. Confirm on the image.`,
+      note: `Wording matches word-for-word but punctuation differs near: "…${divergence}…". This is as likely the reader misreading tight or curved print as the label itself, so confirm on the image.`,
     }
   }
 
@@ -576,7 +575,7 @@ export function checkGovernmentWarning(
     const divergence = firstDivergence(found, required)
     return {
       status: "close_match",
-      note: `Wording matches word-for-word but spacing differs near: "…${divergence}…" — usually the model dropping a space in tight print. Confirm on the image.`,
+      note: `Wording matches word-for-word but spacing differs near: "…${divergence}…". This is usually the model dropping a space in tight print, so confirm on the image.`,
     }
   }
 
@@ -621,7 +620,7 @@ export function runRules(
   if (extraction.readability === "unreadable" || !extraction.isAlcoholLabel) {
     const note = !extraction.isAlcoholLabel
       ? "This image does not appear to be an alcohol beverage label."
-      : "The image is too unclear to verify — request a better photograph."
+      : "The image is too unclear to verify. Request a better photograph."
     const expectedRows: [CheckedField, string][] = [
       ["brandName", application.brandName],
       ["classType", application.classType],
@@ -793,13 +792,12 @@ export function applyRecheck(
     if (secondRead === undefined || secondRead === null) return f
     const agreement = compareForField(f.field, secondRead)
     if (agreement !== "match" && agreement !== "close_match") return f
-    const firstRead =
-      f.found === null ? "found nothing" : `read "${f.found}"`
+    const firstRead = f.found === null ? "found nothing" : `read "${f.found}"`
     return {
       ...f,
       status: "close_match",
       found: secondRead,
-      note: `A focused second read returned "${secondRead}", which agrees with the application — the first read ${firstRead}. The second read knew the expected value, so confirm against the image.`,
+      note: `A focused second read returned "${secondRead}", which agrees with the application, while the first read ${firstRead}. The second read knew the expected value, so confirm against the image.`,
     }
   })
 }
@@ -839,7 +837,7 @@ export function applyWarningStability(
       const confirmation =
         f.found === null && secondText === null
           ? "An independent second read also found no government warning."
-          : "An independent second read reproduced the same text — the deviation is printed on the label, not a reading error."
+          : "An independent second read reproduced the same text. The deviation is printed on the label, not a reading error."
       return { ...f, note: f.note ? `${f.note} ${confirmation}` : confirmation }
     }
 
@@ -852,7 +850,7 @@ export function applyWarningStability(
     return {
       ...f,
       status: "close_match",
-      note: `Two independent reads of the warning disagree: the first ${firstDesc}; the second ${secondDesc}. The transcription is unstable, so the deviation may be a misread — confirm the warning on the image.`,
+      note: `Two independent reads of the warning disagree: the first ${firstDesc}; the second ${secondDesc}. The transcription is unstable, so the deviation may be a misread. Confirm the warning on the image.`,
     }
   })
 }

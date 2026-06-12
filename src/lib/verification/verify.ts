@@ -20,11 +20,7 @@ import {
   rollUpOverall,
   runRules,
 } from "./rules"
-import type {
-  ApplicationData,
-  CheckedField,
-  VerificationResult,
-} from "./types"
+import type { ApplicationData, CheckedField, VerificationResult } from "./types"
 import { upscaleForExtraction } from "./upscale"
 
 /**

@@ -36,7 +36,7 @@ export async function verifyLabelRequest(
     response = await fetch("/api/verify", { method: "POST", body: form })
   } catch {
     throw new VerifyError(
-      "Could not reach the server — check your connection.",
+      "Could not reach the server. Check your connection.",
       true
     )
   }

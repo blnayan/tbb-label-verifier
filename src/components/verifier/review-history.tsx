@@ -85,7 +85,7 @@ const TAB_EMPTY: Record<TabValue, { title: string; description: string }> = {
   pending: {
     title: "Nothing waiting for review",
     description:
-      "Ambiguous results — close matches and unreadable images — will queue here for your decision.",
+      "Ambiguous results, like close matches and unreadable images, will queue here for your decision.",
   },
   approved: {
     title: "No approved verifications",
@@ -99,7 +99,7 @@ const TAB_EMPTY: Record<TabValue, { title: string; description: string }> = {
   },
   all: {
     title: "No verifications yet",
-    description: "Upload a label — single or batch — and it will land here.",
+    description: "Upload a label, single or batch, and it will land here.",
   },
 }
 
@@ -112,12 +112,12 @@ const TAB_TABLE: Record<TabValue, { title: string; description: string }> = {
   approved: {
     title: "Approved",
     description:
-      "Automatic and manual approvals. Open one to revisit — decisions can be changed.",
+      "Automatic and manual approvals. Open one to revisit it. Decisions can be changed.",
   },
   rejected: {
     title: "Rejected",
     description:
-      "Automatic and manual rejections. Open one to revisit — decisions can be changed.",
+      "Automatic and manual rejections. Open one to revisit it. Decisions can be changed.",
   },
   all: {
     title: "All verifications",
@@ -199,7 +199,7 @@ export function ReviewHistory() {
           </EmptyMedia>
           <EmptyTitle>No verifications yet</EmptyTitle>
           <EmptyDescription>
-            Upload a label — single or batch — and it will land here. Clear
+            Upload a label, single or batch, and it will land here. Clear
             passes and fails are decided automatically; everything else waits
             for your review.
           </EmptyDescription>
@@ -417,8 +417,8 @@ function ClearHistoryButton({
           <AlertDialogTitle>Clear the verification history?</AlertDialogTitle>
           <AlertDialogDescription>
             This permanently deletes all {count} saved verification
-            {count === 1 ? "" : "s"} — pending and reviewed — including the
-            label images. There is no undo.
+            {count === 1 ? "" : "s"}, pending and reviewed alike, including
+            the label images. There is no undo.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
