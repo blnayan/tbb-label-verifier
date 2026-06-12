@@ -2,10 +2,10 @@
 
 /**
  * Batch upload ("Janet's feature"): a CSV pairs application data with image
- * filenames; the agent drops both in and the queue verifies in parallel —
- * four at a time, each label still inside the ~5 second budget. The queue
- * table is progress feedback only; the reports are worked on the Review
- * page.
+ * filenames; the agent drops both in — literally, both pickers accept
+ * drag-and-drop — and the queue verifies in parallel, four at a time, each
+ * label still inside the ~5 second budget. The queue table is progress
+ * feedback only; the reports are worked on the Review page.
  */
 
 import { useEffect, useMemo, useState } from "react"
@@ -47,6 +47,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { OverallBadge } from "@/components/verifier/status"
+import { cn } from "@/lib/utils"
 import { VerifyError, verifyLabelRequest } from "@/lib/client/api"
 import { downscaleImage } from "@/lib/client/downscale"
 import { saveVerification } from "@/lib/client/history"
@@ -62,6 +63,16 @@ import type { VerificationResult } from "@/lib/verification/types"
 
 /** Keeps a 300-label dump from opening 300 simultaneous requests. */
 const CONCURRENCY = 4
+
+/** Mirrors the pickers' accept lists for files arriving by drag-and-drop. */
+const IMAGE_TYPES: ReadonlySet<string> = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+])
+
+const isCsv = (file: File) =>
+  file.type === "text/csv" || file.name.toLowerCase().endsWith(".csv")
 
 type ItemState =
   | { phase: "queued" }
@@ -119,10 +130,10 @@ export function BatchVerify() {
     }
   }
 
-  function onImagesChosen(list: FileList | null) {
-    if (!list || list.length === 0) return
+  function onImagesChosen(list: File[]) {
+    if (list.length === 0) return
     const next = new Map(images)
-    for (const file of Array.from(list)) next.set(file.name, file)
+    for (const file of list) next.set(file.name, file)
     setImages(next)
     setItems((current) =>
       attachImages(
@@ -212,7 +223,7 @@ export function BatchVerify() {
 
     setRunning(false)
     toast.success(
-      `Batch finished — ${queue.length} label${queue.length === 1 ? "" : "s"} saved to Verifications.`,
+      `Batch finished. ${queue.length} label${queue.length === 1 ? "" : "s"} saved to Verifications.`,
       {
         action: {
           label: "View",
@@ -239,7 +250,7 @@ export function BatchVerify() {
           <CardDescription>
             Upload a CSV of application data plus the label images it refers to.
             Columns: filename, brandName, classType, alcoholPercent,
-            netContents, bottlerNameAddress — plus optional imported (yes/no)
+            netContents, bottlerNameAddress, plus optional imported (yes/no)
             and countryOfOrigin (required when imported is yes).
           </CardDescription>
         </CardHeader>
@@ -249,16 +260,22 @@ export function BatchVerify() {
               <FieldLabel htmlFor="batch-csv">
                 Application data (CSV)
               </FieldLabel>
-              <label
+              <DropLabel
                 htmlFor="batch-csv"
-                className="flex cursor-pointer items-center gap-2 rounded-lg border-2 border-dashed p-4 hover:bg-accent/50"
+                disabled={running}
+                onFiles={(files) => {
+                  const csv = files.find(isCsv)
+                  if (csv) void onCsvChosen(csv)
+                }}
               >
                 <FileSpreadsheetIcon
                   aria-hidden
                   className="size-5 text-muted-foreground"
                 />
-                <span className="text-sm">Choose a CSV file</span>
-              </label>
+                <span className="text-sm">
+                  Choose a CSV file, or drag it here
+                </span>
+              </DropLabel>
               <input
                 id="batch-csv"
                 type="file"
@@ -270,9 +287,12 @@ export function BatchVerify() {
             </Field>
             <Field>
               <FieldLabel htmlFor="batch-images">Label images</FieldLabel>
-              <label
+              <DropLabel
                 htmlFor="batch-images"
-                className="flex cursor-pointer items-center gap-2 rounded-lg border-2 border-dashed p-4 hover:bg-accent/50"
+                disabled={running}
+                onFiles={(files) =>
+                  onImagesChosen(files.filter((f) => IMAGE_TYPES.has(f.type)))
+                }
               >
                 <ImagesIcon
                   aria-hidden
@@ -281,17 +301,19 @@ export function BatchVerify() {
                 <span className="text-sm">
                   {images.size > 0
                     ? `${images.size} image${images.size === 1 ? "" : "s"} added`
-                    : "Choose image files (multi-select)"}
+                    : "Choose image files, or drag them here"}
                 </span>
-              </label>
+              </DropLabel>
               <input
                 id="batch-images"
                 type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif"
+                accept="image/jpeg,image/png,image/webp"
                 multiple
                 className="sr-only"
                 disabled={running}
-                onChange={(e) => onImagesChosen(e.target.files)}
+                onChange={(e) =>
+                  onImagesChosen(Array.from(e.target.files ?? []))
+                }
               />
               <FieldDescription>
                 Filenames must match the CSV&apos;s filename column.
@@ -379,7 +401,7 @@ export function BatchVerify() {
             </EmptyMedia>
             <EmptyTitle>No batch loaded</EmptyTitle>
             <EmptyDescription>
-              Add a CSV and its label images — or load the sample batch to see
+              Add a CSV and its label images, or load the sample batch to see
               how it works.
             </EmptyDescription>
           </EmptyHeader>
@@ -420,6 +442,49 @@ export function BatchVerify() {
         </Card>
       )}
     </div>
+  )
+}
+
+/**
+ * A picker label that is also a drop target: click opens the hidden input
+ * it points at, dragging files onto it hands them to onFiles. Files the
+ * caller can't use (wrong type) are the caller's job to filter — the label
+ * only handles the drag mechanics and highlight.
+ */
+function DropLabel({
+  htmlFor,
+  disabled,
+  onFiles,
+  children,
+}: {
+  htmlFor: string
+  disabled?: boolean
+  onFiles: (files: File[]) => void
+  children: React.ReactNode
+}) {
+  const [dragging, setDragging] = useState(false)
+
+  return (
+    <label
+      htmlFor={htmlFor}
+      onDragOver={(e) => {
+        e.preventDefault()
+        if (!disabled) setDragging(true)
+      }}
+      onDragLeave={() => setDragging(false)}
+      onDrop={(e) => {
+        e.preventDefault()
+        setDragging(false)
+        if (!disabled) onFiles(Array.from(e.dataTransfer.files))
+      }}
+      className={cn(
+        "flex cursor-pointer items-center gap-2 rounded-lg border-2 border-dashed p-4 transition-colors",
+        dragging ? "border-ring bg-accent" : "hover:bg-accent/50",
+        disabled && "pointer-events-none opacity-50"
+      )}
+    >
+      {children}
+    </label>
   )
 }
 
