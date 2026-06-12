@@ -50,18 +50,28 @@ Each entry says what was assumed, and why that reading was chosen.
 
 5. **The government warning must match 27 CFR 16.21 word-for-word.** The
    statutory text embedded in the rule engine was checked against the CFR.
-   Whitespace and line breaks are tolerated (labels wrap text); any word
-   difference is a failure, matching Jenny's "it has to be exact".
+   Whitespace and line breaks are tolerated (labels wrap text); any word or
+   punctuation difference is a failure, matching Jenny's "it has to be
+   exact". One nuance, measured on a real label: condensed print can make
+   the model drop a space in transcription ("(2) CONSUMPTION" read as
+   "(2)CONSUMPTION"). When the text differs from the statutory wording by
+   whitespace alone — every word and comma intact — the label queues for
+   review instead of auto-failing, because the divergence is more likely
+   the reader than the label.
 
 6. **"GOVERNMENT WARNING" must be in capital letters** (27 CFR 16.22(a)).
    A title-case heading is an automatic failure — this exact scenario is in
    the sample dataset because Jenny caught one last month.
 
-7. **Bold type on the heading is enforced when the model can judge it.**
-   27 CFR 16.22 requires the heading in bold type, so a heading the model
-   reads as not bold fails the label. When the model cannot judge the
-   weight (it returns null — glare, rendering, font ambiguity), the check
-   does not penalize the label rather than guessing.
+7. **Bold type on the heading queues for review, never auto-rejects.**
+   27 CFR 16.22 requires the heading in bold type, but type weight is a
+   perceptual judgment the model gets wrong on real labels (it read the
+   bold MB Liquors heading as not bold) — unlike wording and caps, which
+   come from transcription and are enforced as hard failures. A not-bold
+   read therefore lands the label in needs_review for a human to confirm
+   against the image. When the model cannot judge the weight (it returns
+   null — glare, rendering, font ambiguity), the check does not penalize
+   the label rather than guessing.
 
 8. **Type-size and characters-per-inch rules (16.22(b)) are not checked.**
    Physical measurements can't be derived from an uncalibrated photo. TTB
@@ -76,7 +86,16 @@ Each entry says what was assumed, and why that reading was chosen.
    fail. Class/type gets one extra tolerance: labels often print an
    appellation with the class designation ("Barbera d'Asti D.O.C.G. Red
    wine" for an application's "Red wine"), so a class line that contains the
-   expected designation is a close match for review, not a failure.
+   expected designation is a close match for review, not a failure. Brand
+   names get the same containment tolerance for fanciful names printed with
+   the brand ("Stillwater Artisanal Debutante" for an application's
+   "Stillwater Artisanal"). Finally, a near-miss — a couple of stray
+   characters in an otherwise identical long string (measured: condensed
+   "APPELLATION" transcribed as "APPALATION") — queues for review rather
+   than auto-rejecting: it is as likely a model misread as a label typo,
+   and both deserve human eyes. The budget is strict (≈1 character per 12,
+   capped at 4), so word substitutions like "EAGLE HOLLOW" vs "EAGLE
+   HARBOR" still fail outright.
 
 10. **ABV must match the application exactly** (no tolerance beyond float
     rounding). TTB tolerances govern label-vs-product, not
@@ -133,8 +152,9 @@ Each entry says what was assumed, and why that reading was chosen.
   cannot detect an import whose application wrongly marks it domestic
   (see #1).
 - One image per application (see #3).
-- Bold detection fails only on a confident not-bold read; type-size rules
-  unchecked (see #7, #8).
+- A not-bold heading read queues for human review instead of failing —
+  the model's weight judgment is unreliable; type-size rules unchecked
+  (see #7, #8).
 - The "same field of vision" placement rule (brand name, class/type, and
   alcohol content must be viewable simultaneously) is not verified from a
   single photo.

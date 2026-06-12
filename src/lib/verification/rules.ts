@@ -85,10 +85,69 @@ export function compareText(
       note: "Same characters — differs only in spacing or punctuation.",
     }
   }
+  // Near-miss: a couple of stray characters in a long string (measured:
+  // condensed "APPELLATION" transcribed as APPALATION) is as likely the
+  // model misreading as the label misprinting — both are review, not
+  // auto-reject. The budget scales with length and stays far below word
+  // substitutions ("HOLLOW" vs "HARBOR" is 4 edits and still fails).
+  const a = normalizeLoose(expected).replace(/ /g, "")
+  const b = normalizeLoose(found).replace(/ /g, "")
+  const budget = Math.min(4, Math.floor(Math.max(a.length, b.length) / 12) + 1)
+  const distance = editDistance(a, b)
+  if (distance <= budget) {
+    return {
+      status: "close_match",
+      note: `Nearly identical — differs by ${distance} character${distance === 1 ? "" : "s"}, a possible transcription misread. Confirm on the image.`,
+    }
+  }
   return {
     status: "mismatch",
     note: "Label text does not match the application.",
   }
+}
+
+/** Levenshtein distance — both inputs are short normalized strings. */
+function editDistance(a: string, b: string): number {
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j)
+  for (let i = 1; i <= a.length; i++) {
+    const current = [i]
+    for (let j = 1; j <= b.length; j++) {
+      current[j] = Math.min(
+        prev[j] + 1,
+        current[j - 1] + 1,
+        prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+      )
+    }
+    prev = current
+  }
+  return prev[b.length]
+}
+
+/**
+ * Compare the brand name. Same semantics as compareText, except a label
+ * that prints additional words around the brand — typically a fanciful
+ * name read as part of the same line, e.g. "Stillwater Artisanal
+ * Debutante" against an application's "Stillwater Artisanal" — is a close
+ * match for human review rather than an automatic failure.
+ */
+export function compareBrandName(
+  expected: string,
+  found: string | null
+): { status: FieldStatus; note: string | null } {
+  const base = compareText(expected, found)
+  if (base.status !== "mismatch" || found === null) return base
+  if (
+    isTokenSubsequence(
+      normalizeLoose(expected).split(" "),
+      normalizeLoose(found).split(" ")
+    )
+  ) {
+    return {
+      status: "close_match",
+      note: "The label prints additional words with the brand (e.g. a fanciful name) — confirm they agree.",
+    }
+  }
+  return base
 }
 
 /**
@@ -384,8 +443,15 @@ export function compareCountryOfOrigin(
 /**
  * The government warning must match the statutory text word-for-word, and
  * the "GOVERNMENT WARNING:" heading must be in capital letters and bold
- * type. A heading the model reads as not bold fails; when the model can't
- * judge the weight (null) the check does not penalize the label.
+ * type. Wording and caps come from transcription, which the model does
+ * reliably, so those are hard fails. Two judgments it does NOT make reliably
+ * only queue the label for human review (close_match) instead:
+ *  - boldness (measured: MB Liquors reads as not bold);
+ *  - spacing in tight condensed print (measured: ZD Wines "(2) CONSUMPTION"
+ *    transcribed as "(2)CONSUMPTION") — when the text differs from the
+ *    statutory wording by whitespace alone, every word is still present, so
+ *    a human confirms rather than the label auto-failing.
+ * A null bold judgment (can't tell) does not penalize the label.
  */
 export function checkGovernmentWarning(
   warning: LabelExtraction["governmentWarning"]
@@ -397,16 +463,18 @@ export function checkGovernmentWarning(
     }
   }
 
-  const found = canonicalize(warning.verbatimText)
-  const required = canonicalize(GOVERNMENT_WARNING_TEXT)
+  const found = canonicalize(warning.verbatimText).toUpperCase()
+  const required = canonicalize(GOVERNMENT_WARNING_TEXT).toUpperCase()
 
   // Wording check is case-insensitive; the caps requirement applies to the
   // heading and is checked separately so the agent sees the precise problem.
-  if (found.toUpperCase() !== required.toUpperCase()) {
-    const divergence = firstDivergence(
-      found.toUpperCase(),
-      required.toUpperCase()
-    )
+  // A divergence in whitespace alone is deferred below — same characters,
+  // likely a transcription artifact of tight print.
+  const spacingOnly =
+    found !== required &&
+    found.replace(/ /g, "") === required.replace(/ /g, "")
+  if (found !== required && !spacingOnly) {
+    const divergence = firstDivergence(found, required)
     return {
       status: "mismatch",
       note: `Warning text deviates from the required wording near: "…${divergence}…". The statement must match 27 CFR 16.21 word-for-word.`,
@@ -417,8 +485,11 @@ export function checkGovernmentWarning(
     0,
     "GOVERNMENT WARNING".length
   )
+  // The heading itself may carry the dropped space ("GOVERNMENTWARNING"),
+  // so the caps check tolerates exactly that while still requiring capitals.
   const headingIsCaps =
-    headingOnLabel === "GOVERNMENT WARNING" && warning.headingAllCaps !== false
+    /^GOVERNMENT ?WARNING/.test(warning.verbatimText) &&
+    warning.headingAllCaps !== false
   if (!headingIsCaps) {
     return {
       status: "mismatch",
@@ -428,8 +499,16 @@ export function checkGovernmentWarning(
 
   if (warning.headingAppearsBold === false) {
     return {
-      status: "mismatch",
-      note: '"GOVERNMENT WARNING" must appear in bold type (27 CFR 16.22) — the heading does not appear bold on the label.',
+      status: "close_match",
+      note: '"GOVERNMENT WARNING" must appear in bold type (27 CFR 16.22) — the model read the heading as not bold, a judgment it sometimes gets wrong. Confirm the type weight on the image.',
+    }
+  }
+
+  if (spacingOnly) {
+    const divergence = firstDivergence(found, required)
+    return {
+      status: "close_match",
+      note: `Wording matches word-for-word but spacing differs near: "…${divergence}…" — usually the model dropping a space in tight print. Confirm on the image.`,
     }
   }
 
@@ -490,7 +569,7 @@ export function runRules(
     }
   }
 
-  const brand = compareText(application.brandName, extraction.brandName)
+  const brand = compareBrandName(application.brandName, extraction.brandName)
   const classType = compareClassType(
     application.classType,
     extraction.classType

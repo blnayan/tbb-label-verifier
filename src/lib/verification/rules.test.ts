@@ -5,6 +5,7 @@ import {
   canonicalize,
   checkGovernmentWarning,
   compareAbv,
+  compareBrandName,
   compareClassType,
   compareCountryOfOrigin,
   compareNameAddress,
@@ -73,6 +74,42 @@ describe("compareText (brand name / class type)", () => {
 
   it("missing label value reports not_found", () => {
     expect(compareText("OLD TOM", null).status).toBe("not_found")
+  })
+
+  it("near-miss: a one-word misread is a close_match for review, not an auto-reject", () => {
+    // House of Harvey, measured live: the label prints "APPELLATION" in
+    // condensed type and models transcribe APPALATION / APPALLATION. A
+    // couple of stray characters is as likely a misread as a label typo —
+    // either way a human decides.
+    const result = compareText(
+      "APPELLATION AMERICAN SPARKLING WINE",
+      "APPALATION AMERICAN SPARKLING WINE"
+    )
+    expect(result.status).toBe("close_match")
+    expect(result.note).toContain("character")
+  })
+
+  it("a genuinely different word is still a mismatch (Eagle Harbor vs Eagle Hollow)", () => {
+    expect(compareText("EAGLE HARBOR", "EAGLE HOLLOW").status).toBe("mismatch")
+  })
+})
+
+describe("compareBrandName", () => {
+  it("extra printed words around the brand are a close_match, not a failure", () => {
+    // Stillwater keg collar: the fanciful name "Debutante" is printed
+    // directly under the brand and models read them as one line.
+    const result = compareBrandName(
+      "Stillwater Artisanal",
+      "Stillwater Artisanal Debutante"
+    )
+    expect(result.status).toBe("close_match")
+    expect(result.note).toContain("additional")
+  })
+
+  it("a different brand is still a mismatch", () => {
+    expect(compareBrandName("EAGLE HARBOR", "EAGLE HOLLOW").status).toBe(
+      "mismatch"
+    )
   })
 })
 
@@ -396,11 +433,36 @@ describe("checkGovernmentWarning", () => {
     ).toBe("match")
   })
 
-  it("non-bold heading fails — bold type is required (27 CFR 16.22)", () => {
+  it("a missing space is a close_match — condensed print drops spaces in transcription, so a human decides", () => {
+    // ZD Wines, measured live: the label prints "(2) CONSUMPTION" in tight
+    // condensed type and the model transcribed "(2)CONSUMPTION".
+    const missingSpace = GOVERNMENT_WARNING_TEXT.replace(
+      "(2) Consumption",
+      "(2)Consumption"
+    )
+    const result = checkGovernmentWarning(
+      exactWarning({ verbatimText: missingSpace })
+    )
+    expect(result.status).toBe("close_match")
+    expect(result.note).toContain("spacing")
+  })
+
+  it("a missing comma is still a hard mismatch even when spacing collapses around it", () => {
+    const missingComma = GOVERNMENT_WARNING_TEXT.replace(
+      "machinery, and",
+      "machinery and"
+    )
+    expect(
+      checkGovernmentWarning(exactWarning({ verbatimText: missingComma }))
+        .status
+    ).toBe("mismatch")
+  })
+
+  it("non-bold heading is a close_match — the model misjudges weight, so a human decides", () => {
     const result = checkGovernmentWarning(
       exactWarning({ headingAppearsBold: false })
     )
-    expect(result.status).toBe("mismatch")
+    expect(result.status).toBe("close_match")
     expect(result.note).toContain("bold")
   })
 
