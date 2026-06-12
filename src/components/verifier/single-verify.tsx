@@ -2,10 +2,10 @@
 
 /**
  * Single-label upload: the agent keys in what the application says, adds the
- * label image, and uploads. The form frees up immediately — the upload shows
- * under "Verifying" on the Verifications page until its verdict lands, and
- * the verdict is also announced in a toast. Uploading and reviewing are
- * separate jobs.
+ * label image, and uploads. The form locks while the label verifies, and the
+ * record's report page opens automatically when the verdict lands — a single
+ * upload flows straight into review. (Batch uploads stay fire-and-forget:
+ * their results collect on the Verifications page.)
  */
 
 import { useEffect, useState } from "react"
@@ -42,11 +42,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Spinner } from "@/components/ui/spinner"
 import { ImageDrop } from "@/components/verifier/image-drop"
 import { OVERALL_DISPLAY } from "@/components/verifier/status"
 import { VerifyError, verifyLabelRequest } from "@/lib/client/api"
 import { downscaleImage } from "@/lib/client/downscale"
 import { saveVerification } from "@/lib/client/history"
+import { uploadReportHref } from "@/lib/client/review-tab"
 import {
   fetchAsFile,
   fetchSampleManifest,
@@ -84,6 +86,9 @@ export function SingleVerify() {
   const [file, setFile] = useState<File | null>(null)
   const [samples, setSamples] = useState<SampleLabel[]>([])
   const [sampleId, setSampleId] = useState<string | null>(null)
+  // Locks the form from upload until the report page takes over (or the
+  // verification fails and hands the form back).
+  const [verifying, setVerifying] = useState(false)
 
   useEffect(() => {
     fetchSampleManifest()
@@ -118,27 +123,22 @@ export function SingleVerify() {
 
   function announceVerdict(filename: string, verification: VerificationResult) {
     const display = OVERALL_DISPLAY[verification.overall]
-    const openVerifications = {
-      label: "View",
-      onClick: () => router.push("/verifications"),
-    }
     if (verification.overall === "pass") {
-      toast.success(`${filename}: ${display.label} — auto-approved.`, {
-        action: openVerifications,
-      })
+      toast.success(`${filename}: ${display.label}, auto-approved.`)
     } else if (verification.overall === "fail") {
-      toast.error(`${filename}: ${display.label} — auto-rejected.`, {
-        action: openVerifications,
-      })
+      toast.error(`${filename}: ${display.label}, auto-rejected.`)
     } else {
-      toast.warning(`${filename}: ${display.label} — queued for your review.`, {
-        action: openVerifications,
-      })
+      toast.warning(`${filename}: ${display.label}, queued for your review.`)
     }
   }
 
-  /** Runs after the form has already been released for the next label. */
-  async function runVerification(file: File, application: ApplicationData) {
+  /** Verifies and saves; resolves to the saved record's id, null on failure. */
+  async function runVerification(
+    file: File,
+    application: ApplicationData
+  ): Promise<string | null> {
+    // Tracked as an in-flight upload so the Verifications page still shows
+    // it under "Verifying" if the user wanders off mid-verification.
     const uploadId = startUpload({
       source: "single",
       filename: file.name,
@@ -148,7 +148,7 @@ export function SingleVerify() {
       const upload = await downscaleImage(file)
       const verification = await verifyLabelRequest(application, upload)
       try {
-        await saveVerification({
+        const saved = await saveVerification({
           source: "single",
           filename: file.name,
           application,
@@ -156,11 +156,13 @@ export function SingleVerify() {
           image: upload,
         })
         announceVerdict(file.name, verification)
+        return saved.id
       } catch {
         // The verdict must not vanish just because storage failed.
         toast.error(
           `${file.name}: verified (${OVERALL_DISPLAY[verification.overall].label}) but the result could not be saved to Verifications.`
         )
+        return null
       }
     } catch (error) {
       const message =
@@ -168,12 +170,13 @@ export function SingleVerify() {
           ? error.message
           : "Something went wrong while verifying the label."
       toast.error(`${file.name}: ${message}`)
+      return null
     } finally {
       finishUpload(uploadId)
     }
   }
 
-  function onSubmit(event: React.FormEvent) {
+  async function onSubmit(event: React.FormEvent) {
     event.preventDefault()
     if (!file) {
       toast.error("Add a label image first.")
@@ -189,9 +192,18 @@ export function SingleVerify() {
         ? form.countryOfOrigin.trim() || undefined
         : undefined,
     }
-    // Fire and forget: hand the work off, clear the form for the next label.
-    void runVerification(file, application)
+    setVerifying(true)
+    const savedId = await runVerification(file, application)
+    if (savedId === null) {
+      // Verification or storage failed (already toasted) — hand the form
+      // back untouched so the agent can retry.
+      setVerifying(false)
+      return
+    }
+    // Straight into review. The form stays locked until the report page
+    // takes over, and is cleared for the next label behind the navigation.
     reset()
+    router.push(uploadReportHref(savedId))
   }
 
   function reset() {
@@ -207,7 +219,7 @@ export function SingleVerify() {
           <CardTitle>Application details</CardTitle>
           <CardDescription>
             Enter the values from the COLA application, then add the label
-            image. The verification lands on the Verifications page.
+            image. The report opens as soon as the verification finishes.
           </CardDescription>
           {samples.length > 0 && (
             <div className="flex items-center gap-2 pt-1">
@@ -385,19 +397,29 @@ export function SingleVerify() {
                     />
                   </div>
                   <FieldDescription>
-                    The government warning is checked automatically — it must
-                    match the required text word-for-word.
+                    The government warning is checked automatically. It must
+                    match the required text word for word.
                   </FieldDescription>
                 </Field>
                 <div className="flex items-center gap-3">
-                  <Button type="submit" size="lg" className="flex-1">
-                    <UploadIcon data-icon="inline-start" />
-                    Upload
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="flex-1"
+                    disabled={verifying}
+                  >
+                    {verifying ? (
+                      <Spinner data-icon="inline-start" />
+                    ) : (
+                      <UploadIcon data-icon="inline-start" />
+                    )}
+                    {verifying ? "Verifying…" : "Upload"}
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
                     size="lg"
+                    disabled={verifying}
                     onClick={reset}
                   >
                     <RotateCcwIcon data-icon="inline-start" />

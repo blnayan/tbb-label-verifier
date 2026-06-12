@@ -6,7 +6,7 @@
  * application — what the label must show — on its left, and what was read
  * off the label — each field with its match status — on its right, with
  * Approve/Reject in the header. The page lives outside the dashboard shell
- * because the sidebar would only steal width from the image; either panel
+ * because its navbar would only steal height from the image; either panel
  * scrolls internally if it ever runs long, the page itself never does.
  * (Small screens stack the panels and scroll normally — one-screen review
  * is a desktop promise.)
@@ -14,6 +14,17 @@
  * The record loads from IndexedDB by id, so the page only works in the
  * browser that verified the label — consistent with history being
  * device-local. A cleared or unknown id gets a friendly dead end.
+ *
+ * Review runs as a session over the tab the user came from (?tab=…):
+ * Back/Next buttons step through that tab's records without deciding, and
+ * an approve/reject advances to the next one automatically — computed
+ * before the decision lands, so deciding a pending label still leads to
+ * the next pending one. When the queue runs dry, the session exits back
+ * to the list.
+ *
+ * A report opened straight from a single upload (?from=upload) is not a
+ * session: the back option and the post-decision exit both return to
+ * Upload for the next label, and the queue-stepping buttons stay hidden.
  */
 
 import { useEffect, useState } from "react"
@@ -22,6 +33,7 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import {
   ArrowLeftIcon,
+  ArrowRightIcon,
   CheckCircle2Icon,
   InfoIcon,
   SearchXIcon,
@@ -57,44 +69,82 @@ import {
 } from "@/components/verifier/status"
 import { useObjectUrl } from "@/hooks/use-object-url"
 import {
-  getVerification,
+  listVerifications,
   reviewVerification,
   subscribeToVerifications,
   type ReviewDecision,
   type VerificationRecord,
 } from "@/lib/client/history"
-import { parseReviewTab, verificationsHref } from "@/lib/client/review-tab"
+import {
+  nextReportHref,
+  parseReviewTab,
+  previousReportHref,
+  verificationsHref,
+} from "@/lib/client/review-tab"
 import { fieldLabel } from "@/lib/verification/rules"
 
 /** Application | image | on-label — the image gets the widest track. */
 const PANES_GRID =
   "grid flex-1 gap-4 lg:min-h-0 lg:grid-cols-[minmax(0,3fr)_minmax(0,4fr)_minmax(0,3fr)]"
 
+/**
+ * Stepping between reports remounts the page (the App Router keys pages by
+ * their segment), so component state alone would reset to "loading" and
+ * flash the skeleton on every Back/Next. The last-loaded list survives here
+ * at module scope instead: the next mount paints its record immediately and
+ * the IndexedDB re-read refreshes it in the background. Blobs are cheap to
+ * hold — they are references, not copies of the image bytes.
+ */
+let cachedRecords: VerificationRecord[] | undefined
+
 export function ReviewDetail({ id }: { id: string }) {
   const router = useRouter()
+  const params = useSearchParams()
   // The list page tags report links with the tab they came from (?tab=…),
-  // so the back link and the post-decision redirect both land the user on
-  // the tab they left, not back on "All".
-  const backHref = verificationsHref(
-    parseReviewTab(useSearchParams().get("tab"))
+  // so the back link, the Next button, and the post-decision redirect all
+  // work the tab the user left, not "All". A single upload tags its report
+  // ?from=upload instead — its exits lead back to Upload.
+  const tab = parseReviewTab(params.get("tab"))
+  const fromUpload = params.get("from") === "upload"
+  const backHref = fromUpload ? "/" : verificationsHref(tab)
+  const backLabel = fromUpload ? "Upload" : "Verifications"
+  // The whole history loads, not just the one record: the review session
+  // needs the list to know which report comes next on this tab.
+  // undefined = still loading from IndexedDB (first visit this session).
+  const [records, setRecords] = useState<VerificationRecord[] | undefined>(
+    cachedRecords
   )
-  // undefined = still loading from IndexedDB; null = no such record.
-  const [record, setRecord] = useState<VerificationRecord | null | undefined>(
-    undefined
-  )
-  const [deciding, setDeciding] = useState(false)
+  // A decision in flight freezes the page on its pre-decision snapshot.
+  // Saving the decision triggers the live re-read, which would otherwise
+  // flip the badge and drop a button on a page the user is about to leave —
+  // a flash of layout shift right before the next report appears. Keyed to
+  // the record so it can never freeze a different report.
+  const [decidingRecord, setDecidingRecord] =
+    useState<VerificationRecord | null>(null)
+  const deciding = decidingRecord?.id === id
+  // null = no such record (cleared, or another device's history).
+  const liveRecord =
+    records === undefined
+      ? undefined
+      : (records.find((r) => r.id === id) ?? null)
+  const record = deciding ? decidingRecord : liveRecord
+  const nextHref =
+    records && !fromUpload ? nextReportHref(records, id, tab) : null
+  const prevHref =
+    records && !fromUpload ? previousReportHref(records, id, tab) : null
   const imageUrl = useObjectUrl(record?.image ?? null)
 
   useEffect(() => {
     let cancelled = false
     const load = () =>
-      getVerification(id)
+      listVerifications()
         .then((found) => {
-          if (!cancelled) setRecord(found)
+          cachedRecords = found
+          if (!cancelled) setRecords(found)
         })
         .catch(() => {
           if (!cancelled) {
-            setRecord(null)
+            setRecords([])
             toast.error("Could not load the verification.")
           }
         })
@@ -105,10 +155,13 @@ export function ReviewDetail({ id }: { id: string }) {
       cancelled = true
       unsubscribe()
     }
-  }, [id])
+  }, [])
 
   async function decide(target: VerificationRecord, decision: ReviewDecision) {
-    setDeciding(true)
+    setDecidingRecord(target)
+    // Where to go after: settled from the pre-decision list, because the
+    // decision itself may move this record off the current tab.
+    const onwardHref = nextHref ?? backHref
     try {
       await reviewVerification(target.id, decision)
       toast.success(
@@ -116,10 +169,10 @@ export function ReviewDetail({ id }: { id: string }) {
           ? `${target.application.brandName} approved.`
           : `${target.application.brandName} rejected.`
       )
-      router.push(backHref)
+      router.push(onwardHref)
     } catch {
       toast.error("Could not save the review decision.")
-      setDeciding(false)
+      setDecidingRecord(null)
     }
   }
 
@@ -150,7 +203,7 @@ export function ReviewDetail({ id }: { id: string }) {
             <EmptyTitle>Verification not found</EmptyTitle>
             <EmptyDescription>
               It may have been cleared, or it was verified in a different
-              browser — history lives on the device that did the work.
+              browser. History stays on the device that did the work.
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
@@ -160,7 +213,7 @@ export function ReviewDetail({ id }: { id: string }) {
               render={<Link href={backHref} />}
             >
               <ArrowLeftIcon data-icon="inline-start" />
-              Back to verifications
+              Back to {backLabel.toLowerCase()}
             </Button>
           </EmptyContent>
         </Empty>
@@ -180,7 +233,7 @@ export function ReviewDetail({ id }: { id: string }) {
             className="inline-flex shrink-0 items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeftIcon className="size-4" />
-            Verifications
+            {backLabel}
           </Link>
           {/* The base separator self-stretches; pin the fixed height to the
               row's center so it aligns with the link and title midline. */}
@@ -190,7 +243,7 @@ export function ReviewDetail({ id }: { id: string }) {
               {application.brandName}
             </h1>
             <p className="truncate text-xs text-muted-foreground">
-              {record.filename} — verified{" "}
+              {record.filename}, verified{" "}
               {formatFullTimestamp(record.createdAt)}
             </p>
           </div>
@@ -216,6 +269,22 @@ export function ReviewDetail({ id }: { id: string }) {
               <CheckCircle2Icon data-icon="inline-start" />
               Approve
             </Button>
+          )}
+          {/* Step through this tab's records without deciding; disabled
+              (not hidden) at either end of the queue so the header keeps
+              its shape on the first and last record. From an upload there
+              is no queue — the pair disappears entirely. */}
+          {!fromUpload && (
+            <>
+              <StepButton href={prevHref} disabled={deciding}>
+                <ArrowLeftIcon data-icon="inline-start" />
+                Back
+              </StepButton>
+              <StepButton href={nextHref} disabled={deciding}>
+                Next
+                <ArrowRightIcon data-icon="inline-end" />
+              </StepButton>
+            </>
           )}
         </div>
       </header>
@@ -263,7 +332,7 @@ export function ReviewDetail({ id }: { id: string }) {
               href={imageUrl}
               target="_blank"
               rel="noreferrer"
-              title="The label as verified — click to open full size"
+              title="The label as verified. Click to open it full size."
               className="block h-full w-full"
             >
               {/* object URL — next/image can't optimize blob: URLs */}
@@ -283,8 +352,8 @@ export function ReviewDetail({ id }: { id: string }) {
           <CardHeader>
             <CardTitle>On label</CardTitle>
             <CardDescription>
-              What the model read off the image — every status decided by the
-              rules, never by the AI.
+              What the AI read off the image. It only does the reading: every
+              pass or fail below comes from the compliance rules.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4 lg:min-h-0 lg:flex-1">
@@ -355,6 +424,34 @@ export function ReviewDetail({ id }: { id: string }) {
         </Card>
       </div>
     </div>
+  )
+}
+
+/** A queue-stepping link styled as a button; a dead end renders disabled. */
+function StepButton({
+  href,
+  disabled,
+  children,
+}: {
+  href: string | null
+  disabled: boolean
+  children: React.ReactNode
+}) {
+  if (href === null || disabled) {
+    return (
+      <Button variant="outline" disabled>
+        {children}
+      </Button>
+    )
+  }
+  return (
+    <Button
+      variant="outline"
+      nativeButton={false}
+      render={<Link href={href} />}
+    >
+      {children}
+    </Button>
   )
 }
 
