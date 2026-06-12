@@ -1,235 +1,57 @@
 # Assumptions
 
-Everything below was assumed because the requirements didn't spell it out.
-Each entry says what was assumed, and why that reading was chosen.
+Everything below was assumed because the requirements didn't spell it out. Each entry says what was assumed, and why that reading was chosen.
 
 ## Scope of verification
 
-1. **Six fields are always checked; country of origin is added for
-   imports.** The application data model defines the concrete data every
-   application carries: brand name, class/type, alcohol content, net
-   contents, and the government warning. TTB's own labeling requirements
-   (ttb.gov) add two more mandatory elements that the application data
-   model doesn't include:
-   - **Bottler/producer/importer name and address** (27 CFR 5.66 for
-     spirits, 4.35 for wine, 7.66 for malt beverages; for imports the U.S.
-     importer's statement, 5.69/7.69). Mandatory on every label — and on
-     the application itself (TTB F 5100.31 requires the applicant's name
-     and address) — so it is a required input and always compared. The regs
-     require a qualifying phrase ("Bottled by", "Imported by", noun-style
-     "US Importer:", …) before the name, so the comparison strips it; extra
-     address detail on the label (street, ZIP — permitted but not required)
-     downgrades to "Needs review" rather than failing. A label with no
-     statement at all fails. State abbreviation variants ("KY" vs
-     "Kentucky") are not normalized — they surface as a close match for
-     human judgment.
-   - **Country of origin** for imports (CBP regs, 19 CFR 134; TTB's 2020
-     modernization rule confirmed it applies to all imported commodities).
-     Several phrasings are acceptable ("Product of France", "Produced in
-     France"), so the check is that the label's statement names the expected
-     country. The application marks each product domestic or imported:
-     imports must name a country (refusing to silently skip a mandatory
-     check), domestic products skip it. Where the flag isn't given (older
-     CSVs, direct API calls), a present country implies an import.
+1. **Six fields are always checked; country of origin is added for imports.** The application data model defines the concrete data every application carries: brand name, class/type, alcohol content, net contents, and the government warning. TTB's own labeling requirements (ttb.gov) add two more mandatory elements that the application data model doesn't include:
+   - **Bottler/producer/importer name and address** (27 CFR 5.66 for spirits, 4.35 for wine, 7.66 for malt beverages; for imports the U.S. importer's statement, 5.69/7.69). Mandatory on every label — and on the application itself (TTB F 5100.31 requires the applicant's name and address) — so it is a required input and always compared. The regs require a qualifying phrase ("Bottled by", "Imported by", noun-style "US Importer:", …) before the name, so the comparison strips it; extra address detail on the label (street, ZIP — permitted but not required) downgrades to "Needs review" rather than failing. A label with no statement at all fails. State abbreviation variants ("KY" vs "Kentucky") are not normalized — they surface as a close match for human judgment.
+   - **Country of origin** for imports (CBP regs, 19 CFR 134; TTB's 2020 modernization rule confirmed it applies to all imported commodities). Several phrasings are acceptable ("Product of France", "Produced in France"), so the check is that the label's statement names the expected country. The application marks each product domestic or imported: imports must name a country (refusing to silently skip a mandatory check), domestic products skip it. Where the flag isn't given (older CSVs, direct API calls), a present country implies an import.
 
-2. **The application data is keyed in by the agent (or supplied via CSV).**
-   COLA integration is deliberately out of scope for this prototype, so
-   there is no application lookup — the agent supplies what the application
-   says, mirroring the team's current screen-to-screen comparison workflow.
+2. **The application data is keyed in by the agent (or supplied via CSV).** COLA integration is deliberately out of scope for this prototype, so there is no application lookup — the agent supplies what the application says, mirroring the team's current screen-to-screen comparison workflow.
 
-3. **One image per label application.** Real COLAs often attach front and
-   back labels separately. The prototype verifies a single image; if the
-   warning is on the back label, the agent verifies the image that carries
-   it (or a combined image). Multi-image applications are a known extension,
-   not a core requirement of the prototype.
+3. **One image per label application.** Real COLAs often attach front and back labels separately. The prototype verifies a single image; if the warning is on the back label, the agent verifies the image that carries it (or a combined image). Multi-image applications are a known extension, not a core requirement of the prototype.
 
-4. **English-language labels.** TTB requires mandatory information in
-   English; verifying foreign-language supplementary text is out of scope.
+4. **English-language labels.** TTB requires mandatory information in English; verifying foreign-language supplementary text is out of scope.
 
 ## Compliance interpretations (validated against ttb.gov / eCFR)
 
-5. **The government warning must match 27 CFR 16.21 word-for-word.** The
-   statutory text embedded in the rule engine was checked against the CFR.
-   Any word difference is a failure — the statement is exact by policy.
-   Whitespace and punctuation get one calibrated tolerance, because the
-   reader is measurably unreliable on exactly those marks: condensed print
-   makes the model drop a space ("(2) CONSUMPTION" read as
-   "(2)CONSUMPTION"), and arc-wrapped print makes it drop a comma
-   (Stillwater's "Surgeon General," loses its comma in roughly half of
-   reads). When every word of the statutory text is present in order and
-   only spacing or punctuation differs, the label queues for review with
-   the divergence pinpointed instead of auto-failing — an auto-reject built
-   on a signal the reader gets wrong half the time would reject compliant
-   labels, and a genuinely missing comma still reaches a human, never a
-   silent pass. Word-level deviations that survive the blind stability
-   re-read (see #12) remain hard failures.
+5. **The government warning must match 27 CFR 16.21 word-for-word.** The statutory text embedded in the rule engine was checked against the CFR. Any word difference is a failure — the statement is exact by policy. Whitespace and punctuation get one calibrated tolerance, because the reader is measurably unreliable on exactly those marks: condensed print makes the model drop a space ("(2) CONSUMPTION" read as "(2)CONSUMPTION"), and arc-wrapped print makes it drop a comma (Stillwater's "Surgeon General," loses its comma in roughly half of reads). When every word of the statutory text is present in order and only spacing or punctuation differs, the label queues for review with the divergence pinpointed instead of auto-failing — an auto-reject built on a signal the reader gets wrong half the time would reject compliant labels, and a genuinely missing comma still reaches a human, never a silent pass. Word-level deviations that survive the blind stability re-read (see #12) remain hard failures.
 
-6. **"GOVERNMENT WARNING" must be in capital letters** (27 CFR 16.22(a)).
-   A title-case heading is an automatic failure — this exact scenario is in
-   the sample dataset because real submissions get the heading's case
-   wrong.
+6. **"GOVERNMENT WARNING" must be in capital letters** (27 CFR 16.22(a)). A title-case heading is an automatic failure — this exact scenario is in the sample dataset because real submissions get the heading's case wrong.
 
-7. **Bold type on the heading queues for review, never auto-rejects.**
-   27 CFR 16.22 requires the heading in bold type, but type weight is a
-   perceptual judgment the model gets wrong on real labels (it read the
-   bold MB Liquors heading as not bold) — unlike wording and caps, which
-   come from transcription and are enforced as hard failures. A not-bold
-   read therefore lands the label in needs_review for a human to confirm
-   against the image. When the model cannot judge the weight (it returns
-   null — glare, rendering, font ambiguity), the check does not penalize
-   the label rather than guessing.
+7. **Bold type on the heading queues for review, never auto-rejects.** 27 CFR 16.22 requires the heading in bold type, but type weight is a perceptual judgment the model gets wrong on real labels (it read the bold MB Liquors heading as not bold) — unlike wording and caps, which come from transcription and are enforced as hard failures. A not-bold read therefore lands the label in needs_review for a human to confirm against the image. When the model cannot judge the weight (it returns null — glare, rendering, font ambiguity), the check does not penalize the label rather than guessing.
 
-8. **Type-size and characters-per-inch rules (16.22(b)) are not checked.**
-   Physical measurements can't be derived from an uncalibrated photo. TTB
-   itself adds a qualification to COLAs saying it has not reviewed type
-   size — the responsible industry member must ensure it. Same boundary
-   here.
+8. **Type-size and characters-per-inch rules (16.22(b)) are not checked.** Physical measurements can't be derived from an uncalibrated photo. TTB itself adds a qualification to COLAs saying it has not reviewed type size — the responsible industry member must ensure it. Same boundary here.
 
-9. **Brand-name comparison is case-insensitive, with transparency.**
-   A display-caps brand ("STONE'S THROW" for an application's "Stone's
-   Throw") is a full match —
-   labels routinely set the brand in display caps, and a
-   capitalization-only difference carries no compliance signal — but the
-   result still carries a note saying the case differs. Punctuation,
-   apostrophe, and diacritic differences remain a close match flagged for
-   review: never silently passed and never auto-failed. Substantive word
-   differences fail. Class/type gets one extra tolerance: labels often print
-   an appellation or qualifier with the class designation ("Barbera d'Asti
-   D.O.C.G. Red wine" for an application's "Red wine"), so a class line that
-   contains the expected designation is a full match — the surrounding text
-   carries no compliance signal against the application. The result displays
-   only the portion that matched; the note keeps the full label line for
-   transparency. Brand names get a containment tolerance too, but the
-   conservative kind — a fanciful name printed with the brand ("Stillwater
-   Artisanal Debutante" for an application's "Stillwater Artisanal") is a
-   close match for review, because extra words around a brand can change
-   its identity. Finally, a near-miss — a couple of stray
-   characters in an otherwise identical long string (measured: condensed
-   "APPELLATION" transcribed as "APPALATION") — queues for review rather
-   than auto-rejecting: it is as likely a model misread as a label typo,
-   and both deserve human eyes. The budget is strict (≈1 character per 12,
-   capped at 4), so word substitutions like "EAGLE HOLLOW" vs "EAGLE
-   HARBOR" still fail outright.
+9. **Brand-name comparison is case-insensitive, with transparency.** A display-caps brand ("STONE'S THROW" for an application's "Stone's Throw") is a full match — labels routinely set the brand in display caps, and a capitalization-only difference carries no compliance signal — but the result still carries a note saying the case differs. Punctuation, apostrophe, and diacritic differences remain a close match flagged for review: never silently passed and never auto-failed. Substantive word differences fail. Class/type gets one extra tolerance: labels often print an appellation or qualifier with the class designation ("Barbera d'Asti D.O.C.G. Red wine" for an application's "Red wine"), so a class line that contains the expected designation is a full match — the surrounding text carries no compliance signal against the application. The result displays only the portion that matched; the note keeps the full label line for transparency. Brand names get a containment tolerance too, but the conservative kind — a fanciful name printed with the brand ("Stillwater Artisanal Debutante" for an application's "Stillwater Artisanal") is a close match for review, because extra words around a brand can change its identity. Finally, a near-miss — a couple of stray characters in an otherwise identical long string (measured: condensed "APPELLATION" transcribed as "APPALATION") — queues for review rather than auto-rejecting: it is as likely a model misread as a label typo, and both deserve human eyes. The budget is strict (≈1 character per 12, capped at 4), so word substitutions like "EAGLE HOLLOW" vs "EAGLE HARBOR" still fail outright.
 
-10. **ABV must match the application exactly** (no tolerance beyond float
-    rounding). TTB tolerances govern label-vs-product, not
-    label-vs-application. The percent-alcohol-by-volume statement is
-    mandatory (27 CFR 5.65): a label that prints proof alone fails, even
-    when the proof is numerically equivalent — proof may only appear in
-    addition to the percentage, never instead of it. When a label prints
-    both by-weight and by-volume percentages, the by-volume figure is the
-    ABV.
+10. **ABV must match the application exactly** (no tolerance beyond float rounding). TTB tolerances govern label-vs-product, not label-vs-application. The percent-alcohol-by-volume statement is mandatory (27 CFR 5.65): a label that prints proof alone fails, even when the proof is numerically equivalent — proof may only appear in addition to the percentage, never instead of it. When a label prints both by-weight and by-volume percentages, the by-volume figure is the ABV.
 
-11. **Net contents are compared by volume, not by string.** "75 cl" vs
-    "750 mL" is the same quantity — that passes with a note rather than
-    failing. A boilerplate "Net Contents" / "Net. Cont." prefix on the label
-    is ignored entirely. Standard-of-fill validation (whether 750 mL is an
-    authorized size) is out of scope.
+11. **Net contents are compared by volume, not by string.** "75 cl" vs "750 mL" is the same quantity — that passes with a note rather than failing. A boilerplate "Net Contents" / "Net. Cont." prefix on the label is ignored entirely. Standard-of-fill validation (whether 750 mL is an authorized size) is out of scope.
 
 ## Product decisions
 
-12. **The AI never decides pass/fail.** The model transcribes; deterministic
-    rules decide. This is the central design decision — reasoning in
-    [ARCHITECTURE.md](ARCHITECTURE.md) and
-    [docs/design/02-ai-boundary.md](docs/design/02-ai-boundary.md).
-    The first extraction is blind — the model never sees what the
-    application claims, so agreement between label and application is
-    independent evidence. One refinement: when a comparison field fails,
-    a single *focused second read* re-examines just the disputed fields,
-    and that call does see the application's claim (it is what lets the
-    model recover text the blind pass garbled — condensed "APPELLATION"
-    reads as APPALATION about half the time). Because the second read is
-    primed, the rules never let it pass a field: agreement with the claim
-    rescues the label into needs_review for a human, and anything else
-    leaves the blind failure standing. Priming can only move a label
-    toward review, never toward pass — measured against the deliberately
-    wrong samples (wrong brand/ABV/net contents/missing bottler), the
-    primed read held the failure in 16 of 16 attempts. The government
-    warning is excluded from the primed read: the model knows the
-    statutory text by heart, and priming there invites normalizing a
-    deviating label back to compliance. The warning instead gets a *blind
-    re-read* — a second independent transcription of just the warning that
-    sees neither the application nor the statutory text — which runs in
-    parallel with the first read on EVERY label, because it is needed on
-    both sides of the verdict. On a failing warning it is the stability
-    check: if it reproduces the first read's deviation word-for-word, the
-    deviation is on the label and the failure stands with the confirmation
-    noted; if the two reads disagree, the transcription is unstable
-    (measured: a degraded image read "IMPAIRS" as "IMPARES") and the label
-    queues for review. On a PASSING warning it is the normalization check:
-    the model autocompletes fine print to the statutory wording it expects
-    (measured 2026-06-12: a label printing "impares" was transcribed as
-    "impairs" in 16 of 16 reads and auto-approved), so a warning
-    auto-passes only when two independent reads agree on it — a re-read
-    that reports a word-level deviation or no warning sends the label to
-    review. Judgments known to wobble without signifying a deviation
-    (punctuation, spacing, boldness) never challenge a pass. Same
-    invariant throughout: a re-read can only move a label toward review,
-    never toward pass.
+12. **The AI never decides pass/fail.** The model transcribes; deterministic rules decide. This is the central design decision — reasoning in [ARCHITECTURE.md](ARCHITECTURE.md) and [docs/design/02-ai-boundary.md](docs/design/02-ai-boundary.md). The first extraction is blind — the model never sees what the application claims, so agreement between label and application is independent evidence. One refinement: when a comparison field fails, a single *focused second read* re-examines just the disputed fields, and that call does see the application's claim (it is what lets the model recover text the blind pass garbled — condensed "APPELLATION" reads as APPALATION about half the time). Because the second read is primed, the rules never let it pass a field: agreement with the claim rescues the label into needs_review for a human, and anything else leaves the blind failure standing. Priming can only move a label toward review, never toward pass — measured against the deliberately wrong samples (wrong brand/ABV/net contents/missing bottler), the primed read held the failure in 16 of 16 attempts. The government warning is excluded from the primed read: the model knows the statutory text by heart, and priming there invites normalizing a deviating label back to compliance. The warning instead gets a *blind re-read* — a second independent transcription of just the warning that sees neither the application nor the statutory text — which runs in parallel with the first read on EVERY label, because it is needed on both sides of the verdict. On a failing warning it is the stability check: if it reproduces the first read's deviation word-for-word, the deviation is on the label and the failure stands with the confirmation noted; if the two reads disagree, the transcription is unstable (measured: a degraded image read "IMPAIRS" as "IMPARES") and the label queues for review. On a PASSING warning it is the normalization check: the model autocompletes fine print to the statutory wording it expects (measured 2026-06-12: a label printing "impares" was transcribed as "impairs" in 16 of 16 reads and auto-approved), so a warning auto-passes only when two independent reads agree on it — a re-read that reports a word-level deviation or no warning sends the label to review. Judgments known to wobble without signifying a deviation (punctuation, spacing, boldness) never challenge a pass. Same invariant throughout: a re-read can only move a label toward review, never toward pass.
 
-13. **The model is configuration, not code.** The 5-second requirement
-    is a hard product constraint (slower tools lose the race against a
-    human eyeball and go unused), and label
-    transcription is a narrow task a fast mini-class vision model handles
-    well. `OPENAI_MODEL` is required and there is deliberately no default
-    or fallback — one explicitly chosen model, swappable without a code
-    change; the app refuses to verify until it is set.
+13. **The model is configuration, not code.** The 5-second requirement is a hard product constraint (slower tools lose the race against a human eyeball and go unused), and label transcription is a narrow task a fast mini-class vision model handles well. `OPENAI_MODEL` is required and there is deliberately no default or fallback — one explicitly chosen model, swappable without a code change; the app refuses to verify until it is set.
 
-14. **No accounts, no server-side persistence.** Nothing sensitive is
-    stored anywhere: images are processed in memory
-    and discarded, and the server stores nothing. Results do persist — in the
-    browser's IndexedDB on the device that verified them — so history
-    survives refreshes and restarts but never leaves the machine: a report
-    link opened in a different browser finds nothing, and a guarded "Clear
-    history" action erases everything. This keeps the deployment a single
-    stateless container.
+14. **No accounts, no server-side persistence.** Nothing sensitive is stored anywhere: images are processed in memory and discarded, and the server stores nothing. Results do persist — in the browser's IndexedDB on the device that verified them — so history survives refreshes and restarts but never leaves the machine: a report link opened in a different browser finds nothing, and a guarded "Clear history" action erases everything. This keeps the deployment a single stateless container.
 
-15. **Batch pairing is by filename.** A CSV column names each image file.
-    This matches how bulk submissions arrive in practice (a spreadsheet plus
-    a folder of artwork) and keeps the server stateless — the browser
-    orchestrates the queue, four labels at a time.
+15. **Batch pairing is by filename.** A CSV column names each image file. This matches how bulk submissions arrive in practice (a spreadsheet plus a folder of artwork) and keeps the server stateless — the browser orchestrates the queue, four labels at a time.
 
-16. **Batch size is bounded by patience, not the app.** 300 labels × ~3s at
-    concurrency 4 ≈ 4 minutes — a peak-season dump from a large importer
-    clears in one sitting. Rows with bad data are skipped with line-numbered
-    errors
-    instead of aborting the batch.
+16. **Batch size is bounded by patience, not the app.** 300 labels × ~3s at concurrency 4 ≈ 4 minutes — a peak-season dump from a large importer clears in one sitting. Rows with bad data are skipped with line-numbered errors instead of aborting the batch.
 
-17. **"AI-generated" sample labels are AI-designed and programmatically
-    rendered** (SVG → PNG via `scripts/generate-samples.mjs`) rather than
-    diffusion-generated images — this gives pixel-exact control over the
-    error each sample encodes (you can't reliably ask an image model for "a
-    label whose warning text is subtly reworded"). Real labels come from
-    TTB's public COLA registry; sources
-    in [public/samples/SOURCES.md](public/samples/SOURCES.md).
+17. **"AI-generated" sample labels are AI-designed and programmatically rendered** (SVG → PNG via `scripts/generate-samples.mjs`) rather than diffusion-generated images — this gives pixel-exact control over the error each sample encodes (you can't reliably ask an image model for "a label whose warning text is subtly reworded"). Real labels come from TTB's public COLA registry; sources in [public/samples/SOURCES.md](public/samples/SOURCES.md).
 
 ## Known limitations (deliberate trade-offs)
 
-- Country of origin is checked only for products marked imported; the app
-  cannot detect an import whose application wrongly marks it domestic
-  (see #1).
+- Country of origin is checked only for products marked imported; the app cannot detect an import whose application wrongly marks it domestic (see #1).
 - One image per application (see #3).
-- Supported image formats are JPEG, PNG, and WebP. GIFs are rejected at
-  every entry point (file pickers, drag-and-drop, server validation):
-  animation frames make "the pixels that were verified" ambiguous, and
-  flattening one client-side would verify pixels the server never saw.
-- Verification history is device-local by design (see #14): a report link
-  only opens in the browser that verified the label.
-- A not-bold heading read queues for human review instead of failing —
-  the model's weight judgment is unreliable; type-size rules unchecked
-  (see #7, #8).
-- The "same field of vision" placement rule (brand name, class/type, and
-  alcohol content must be viewable simultaneously) is not verified from a
-  single photo.
-- No retry/queue persistence: refreshing mid-batch loses client-side
-  progress. Acceptable for a prototype; a job store is the production fix.
-- Extraction quality is bounded by the model; the readability field and
-  image-quality notes are the honesty valve — bad photos are flagged
-  "Can't read label" rather than guessed at.
-- A subtle warning misprint can still slip through on a genuinely
-  low-detail photograph: below the resolution where letters are
-  resolvable, the reader reconstructs words from shape and both
-  independent reads can normalize the same typo. The pre-upscale step
-  (see ARCHITECTURE.md) pushes that floor down for small images — on the
-  planted-typo sample the false-pass rate went from 16/16 to 0/24 — but
-  it cannot create detail a photo never captured.
+- Supported image formats are JPEG, PNG, and WebP. GIFs are rejected at every entry point (file pickers, drag-and-drop, server validation): animation frames make "the pixels that were verified" ambiguous, and flattening one client-side would verify pixels the server never saw.
+- Verification history is device-local by design (see #14): a report link only opens in the browser that verified the label.
+- A not-bold heading read queues for human review instead of failing — the model's weight judgment is unreliable; type-size rules unchecked (see #7, #8).
+- The "same field of vision" placement rule (brand name, class/type, and alcohol content must be viewable simultaneously) is not verified from a single photo.
+- No retry/queue persistence: refreshing mid-batch loses client-side progress. Acceptable for a prototype; a job store is the production fix.
+- Extraction quality is bounded by the model; the readability field and image-quality notes are the honesty valve — bad photos are flagged "Can't read label" rather than guessed at.
+- A subtle warning misprint can still slip through on a genuinely low-detail photograph: below the resolution where letters are resolvable, the reader reconstructs words from shape and both independent reads can normalize the same typo. The pre-upscale step (see ARCHITECTURE.md) pushes that floor down for small images — on the planted-typo sample the false-pass rate went from 16/16 to 0/24 — but it cannot create detail a photo never captured.

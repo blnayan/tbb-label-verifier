@@ -1,32 +1,17 @@
 # Trust and failure: the tool that knows what it doesn't know
 
-A compliance tool earns adoption by how it behaves when things go wrong —
-bad photos, bad CSVs, flaky networks, ambiguous matches. The design rule
-throughout: **never guess silently, never fail loudly without a next step.**
+A compliance tool earns adoption by how it behaves when things go wrong — bad photos, bad CSVs, flaky networks, ambiguous matches. The design rule throughout: **never guess silently, never fail loudly without a next step.**
 
 ## A four-state verdict, not a boolean
 
-`pass / needs_review / fail / unreadable` — because the honest answer space
-isn't binary:
+`pass / needs_review / fail / unreadable` — because the honest answer space isn't binary:
 
 - **Pass** — every check matched exactly. Safe to move on.
-- **Needs review** — the tool found something a human should glance at
-  (case-only brand difference, possibly-unbold heading, partially readable
-  photo). The tool says *what* and *why*; the human spends ten seconds, not
-  ten minutes.
-- **Issues found** — a deterministic rule failed; the note cites the exact
-  divergence ("Label shows 40%, but the application says 45%.").
-- **Can't read label** — the honesty valve. If the model reports the image
-  unreadable (or not an alcohol label at all), no checks are run and the
-  recommendation is the workflow agents already use: request a better
-  image. Tolerating imperfect photos is a core requirement; tolerance
-  includes knowing when to stop.
+- **Needs review** — the tool found something a human should glance at (case-only brand difference, possibly-unbold heading, partially readable photo). The tool says *what* and *why*; the human spends ten seconds, not ten minutes.
+- **Issues found** — a deterministic rule failed; the note cites the exact divergence ("Label shows 40%, but the application says 45%.").
+- **Can't read label** — the honesty valve. If the model reports the image unreadable (or not an alcohol label at all), no checks are run and the recommendation is the workflow agents already use: request a better image. Tolerating imperfect photos is a core requirement; tolerance includes knowing when to stop.
 
-The asymmetry is deliberate: anything mechanical that's clearly wrong
-*fails*, anything requiring judgment *escalates to the human*. The tool
-removes the data-entry half of the job — agents spend half their day on
-what is essentially data-entry verification — and explicitly keeps the
-judgment half human.
+The asymmetry is deliberate: anything mechanical that's clearly wrong *fails*, anything requiring judgment *escalates to the human*. The tool removes the data-entry half of the job — agents spend half their day on what is essentially data-entry verification — and explicitly keeps the judgment half human.
 
 ## Failure handling by layer
 
@@ -41,19 +26,11 @@ judgment half human.
 
 ## Why transparency is the trust strategy
 
-The division's veterans have watched modernization projects fail for
-decades, and their skepticism is rational: tools that hide their reasoning
-get blamed for every disagreement. This tool's bet is the opposite of
-"trust me":
+The division's veterans have watched modernization projects fail for decades, and their skepticism is rational: tools that hide their reasoning get blamed for every disagreement. This tool's bet is the opposite of "trust me":
 
 - every verdict shows its inputs (expected vs. found, verbatim),
 - every rule's behavior is documented and unit-tested,
 - every response shows how long the AI took,
-- and the AI's own uncertainty (readability, glare, angle notes) is
-  surfaced, not smoothed over.
+- and the AI's own uncertainty (readability, glare, angle notes) is surfaced, not smoothed over.
 
-The goal is not for agents to believe the tool. It's for agents to be able
-to *check* the tool faster than they could do the work — and let the
-checking habit decay into trust at their own pace. That's also why the
-verdict vocabulary stops at "needs review": the tool never pretends to a
-certainty it doesn't have.
+The goal is not for agents to believe the tool. It's for agents to be able to *check* the tool faster than they could do the work — and let the checking habit decay into trust at their own pace. That's also why the verdict vocabulary stops at "needs review": the tool never pretends to a certainty it doesn't have.
