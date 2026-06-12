@@ -298,7 +298,7 @@
       "id": "real-stillwater-debutante",
       "name": "Stillwater Artisanal Debutante keg collar — arc-wrapped warning (real TTB label)",
       "image": "/samples/real-stillwater-debutante.png",
-      "description": "Real round keg collar from a filled-out TTB F 5100.31 application (TTB ID 11364001000181). The government warning curves around the collar's arc with a keg-rupture CAUTION interleaved, and net contents are an unticked checkbox list of four keg sizes. Expected result: Issues found — the checkbox net contents go unread and the arc transcription drops a comma at its line break, so the warning reads as deviating. A hard-mode test of non-linear label text.",
+      "description": "Real round keg collar from a filled-out TTB F 5100.31 application (TTB ID 11364001000181). The government warning curves around the collar's arc with a keg-rupture CAUTION interleaved, and net contents are an unticked checkbox list of four keg sizes. The label is fully compliant — the arc-printed warning is word-perfect. Expected result: Pass or Needs review; a model that drops a comma transcribing the curve reports Issues found, which is a transcription miss, not a label defect. A hard-mode test of non-linear label text.",
       "source": "real",
       "application": {
         "brandName": "Stillwater Artisanal",
@@ -410,7 +410,7 @@
       "id": "unbolded-warning",
       "name": "Meridian Pass — warning heading not bold (generated)",
       "image": "/samples/unbolded-warning.png",
-      "description": "The warning's wording and capitals are exact, but the GOVERNMENT WARNING heading is printed in regular weight — bold type is required (27 CFR 16.22). Expected result: Issues found (heading not bold). If the model can't judge the weight it returns null and the label is not penalized.",
+      "description": "The warning's wording and capitals are exact, but the GOVERNMENT WARNING heading is printed in regular weight — bold type is required (27 CFR 16.22). Expected result: Needs review (the model misjudges type weight on real labels, so a not-bold read queues for a human instead of auto-rejecting). If the model can't judge the weight it returns null and the label is not penalized.",
       "source": "generated",
       "application": {
         "brandName": "MERIDIAN PASS",
