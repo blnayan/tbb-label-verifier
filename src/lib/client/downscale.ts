@@ -1,49 +1,59 @@
 /**
- * Client-side image downscaling before upload.
+ * Last-resort image shrinking before upload.
  *
- * The vision model never sees more than ~1568px on the long edge (the API
- * downscales larger images server-side anyway), so shrinking a 12MP phone
- * photo in the browser cuts upload time and tokens with zero accuracy cost —
- * which is how we protect the ~5 second budget on slow connections.
+ * Images are sent exactly as the user provided them — resampling plus a
+ * JPEG re-encode visibly degrades fine print (measured on a real crown
+ * label: it flipped the government warning from a reliable match to a
+ * misread, "IMPAIRS" → "IMPARES", and auto-rejected a compliant label).
+ * The single exception is a file the server would reject outright
+ * (> MAX_IMAGE_BYTES): shrinking it is strictly better than failing the
+ * upload, so it is resized to the 2048px the OpenAI vision API scales
+ * images down to anyway and re-encoded as JPEG.
  */
 
-const MAX_DIMENSION = 1568;
+import { MAX_IMAGE_BYTES } from "@/lib/verification/input"
+
+const MAX_DIMENSION = 2048
+
+/** Pure gate: shrink only what the server would otherwise reject. */
+export function needsDownscale(bytes: number): boolean {
+  return bytes > MAX_IMAGE_BYTES
+}
 
 export async function downscaleImage(file: File): Promise<File> {
-  // GIFs may animate and canvas would flatten them; send small files as-is.
-  if (file.type === "image/gif") return file;
+  // GIFs are not a supported upload at all; flattening one to JPEG here
+  // would smuggle it past the server's rejection — pass it through so the
+  // server can refuse it with a clear error.
+  if (!needsDownscale(file.size) || file.type === "image/gif") return file
 
-  let bitmap: ImageBitmap;
+  let bitmap: ImageBitmap
   try {
-    bitmap = await createImageBitmap(file);
+    bitmap = await createImageBitmap(file)
   } catch {
     // Not decodable here — let the server/model report a proper error.
-    return file;
+    return file
   }
 
-  const { width, height } = bitmap;
-  if (Math.max(width, height) <= MAX_DIMENSION) {
-    bitmap.close();
-    return file;
-  }
-
-  const scale = MAX_DIMENSION / Math.max(width, height);
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.round(width * scale);
-  canvas.height = Math.round(height * scale);
-  const ctx = canvas.getContext("2d");
+  const { width, height } = bitmap
+  // Never upscale — an oversized file at modest dimensions (say, a huge
+  // PNG) just gets the JPEG re-encode.
+  const scale = Math.min(1, MAX_DIMENSION / Math.max(width, height))
+  const canvas = document.createElement("canvas")
+  canvas.width = Math.round(width * scale)
+  canvas.height = Math.round(height * scale)
+  const ctx = canvas.getContext("2d")
   if (!ctx) {
-    bitmap.close();
-    return file;
+    bitmap.close()
+    return file
   }
-  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  bitmap.close();
+  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+  bitmap.close()
 
   const blob = await new Promise<Blob | null>((resolve) =>
-    canvas.toBlob(resolve, "image/jpeg", 0.9),
-  );
-  if (!blob) return file;
+    canvas.toBlob(resolve, "image/jpeg", 0.9)
+  )
+  if (!blob) return file
 
-  const name = file.name.replace(/\.[^.]+$/, "") + ".jpg";
-  return new File([blob], name, { type: "image/jpeg" });
+  const name = file.name.replace(/\.[^.]+$/, "") + ".jpg"
+  return new File([blob], name, { type: "image/jpeg" })
 }

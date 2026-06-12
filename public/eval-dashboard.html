@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sample eval dashboard</title>
+<style>
+  :root {
+    --ok: #16a34a; --warn: #d97706; --bad: #dc2626; --muted: #6b7280;
+    --border: #e5e7eb; --bg: #f8fafc; --card: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, sans-serif; background: var(--bg); color: #111827; }
+  header { position: sticky; top: 0; z-index: 10; background: var(--card); border-bottom: 1px solid var(--border); padding: 10px 20px; display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+  header h1 { font-size: 16px; margin: 0; }
+  header .meta { color: var(--muted); font-size: 12px; }
+  header .filters { margin-left: auto; display: flex; gap: 6px; }
+  header button { border: 1px solid var(--border); background: var(--card); border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 12px; }
+  header button.active { background: #111827; color: #fff; border-color: #111827; }
+  main { max-width: 1400px; margin: 0 auto; padding: 16px 20px 80px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 18px; overflow: hidden; }
+  .card > .head { display: flex; gap: 10px; align-items: baseline; padding: 10px 16px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .card > .head h2 { font-size: 14px; margin: 0; }
+  .card > .head .id { color: var(--muted); font-size: 12px; font-family: ui-monospace, monospace; }
+  .badge { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 11px; font-weight: 600; color: #fff; vertical-align: middle; }
+  .b-pass, .b-match { background: var(--ok); }
+  .b-needs_review, .b-close_match { background: var(--warn); }
+  .b-fail, .b-mismatch, .b-not_found, .b-unreadable { background: var(--bad); }
+  .b-not_checked { background: var(--muted); }
+  .b-ok { background: var(--ok); } .b-regression { background: var(--bad); } .b-flaky { background: var(--warn); }
+  .body { display: grid; grid-template-columns: 380px 1fr; gap: 0; }
+  @media (max-width: 980px) { .body { grid-template-columns: 1fr; } }
+  .imgpane { padding: 12px; border-right: 1px solid var(--border); background: #fafafa; display: flex; flex-direction: column; gap: 8px; }
+  .imgpane a { display: block; }
+  .imgpane img { width: 100%; max-height: 420px; object-fit: contain; background: #fff; border: 1px solid var(--border); border-radius: 6px; }
+  .imgpane .hint { color: var(--muted); font-size: 11px; text-align: center; }
+  .detail { padding: 12px 16px; min-width: 0; }
+  .desc { color: var(--muted); font-size: 12px; margin: 0 0 10px; }
+  .note { background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 6px 10px; font-size: 12px; margin-bottom: 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; padding: 5px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
+  td.field { white-space: nowrap; font-weight: 600; }
+  td.value { font-family: ui-monospace, monospace; font-size: 12px; word-break: break-word; }
+  .verdicts { display: flex; gap: 14px; align-items: center; margin: 6px 0 12px; flex-wrap: wrap; font-size: 12px; }
+  .verdicts .label { color: var(--muted); }
+  .runtabs { display: flex; gap: 4px; margin-bottom: 8px; }
+  .runtabs button { border: 1px solid var(--border); background: #fff; border-radius: 6px; padding: 2px 8px; font-size: 11px; cursor: pointer; }
+  .runtabs button.active { background: #111827; color: #fff; }
+  .problems { background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 6px 10px; font-size: 12px; margin: 8px 0; }
+  .problems ul { margin: 2px 0 0 16px; padding: 0; }
+  .extra { color: var(--muted); font-size: 12px; margin-top: 8px; }
+  .extra code { background: #f3f4f6; padding: 0 4px; border-radius: 4px; }
+  .warningtext { font-family: ui-monospace, monospace; font-size: 11.5px; background: #f9fafb; border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; margin-top: 4px; white-space: pre-wrap; word-break: break-word; }
+  .empty { color: var(--muted); font-style: italic; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Sample eval dashboard</h1>
+  <span class="meta" id="meta">loading…</span>
+  <div class="filters" id="filters">
+    <button data-f="all" class="active">All</button>
+    <button data-f="problems">Problems only</button>
+    <button data-f="fails">Expected-fail samples</button>
+  </div>
+</header>
+<main id="main"><p class="empty">Loading /eval-results.json…</p></main>
+<script>
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]))
+const badge = (v) => `<span class="badge b-${esc(v)}">${esc(v)}</span>`
+
+const APP_FIELD_TO_RESULT = {
+  brandName: "brandName", classType: "classType", alcoholPercent: "alcoholContent",
+  netContents: "netContents", bottlerNameAddress: "nameAddress", countryOfOrigin: "countryOfOrigin",
+}
+const FIELD_LABELS = {
+  brandName: "Brand name", classType: "Class / type", alcoholContent: "Alcohol content",
+  netContents: "Net contents", nameAddress: "Name & address", countryOfOrigin: "Country of origin",
+  governmentWarning: "Government warning",
+}
+
+let DATA = null
+let FILTER = "all"
+
+function runBadge(run) {
+  if (run.ok) return badge("ok")
+  return run.flaky ? badge("flaky") : badge("regression")
+}
+
+function fieldRows(sample, run) {
+  const result = run?.result
+  const byField = {}
+  if (result) for (const f of result.fields) byField[f.field] = f
+  const rows = []
+  const seen = new Set()
+  // Application-driven rows first, in form order.
+  for (const [appKey, resKey] of Object.entries(APP_FIELD_TO_RESULT)) {
+    if (!(appKey in sample.application)) continue
+    seen.add(resKey)
+    const f = byField[resKey]
+    rows.push(`<tr>
+      <td class="field">${esc(FIELD_LABELS[resKey])}</td>
+      <td class="value">${esc(sample.application[appKey])}</td>
+      <td class="value">${f ? (f.found === null ? '<span class="empty">null</span>' : esc(f.found)) : "—"}</td>
+      <td>${f ? badge(f.status) : "—"}</td>
+      <td class="value">${esc(f?.note ?? "")}</td>
+    </tr>`)
+  }
+  // Remaining result fields (government warning).
+  if (result) {
+    for (const f of result.fields) {
+      if (seen.has(f.field)) continue
+      rows.push(`<tr>
+        <td class="field">${esc(FIELD_LABELS[f.field] ?? f.field)}</td>
+        <td class="value">(statutory text, 27 CFR 16.21)</td>
+        <td class="value">${f.found === null ? '<span class="empty">null</span>' : esc(f.found)}</td>
+        <td>${badge(f.status)}</td>
+        <td class="value">${esc(f.note ?? "")}</td>
+      </tr>`)
+    }
+  }
+  return rows.join("")
+}
+
+function extractionExtras(run) {
+  const x = run?.result?.extraction
+  if (!x) return ""
+  const gw = x.governmentWarning ?? {}
+  return `<div class="extra">
+    extraction: readability <code>${esc(x.readability)}</code>,
+    isAlcoholLabel <code>${esc(x.isAlcoholLabel)}</code>,
+    warning present <code>${esc(gw.present)}</code>,
+    headingAllCaps <code>${esc(gw.headingAllCaps)}</code>,
+    headingAppearsBold <code>${esc(gw.headingAppearsBold)}</code>
+    ${x.imageQualityNotes ? `, quality: <code>${esc(x.imageQualityNotes)}</code>` : ""}
+    <div class="warningtext"><b>warning verbatim:</b> ${gw.verbatimText === null ? '<span class="empty">null</span>' : esc(gw.verbatimText)}</div>
+  </div>`
+}
+
+function card(sample, idx) {
+  const exp = sample.expectation
+  const runs = sample.runs ?? []
+  const hardProblem = runs.some((r) => !r.ok && !r.superseded && !r.flaky)
+  const anyProblem = runs.some((r) => !r.ok)
+  const isFailExpected = exp && exp.overall.length === 1 && exp.overall[0] === "fail"
+  if (FILTER === "problems" && !anyProblem) return ""
+  if (FILTER === "fails" && !isFailExpected) return ""
+  const headBadge = hardProblem ? badge("regression") : anyProblem ? badge("flaky") : badge("ok")
+
+  const runTabs = runs.length > 1
+    ? `<div class="runtabs">${runs.map((r, i) =>
+        `<button data-card="${idx}" data-run="${i}" class="${i === 0 ? "active" : ""}">run ${i + 1} ${r.ok ? "✓" : "✗"}${r.superseded ? " (retried)" : ""}</button>`).join("")}</div>`
+    : ""
+
+  const runPanes = runs.map((r, i) => `
+    <div class="runpane" data-card="${idx}" data-run="${i}" style="${i === 0 ? "" : "display:none"}">
+      <div class="verdicts">
+        <span class="label">expected overall:</span> ${exp ? exp.overall.map(badge).join(" ") : "—"}
+        <span class="label">actual:</span> ${r.result ? badge(r.result.overall) : "—"} ${runBadge(r)}
+        <span class="label">${r.ms} ms${r.result ? ", " + esc(r.result.model) : ""}</span>
+      </div>
+      ${r.problems.length ? `<div class="problems"><b>${r.flaky ? "Flaky-sample warning" : "Expectation violated"}:</b><ul>${r.problems.map((p) => `<li>${esc(p)}</li>`).join("")}</ul></div>` : ""}
+      <table>
+        <thead><tr><th>Field</th><th>Application says</th><th>Model read on label</th><th>Status</th><th>Rule note</th></tr></thead>
+        <tbody>${fieldRows(sample, r)}</tbody>
+      </table>
+      ${extractionExtras(r)}
+    </div>`).join("")
+
+  return `<section class="card" ${anyProblem ? 'data-problem="1"' : ""}>
+    <div class="head">
+      <h2>${esc(sample.name)}</h2>
+      <span class="id">${esc(sample.id)}</span>
+      ${headBadge}
+    </div>
+    <div class="body">
+      <div class="imgpane">
+        <a href="${esc(sample.image)}" target="_blank"><img loading="lazy" src="${esc(sample.image)}" alt="${esc(sample.name)}" /></a>
+        <div class="hint">click image to open full size</div>
+      </div>
+      <div class="detail">
+        <p class="desc">${esc(sample.description)}</p>
+        ${exp?.note ? `<div class="note"><b>expectation note:</b> ${esc(exp.note)}</div>` : ""}
+        ${runTabs}
+        ${runs.length ? runPanes : '<p class="empty">No eval run for this sample yet.</p>'}
+      </div>
+    </div>
+  </section>`
+}
+
+function render() {
+  const main = document.getElementById("main")
+  const html = DATA.samples.map((s, i) => card(s, i)).join("")
+  main.innerHTML = html || '<p class="empty">Nothing matches this filter.</p>'
+  main.querySelectorAll(".runtabs button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const { card: c, run } = btn.dataset
+      btn.parentElement.querySelectorAll("button").forEach((b) => b.classList.toggle("active", b === btn))
+      document.querySelectorAll(`.runpane[data-card="${c}"]`).forEach((p) => {
+        p.style.display = p.dataset.run === run ? "" : "none"
+      })
+    })
+  })
+}
+
+document.getElementById("filters").addEventListener("click", (e) => {
+  const btn = e.target.closest("button")
+  if (!btn) return
+  FILTER = btn.dataset.f
+  document.querySelectorAll("#filters button").forEach((b) => b.classList.toggle("active", b === btn))
+  render()
+})
+
+fetch("/eval-results.json", { cache: "no-store" })
+  .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() })
+  .then((data) => {
+    DATA = data
+    const hard = data.samples.filter((s) =>
+      s.runs.some((r) => !r.ok && !r.superseded && !r.flaky)
+    ).length
+    const flaky = data.samples.filter(
+      (s) => s.runs.some((r) => !r.ok) &&
+        !s.runs.some((r) => !r.ok && !r.superseded && !r.flaky)
+    ).length
+    document.getElementById("meta").textContent =
+      `${data.model ?? "?"} · ${data.generatedAt} · ` +
+      `${data.samples.length - hard - flaky}/${data.samples.length} clean, ${flaky} flaky, ${hard} regression` +
+      (data.partial ? " · PARTIAL RUN (--only)" : "")
+    render()
+  })
+  .catch((err) => {
+    document.getElementById("main").innerHTML =
+      `<p class="empty">Could not load /eval-results.json (${esc(err.message)}). Run <code>node scripts/eval-samples.mjs</code> first.</p>`
+  })
+</script>
+</body>
+</html>

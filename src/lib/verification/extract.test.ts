@@ -1,21 +1,39 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { temperatureFor } from "./extract";
+import { extractionModel, imageDataUrl, reasoningEffort } from "./extract"
 
-describe("temperatureFor", () => {
-  it.each(["claude-haiku-4-5", "claude-sonnet-4-6"])(
-    "pins temperature 0 for %s (deterministic transcription)",
-    (model) => {
-      expect(temperatureFor(model)).toBe(0);
-    },
-  );
+afterEach(() => {
+  vi.unstubAllEnvs()
+})
 
-  // Sampling parameters are removed on Opus 4.7+ and Fable — sending
-  // temperature there returns a 400.
-  it.each(["claude-opus-4-7", "claude-opus-4-8", "claude-fable-5"])(
-    "omits temperature for %s",
-    (model) => {
-      expect(temperatureFor(model)).toBeUndefined();
-    },
-  );
-});
+describe("extractionModel", () => {
+  it("returns the configured OPENAI_MODEL", () => {
+    vi.stubEnv("OPENAI_MODEL", "gpt-5-mini")
+    expect(extractionModel()).toBe("gpt-5-mini")
+  })
+
+  it("throws when OPENAI_MODEL is unset — one explicit model, no fallback", () => {
+    vi.stubEnv("OPENAI_MODEL", "")
+    expect(() => extractionModel()).toThrow(/OPENAI_MODEL/)
+  })
+})
+
+describe("reasoningEffort", () => {
+  it("returns the configured OPENAI_REASONING_EFFORT", () => {
+    vi.stubEnv("OPENAI_REASONING_EFFORT", "medium")
+    expect(reasoningEffort()).toBe("medium")
+  })
+
+  it("returns null when unset — the API's own default applies, no fallback", () => {
+    vi.stubEnv("OPENAI_REASONING_EFFORT", "")
+    expect(reasoningEffort()).toBeNull()
+  })
+})
+
+describe("imageDataUrl", () => {
+  it("builds a data URL from media type and base64 payload", () => {
+    expect(imageDataUrl({ imageBase64: "AAAA", mediaType: "image/png" })).toBe(
+      "data:image/png;base64,AAAA"
+    )
+  })
+})

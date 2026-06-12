@@ -1,5 +1,5 @@
 /**
- * Batch CSV parsing for "Janet's" bulk-upload workflow: a CSV pairs each
+ * Batch CSV parsing for the bulk-upload workflow: a CSV pairs each
  * uploaded image filename with its application data.
  *
  * Hand-rolled RFC-4180-style parser (quoted fields, escaped quotes, CRLF)
@@ -7,23 +7,23 @@
  * covered by tests.
  */
 
-import { parseApplicationFields } from "./input";
-import type { ApplicationData } from "./types";
+import { parseApplicationFields } from "./input"
+import type { ApplicationData } from "./types"
 
 export interface BatchRow {
-  filename: string;
-  application: ApplicationData;
+  filename: string
+  application: ApplicationData
 }
 
 export interface BatchRowError {
   /** 1-based line number in the CSV file. */
-  line: number;
-  message: string;
+  line: number
+  message: string
 }
 
 export interface BatchParseResult {
-  rows: BatchRow[];
-  errors: BatchRowError[];
+  rows: BatchRow[]
+  errors: BatchRowError[]
 }
 
 const REQUIRED_HEADERS = [
@@ -32,75 +32,83 @@ const REQUIRED_HEADERS = [
   "classType",
   "alcoholPercent",
   "netContents",
-] as const;
+  "bottlerNameAddress",
+] as const
+
+/** Optional columns — checked only for rows that fill them in. */
+const OPTIONAL_HEADERS = ["countryOfOrigin", "imported"] as const
 
 /** Split CSV text into rows of fields, honoring quotes and escaped quotes. */
 function tokenize(text: string): { fields: string[]; line: number }[] {
-  const rows: { fields: string[]; line: number }[] = [];
-  let fields: string[] = [];
-  let current = "";
-  let inQuotes = false;
-  let line = 1;
-  let rowStartLine = 1;
+  const rows: { fields: string[]; line: number }[] = []
+  let fields: string[] = []
+  let current = ""
+  let inQuotes = false
+  let line = 1
+  let rowStartLine = 1
 
   const pushField = () => {
-    fields.push(current);
-    current = "";
-  };
+    fields.push(current)
+    current = ""
+  }
   const pushRow = () => {
-    pushField();
+    pushField()
     // Ignore rows that are entirely empty (blank lines).
     if (fields.length > 1 || fields[0].trim() !== "") {
-      rows.push({ fields, line: rowStartLine });
+      rows.push({ fields, line: rowStartLine })
     }
-    fields = [];
-    rowStartLine = line;
-  };
+    fields = []
+    rowStartLine = line
+  }
 
   for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
+    const ch = text[i]
     if (inQuotes) {
       if (ch === '"') {
         if (text[i + 1] === '"') {
-          current += '"';
-          i++;
+          current += '"'
+          i++
         } else {
-          inQuotes = false;
+          inQuotes = false
         }
       } else {
-        if (ch === "\n") line++;
-        current += ch;
+        if (ch === "\n") line++
+        current += ch
       }
     } else if (ch === '"') {
-      inQuotes = true;
+      inQuotes = true
     } else if (ch === ",") {
-      pushField();
+      pushField()
     } else if (ch === "\n") {
-      line++;
-      pushRow();
-      rowStartLine = line;
+      line++
+      pushRow()
+      rowStartLine = line
     } else if (ch !== "\r") {
-      current += ch;
+      current += ch
     }
   }
-  if (current !== "" || fields.length > 0) pushRow();
+  if (current !== "" || fields.length > 0) pushRow()
 
-  return rows;
+  return rows
 }
 
 export function parseBatchCsv(text: string): BatchParseResult {
-  const rows = tokenize(text);
+  const rows = tokenize(text)
   if (rows.length === 0) {
     return {
       rows: [],
       errors: [{ line: 1, message: "The CSV file is empty." }],
-    };
+    }
   }
 
-  const header = rows[0].fields.map((h) => h.trim());
-  const indexOf: Partial<Record<(typeof REQUIRED_HEADERS)[number], number>> = {};
+  type ColumnName =
+    | (typeof REQUIRED_HEADERS)[number]
+    | (typeof OPTIONAL_HEADERS)[number]
+
+  const header = rows[0].fields.map((h) => h.trim())
+  const indexOf: Partial<Record<ColumnName, number>> = {}
   for (const name of REQUIRED_HEADERS) {
-    const idx = header.indexOf(name);
+    const idx = header.indexOf(name)
     if (idx === -1) {
       return {
         rows: [],
@@ -110,22 +118,28 @@ export function parseBatchCsv(text: string): BatchParseResult {
             message: `Missing required column "${name}". Expected columns: ${REQUIRED_HEADERS.join(", ")}.`,
           },
         ],
-      };
+      }
     }
-    indexOf[name] = idx;
+    indexOf[name] = idx
+  }
+  for (const name of OPTIONAL_HEADERS) {
+    const idx = header.indexOf(name)
+    if (idx !== -1) indexOf[name] = idx
   }
 
-  const parsed: BatchRow[] = [];
-  const errors: BatchRowError[] = [];
+  const parsed: BatchRow[] = []
+  const errors: BatchRowError[] = []
 
   for (const row of rows.slice(1)) {
-    const get = (name: (typeof REQUIRED_HEADERS)[number]) =>
-      (row.fields[indexOf[name]!] ?? "").trim();
+    const get = (name: ColumnName) =>
+      indexOf[name] === undefined
+        ? ""
+        : (row.fields[indexOf[name]] ?? "").trim()
 
-    const filename = get("filename");
+    const filename = get("filename")
     if (!filename) {
-      errors.push({ line: row.line, message: "Missing filename." });
-      continue;
+      errors.push({ line: row.line, message: "Missing filename." })
+      continue
     }
 
     const application = parseApplicationFields({
@@ -133,14 +147,20 @@ export function parseBatchCsv(text: string): BatchParseResult {
       classType: get("classType"),
       alcoholPercent: get("alcoholPercent"),
       netContents: get("netContents"),
-    });
+      bottlerNameAddress: get("bottlerNameAddress"),
+      countryOfOrigin: get("countryOfOrigin"),
+      imported: get("imported"),
+    })
     if (!application.ok) {
-      errors.push({ line: row.line, message: `${filename}: ${application.error}` });
-      continue;
+      errors.push({
+        line: row.line,
+        message: `${filename}: ${application.error}`,
+      })
+      continue
     }
 
-    parsed.push({ filename, application: application.data });
+    parsed.push({ filename, application: application.data })
   }
 
-  return { rows: parsed, errors };
+  return { rows: parsed, errors }
 }

@@ -2,7 +2,7 @@
   "singles": [
     {
       "id": "old-tom-clean",
-      "name": "Old Tom Bourbon — clean label (generated)",
+      "name": "Old Tom Bourbon \u2014 clean label (generated)",
       "image": "/samples/old-tom-clean.png",
       "description": "Everything matches the application. Expected result: Pass.",
       "source": "generated",
@@ -10,12 +10,13 @@
         "brandName": "OLD TOM DISTILLERY",
         "classType": "Kentucky Straight Bourbon Whiskey",
         "alcoholPercent": 45,
-        "netContents": "750 mL"
+        "netContents": "750 mL",
+        "bottlerNameAddress": "OLD TOM DISTILLERY, BARDSTOWN, KY"
       }
     },
     {
       "id": "real-mb-liquors",
-      "name": "MB Liquors Vodka — real TTB label",
+      "name": "MB Liquors Vodka \u2014 real TTB label",
       "image": "/samples/real-mb-liquors-vodka.jpg",
       "description": "Real approved label from TTB's public COLA registry (TTB ID 18305001000808). Expected result: Pass.",
       "source": "real",
@@ -23,51 +24,405 @@
         "brandName": "MB LIQUORS",
         "classType": "VODKA WITH NATURAL FLAVORS",
         "alcoholPercent": 40,
-        "netContents": "750ML"
+        "netContents": "750ML",
+        "bottlerNameAddress": "UBLENDIT, LLC. SOQUEL, CA"
       }
     },
     {
       "id": "real-iprandi-soave",
-      "name": "i Prandi Soave — real TTB label",
+      "name": "i Prandi Soave \u2014 real TTB label",
       "image": "/samples/real-iprandi-soave.jpg",
       "description": "Real approved wine back label from TTB's public COLA registry (TTB ID 15173001000487). Expected result: Pass or Needs review (real labels word things their own way).",
       "source": "real",
       "application": {
         "brandName": "i PRANDI",
-        "classType": "White Wine",
+        "classType": "WHITE WINE",
         "alcoholPercent": 12,
-        "netContents": "750 mL"
+        "netContents": "750 mL",
+        "bottlerNameAddress": "MARCATO DIRECT Addison \u2013 IL 60101",
+        "countryOfOrigin": "Italy"
+      }
+    },
+    {
+      "id": "real-valle-etrusca-rosso",
+      "name": "Valle Etrusca rosso Toscana \u2014 real TTB label",
+      "image": "/samples/real-valle-etrusca-rosso.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 26089001000028). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "Rosso Toscana",
+        "classType": "Red Wine",
+        "alcoholPercent": 12.5,
+        "netContents": "750 ML",
+        "bottlerNameAddress": "LANTERNA Distributors, BALTIMORE, MD.",
+        "countryOfOrigin": "Italy"
+      }
+    },
+    {
+      "id": "real-garaudet-monthelie",
+      "name": "Garaudet white Burgundy \u2014 real TTB label",
+      "image": "/samples/real-garaudet-monthelie.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25332001000182). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "GARAUDET PERE ET FILS",
+        "classType": "White Table Wine",
+        "alcoholPercent": 13.5,
+        "netContents": "750ml",
+        "bottlerNameAddress": "Fass Selections, Inc. Irvine, California",
+        "countryOfOrigin": "France"
+      }
+    },
+    {
+      "id": "real-charlie-henri-pinot",
+      "name": "Charlie et Henri pinot noir \u2014 real TTB label",
+      "image": "/samples/real-charlie-henri-pinot.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 26089001000026). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "CHARLIE et HENRI",
+        "classType": "PINOT NOIR",
+        "alcoholPercent": 12.5,
+        "netContents": "750 ML",
+        "bottlerNameAddress": "LANTERNA Distributors, BALTIMORE, MD.",
+        "countryOfOrigin": "France"
+      }
+    },
+    {
+      "id": "real-beaumes-de-venise",
+      "name": "Fran\u00e7ois Xavier Lambert Beaumes-de-Venise \u2014 real TTB label",
+      "image": "/samples/real-beaumes-de-venise.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25116001000011). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "Fran\u00e7ois Xavier Lambert",
+        "classType": "RED WINE",
+        "alcoholPercent": 14.5,
+        "netContents": "750ml.",
+        "bottlerNameAddress": "VineCraft Selections, Troy, OH 45373",
+        "countryOfOrigin": "France"
+      }
+    },
+    {
+      "id": "real-european-standard-vodka",
+      "name": "European Standard coconut vodka \u2014 real TTB label",
+      "image": "/samples/real-european-standard-vodka.png",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25221001000045). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "EUROPEAN STANDARD",
+        "classType": "HANDCRAFTED VODKA INFUSED WITH ALL - NATURAL COCONUT & VANILLA BEANS",
+        "alcoholPercent": 30.0,
+        "netContents": "1 L",
+        "bottlerNameAddress": "HERBESCO INC., WORCESTER, MA"
+      }
+    },
+    {
+      "id": "real-zhenjiu-baijiu",
+      "name": "Zhenjiu 15 sorghum baijiu (100 mL) \u2014 real TTB label",
+      "image": "/samples/real-zhenjiu-baijiu.png",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25225001000521). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "ZHENJIU\u00b7ZHEN 15",
+        "classType": "SPIRITS DISTILLED FROM SORGHUM AND WHEAT",
+        "alcoholPercent": 53.0,
+        "netContents": "100ML",
+        "bottlerNameAddress": "CALIFORNIA WINE CELLARS INC. PLAINVIEW, NEW YORK 11803",
+        "countryOfOrigin": "China"
+      }
+    },
+    {
+      "id": "real-victoria-beer",
+      "name": "Victoria beer (8 fl oz) \u2014 real TTB label",
+      "image": "/samples/real-victoria-beer.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 14251001000304). Imported product \u2014 also checks the importer's name/address and the country of origin statement. Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "Victoria",
+        "classType": "BEER",
+        "alcoholPercent": 4.0,
+        "netContents": "8 FL OZ",
+        "bottlerNameAddress": "R.R. IMPORTACIONES INC 141 3RD ST, UNIT. # 143 Passaic. N.J. 07055-0000",
+        "countryOfOrigin": "Mexico"
+      }
+    },
+    {
+      "id": "real-mastri-birrai-ipa",
+      "name": "Mastri Birrai Umbri Italian pale ale \u2014 real TTB label",
+      "image": "/samples/real-mastri-birrai-ipa.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25335001000692). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "MASTRI BIRRAI UMBRI",
+        "classType": "ITALIAN PALE ALE",
+        "alcoholPercent": 6.5,
+        "netContents": "CONTENTS 10.14 FL.OZ.",
+        "bottlerNameAddress": "TITA ITALIAN IMPORT & EXPORT LLC MIAMI FL 33142",
+        "countryOfOrigin": "Italy"
+      }
+    },
+    {
+      "id": "real-tsarine-champagne",
+      "name": "Tsarine Champagne extra-brut \u2014 real TTB label",
+      "image": "/samples/real-tsarine-champagne.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25064001000113). Imported product \u2014 also checks the importer's name/address and the country of origin statement. Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "TSARINE",
+        "classType": "CHAMPAGNE EXTRA-BRUT",
+        "alcoholPercent": 12.0,
+        "netContents": "NET CONTENTS 750 ml",
+        "bottlerNameAddress": "BUFFALO PEAK SELECTIONS NEW YORK, NY",
+        "countryOfOrigin": "France"
+      }
+    },
+    {
+      "id": "real-mouton-rothschild",
+      "name": "Ch\u00e2teau Mouton Rothschild Bordeaux \u2014 real TTB label",
+      "image": "/samples/real-mouton-rothschild.png",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25223001000361). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "CHATEAU MOUTON ROTHSCHILD",
+        "classType": "RED BORDEAUX WINE",
+        "alcoholPercent": 14.5,
+        "netContents": "NET CONTENTS 750ML",
+        "bottlerNameAddress": "MENDEZ & COMPANY INC., SAN JUAN, PUERTO RICO",
+        "countryOfOrigin": "France"
+      }
+    },
+    {
+      "id": "real-zd-wines-cabernet",
+      "name": "ZD Wines cabernet sauvignon \u2014 real TTB label",
+      "image": "/samples/real-zd-wines-cabernet.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 26099001000822). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "ZD WINES\u00ae",
+        "classType": "Cabernet Sauvignon",
+        "alcoholPercent": 14.5,
+        "netContents": "750mL",
+        "bottlerNameAddress": "ZD WINES, LLC, NAPA, CA"
+      }
+    },
+    {
+      "id": "real-austerum-red",
+      "name": "Austerum red wine \u2014 real TTB label",
+      "image": "/samples/real-austerum-red.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25142001000678). Imported product \u2014 also checks the importer's name/address and the country of origin statement. Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "Austerum",
+        "classType": "Red wine",
+        "alcoholPercent": 14.0,
+        "netContents": "750 ml",
+        "bottlerNameAddress": "TAVOLO VIGNETO, ST LOUIS MO",
+        "countryOfOrigin": "Italy"
+      }
+    },
+    {
+      "id": "real-house-of-harvey-sparkling",
+      "name": "House of Harvey sparkling \u2014 real TTB label",
+      "image": "/samples/real-house-of-harvey-sparkling.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25203001000469). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "Thee House of Harvey",
+        "classType": "APPELLATION AMERICAN SPARKLING WINE",
+        "alcoholPercent": 12.0,
+        "netContents": "750 ML",
+        "bottlerNameAddress": "WILD BLOSSOM MEADERY & WINERY CHICAGO, ILLINOIS"
+      }
+    },
+    {
+      "id": "real-sentada-white",
+      "name": "Sentada vinho branco \u2014 real TTB label",
+      "image": "/samples/real-sentada-white.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 26021001000663). Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "SENTADA",
+        "classType": "VINHO BRANCO . WHITE WINE",
+        "alcoholPercent": 11.0,
+        "netContents": "750ML",
+        "bottlerNameAddress": "SILVER LAKE IMPORTS, MIAMI, FL",
+        "countryOfOrigin": "Portugal"
+      }
+    },
+    {
+      "id": "real-jack-daniels-rye",
+      "name": "Jack Daniel's Single Barrel Rye \u2014 real TTB label",
+      "image": "/samples/real-jack-daniels-rye.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 25052001000168). Also checks the \"Distilled & Bottled by\" name/address statement. Expected result: Pass or Needs review.",
+      "source": "real",
+      "application": {
+        "brandName": "Jack Daniel's",
+        "classType": "Tennessee Rye Whiskey",
+        "alcoholPercent": 47,
+        "netContents": "750 mL",
+        "bottlerNameAddress": "JACK DANIEL DISTILLERY, LYNCHBURG, TENN., U.S.A."
+      }
+    },
+    {
+      "id": "real-barenjager-honey",
+      "name": "Bärenjäger honey liqueur — real COLA application (front + back)",
+      "image": "/samples/real-barenjager-honey.png",
+      "description": "Both label panels from a real filled-out TTB F 5100.31 application (TTB ID 11038001000725), extracted from the COLA PDF. The application data is the form's own entries: it types BARENJAGER and 50 MILLILITERS where the label prints Bärenjäger and 50ML. Expected result: Needs review (same content, different styling), not a failure.",
+      "source": "real",
+      "application": {
+        "brandName": "BARENJAGER",
+        "classType": "HONEY LIQUEUR",
+        "alcoholPercent": 35,
+        "netContents": "50 MILLILITERS",
+        "bottlerNameAddress": "SIDNEY FRANK IMPORTING CO., INC. NEW ROCHELLE, NY",
+        "countryOfOrigin": "Germany"
+      }
+    },
+    {
+      "id": "real-brouwerij-ipa",
+      "name": "Brouwerij 't IJ IPA keg collar — warning misses a comma (real label)",
+      "image": "/samples/real-brouwerij-ipa.jpg",
+      "description": "Real 20-liter keg collar for an imported Dutch IPA. Brand, class, ABV, net contents, importer, and country all match — but the printed government warning omits the comma after \"machinery\" (and misprints \"ABILIITY\"), deviating from the mandatory wording. The reader normalizes the ABILIITY misprint away in most reads, so the missing comma is usually the only deviation that survives transcription — a punctuation-only divergence that queues for human review rather than auto-rejecting. Expected result: Needs review (or Issues found when a read catches the misprint); never a silent pass.",
+      "source": "real",
+      "application": {
+        "brandName": "BROUWERIJ 'T IJ",
+        "classType": "INDIA PALE ALE",
+        "alcoholPercent": 6.5,
+        "netContents": "20 LITER",
+        "bottlerNameAddress": "Duvel Moortgat USA, Ltd. Cooperstown NY",
+        "countryOfOrigin": "Netherlands"
+      }
+    },
+    {
+      "id": "real-stillwater-debutante",
+      "name": "Stillwater Artisanal Debutante keg collar — arc-wrapped warning (real TTB label)",
+      "image": "/samples/real-stillwater-debutante.png",
+      "description": "Real round keg collar from a filled-out TTB F 5100.31 application (TTB ID 11364001000181). The government warning curves around the collar's arc with a keg-rupture CAUTION interleaved, and net contents are an unticked checkbox list of four keg sizes. The label is fully compliant — the arc-printed warning is word-perfect. Expected result: Pass or Needs review — a comma dropped transcribing the curve is a punctuation-only divergence, which queues for review instead of auto-rejecting. A hard-mode test of non-linear label text.",
+      "source": "real",
+      "application": {
+        "brandName": "Stillwater Artisanal",
+        "classType": "Ale",
+        "alcoholPercent": 6.8,
+        "netContents": "5.17 gal.",
+        "bottlerNameAddress": "Twelve Percent, Westminster, MD"
+      }
+    },
+    {
+      "id": "photo-austerum-red",
+      "name": "Austerum red \u2014 photo conditions (real label)",
+      "image": "/samples/photo-austerum-red.jpg",
+      "description": "Real TTB label (ID 25142001000678) re-rendered under simulated photo conditions: tilt, glare, uneven light, blur. Expected result: Pass or Needs review \u2014 and occasionally Issues found when the script brand lettering is misread, which is exactly the boundary this sample probes.",
+      "source": "real",
+      "application": {
+        "brandName": "Austerum",
+        "classType": "Red wine",
+        "alcoholPercent": 14.0,
+        "netContents": "750 ml",
+        "bottlerNameAddress": "TAVOLO VIGNETO, ST LOUIS MO"
+      }
+    },
+    {
+      "id": "photo-victoria-beer",
+      "name": "Victoria beer \u2014 photo conditions (real label)",
+      "image": "/samples/photo-victoria-beer.jpg",
+      "description": "Real TTB label (ID 14251001000304) re-rendered under simulated photo conditions: tilt, glare, uneven light, blur. Expected result: Pass.",
+      "source": "real",
+      "application": {
+        "brandName": "Victoria",
+        "classType": "BEER",
+        "alcoholPercent": 4.0,
+        "netContents": "8 FL OZ",
+        "bottlerNameAddress": "R.R. IMPORTACIONES INC 141 3RD ST, UNIT. # 143 Passaic. N.J. 07055-0000"
       }
     },
     {
       "id": "stones-throw-case",
-      "name": "Stone's Throw — capitalization differs (generated)",
+      "name": "Stone's Throw \u2014 capitalization differs (generated)",
       "image": "/samples/stones-throw-case.png",
-      "description": "Label prints STONE'S THROW in caps; the application says Stone's Throw. Expected result: Needs review, not an automatic failure.",
+      "description": "Label prints STONE'S THROW in caps; the application says Stone's Throw. Expected result: Pass — a capitalization-only difference on the brand is a full match.",
       "source": "generated",
       "application": {
         "brandName": "Stone's Throw",
         "classType": "Red Wine",
         "alcoholPercent": 13.5,
-        "netContents": "750 mL"
+        "netContents": "750 mL",
+        "bottlerNameAddress": "STONE'S THROW CELLARS, WALLA WALLA, WA"
+      }
+    },
+    {
+      "id": "proof-only",
+      "name": "Cartwright & Sons \u2014 proof only, no percent (generated)",
+      "image": "/samples/proof-only.png",
+      "description": "The label states only \"90 PROOF\" \u2014 no percentage. The percent-ABV statement is mandatory and proof may only appear in addition, so this fails even though 90 proof equals the application's 45%. Expected result: Fail.",
+      "source": "generated",
+      "application": {
+        "brandName": "CARTWRIGHT & SONS",
+        "classType": "Tennessee Whiskey",
+        "alcoholPercent": 45,
+        "netContents": "750 mL",
+        "bottlerNameAddress": "CARTWRIGHT & SONS, LYNCHBURG, TN"
+      }
+    },
+    {
+      "id": "unit-mismatch-cl",
+      "name": "Vigneto del Sole \u2014 75 cl vs 750 mL (generated)",
+      "image": "/samples/unit-mismatch-cl.png",
+      "description": "Label prints 75 cl; the application says 750 mL \u2014 the same volume in different units. Expected result: Needs review, not a failure.",
+      "source": "generated",
+      "application": {
+        "brandName": "VIGNETO DEL SOLE",
+        "classType": "Pinot Grigio",
+        "alcoholPercent": 12.5,
+        "netContents": "750 mL",
+        "bottlerNameAddress": "VIGNETO DEL SOLE WINERY, HEALDSBURG, CA"
+      }
+    },
+    {
+      "id": "no-bottler",
+      "name": "Glacier Peak \u2014 no bottler statement (generated)",
+      "image": "/samples/no-bottler.png",
+      "description": "The application carries the bottler statement (it is required on TTB F 5100.31), but the label prints none \u2014 a name and address statement is mandatory on every label (27 CFR 5.66). Expected result: Issues found.",
+      "source": "generated",
+      "application": {
+        "brandName": "GLACIER PEAK",
+        "classType": "American Dry Gin",
+        "alcoholPercent": 42,
+        "netContents": "750 mL",
+        "bottlerNameAddress": "GLACIER PEAK DISTILLERY, LEAVENWORTH, WA"
       }
     },
     {
       "id": "title-case-warning",
-      "name": "Silver Ridge — warning not in capitals (generated)",
+      "name": "Silver Ridge \u2014 warning not in capitals (generated)",
       "image": "/samples/title-case-warning.png",
-      "description": "The health warning says \"Government Warning:\" in title case — it must be all capitals. Expected result: Issues found.",
+      "description": "The health warning says \"Government Warning:\" in title case \u2014 it must be all capitals. Expected result: Issues found.",
       "source": "generated",
       "application": {
         "brandName": "SILVER RIDGE",
         "classType": "Vodka",
         "alcoholPercent": 40,
-        "netContents": "750 mL"
+        "netContents": "750 mL",
+        "bottlerNameAddress": "SILVER RIDGE DISTILLING CO., BOISE, ID"
+      }
+    },
+    {
+      "id": "unbolded-warning",
+      "name": "Meridian Pass — warning heading not bold (generated)",
+      "image": "/samples/unbolded-warning.png",
+      "description": "The warning's wording and capitals are exact, but the GOVERNMENT WARNING heading is printed in regular weight — bold type is required (27 CFR 16.22). Expected result: Needs review (the model misjudges type weight on real labels, so a not-bold read queues for a human instead of auto-rejecting). If the model can't judge the weight it returns null and the label is not penalized.",
+      "source": "generated",
+      "application": {
+        "brandName": "MERIDIAN PASS",
+        "classType": "Straight Bourbon Whiskey",
+        "alcoholPercent": 43,
+        "netContents": "750 mL",
+        "bottlerNameAddress": "MERIDIAN PASS DISTILLERY, OGDEN, UT"
       }
     },
     {
       "id": "wrong-abv",
-      "name": "Copper Creek — wrong alcohol content (generated)",
+      "name": "Copper Creek \u2014 wrong alcohol content (generated)",
       "image": "/samples/wrong-abv.png",
       "description": "Label shows 40% but the application says 45%. Expected result: Issues found.",
       "source": "generated",
@@ -75,12 +430,13 @@
         "brandName": "COPPER CREEK",
         "classType": "Straight Rye Whiskey",
         "alcoholPercent": 45,
-        "netContents": "750 mL"
+        "netContents": "750 mL",
+        "bottlerNameAddress": "COPPER CREEK DISTILLERY, DENVER, CO"
       }
     },
     {
       "id": "missing-warning",
-      "name": "Harbor Light IPA — missing warning (generated)",
+      "name": "Harbor Light IPA \u2014 missing warning (generated)",
       "image": "/samples/missing-warning.png",
       "description": "No government warning anywhere on the label. Expected result: Issues found.",
       "source": "generated",
@@ -88,12 +444,13 @@
         "brandName": "HARBOR LIGHT",
         "classType": "India Pale Ale",
         "alcoholPercent": 6.5,
-        "netContents": "12 FL OZ"
+        "netContents": "12 FL OZ",
+        "bottlerNameAddress": "HARBOR LIGHT BREWING CO., PORTLAND, ME"
       }
     },
     {
       "id": "reworded-warning",
-      "name": "Juniper & Pine — reworded warning (generated)",
+      "name": "Juniper & Pine \u2014 reworded warning (generated)",
       "image": "/samples/reworded-warning.png",
       "description": "The warning says \"should avoid alcoholic beverages while pregnant\" instead of the required wording. Expected result: Issues found.",
       "source": "generated",
@@ -101,7 +458,94 @@
         "brandName": "JUNIPER & PINE",
         "classType": "London Dry Gin",
         "alcoholPercent": 47,
-        "netContents": "750 mL"
+        "netContents": "750 mL",
+        "bottlerNameAddress": "JUNIPER & PINE DISTILLERY, SEATTLE, WA"
+      }
+    },
+    {
+      "id": "typo-warning",
+      "name": "North Fork — warning typo (generated)",
+      "image": "/samples/typo-warning.png",
+      "description": "The warning prints \"impares\" instead of \"impairs\" — a single-letter misprint, otherwise statutory. Probes whether the reader silently corrects a deviation it knows by heart. Expected result: Issues found (or Needs review if the two reads disagree).",
+      "source": "generated",
+      "application": {
+        "brandName": "NORTH FORK",
+        "classType": "Single Malt Whiskey",
+        "alcoholPercent": 46,
+        "netContents": "750 mL",
+        "bottlerNameAddress": "NORTH FORK DISTILLERY, BOZEMAN, MT"
+      }
+    },
+    {
+      "id": "dropped-word-warning",
+      "name": "Red Lantern — warning missing a word (generated)",
+      "image": "/samples/dropped-word-warning.png",
+      "description": "The warning reads \"and cause health problems\" — the word \"may\" is missing, otherwise statutory. Expected result: Issues found (or Needs review if the two reads disagree).",
+      "source": "generated",
+      "application": {
+        "brandName": "RED LANTERN",
+        "classType": "Amber Lager",
+        "alcoholPercent": 5.2,
+        "netContents": "12 FL OZ",
+        "bottlerNameAddress": "RED LANTERN BREWING CO., DULUTH, MN"
+      }
+    },
+    {
+      "id": "swapped-words-warning",
+      "name": "Quarry Rock — warning words transposed (generated)",
+      "image": "/samples/swapped-words-warning.png",
+      "description": "The warning reads \"operate a car or drive machinery\" — drive/operate transposed, every word statutory but out of order. Expected result: Issues found (or Needs review if the two reads disagree).",
+      "source": "generated",
+      "application": {
+        "brandName": "QUARRY ROCK",
+        "classType": "Blanco Tequila",
+        "alcoholPercent": 40,
+        "netContents": "750 mL",
+        "bottlerNameAddress": "QUARRY ROCK SPIRITS, EL PASO, TX",
+        "countryOfOrigin": "Mexico"
+      }
+    },
+    {
+      "id": "wrong-net-contents",
+      "name": "Blackwater Bay \u2014 wrong net contents (generated)",
+      "image": "/samples/wrong-net-contents.png",
+      "description": "Label shows 375 mL but the application says 750 mL. Expected result: Issues found.",
+      "source": "generated",
+      "application": {
+        "brandName": "BLACKWATER BAY",
+        "classType": "Spiced Rum",
+        "alcoholPercent": 35,
+        "netContents": "750 mL",
+        "bottlerNameAddress": "BLACKWATER BAY RUM CO., SAVANNAH, GA"
+      }
+    },
+    {
+      "id": "wrong-brand",
+      "name": "Eagle Hollow vs Eagle Harbor \u2014 wrong brand (generated)",
+      "image": "/samples/wrong-brand.png",
+      "description": "Label prints EAGLE HOLLOW; the application says EAGLE HARBOR. Canadian whisky is a distinctive product of Canada, so the label is an import carrying \"IMPORTED BY\" and \"PRODUCT OF CANADA\" statements \u2014 both correct; only the brand is wrong. Expected result: Issues found.",
+      "source": "generated",
+      "application": {
+        "brandName": "EAGLE HARBOR",
+        "classType": "Blended Canadian Whisky",
+        "alcoholPercent": 40,
+        "netContents": "750 mL",
+        "bottlerNameAddress": "EAGLE HARBOR IMPORTS, BUFFALO, NY",
+        "countryOfOrigin": "Canada"
+      }
+    },
+    {
+      "id": "real-four-loko-shot",
+      "name": "Four Loko Shot \u2014 warning on another panel (real TTB label)",
+      "image": "/samples/real-four-loko-shot.jpg",
+      "description": "Real approved label from TTB's public COLA registry (TTB ID 24152001000126). This is the front panel of a wrap-around label \u2014 the government warning is printed on the back panel, so a single-image check flags it as missing. The explicit class statement is the fine print at the bottom, which the reader resolves reliably since the pre-upscale step (2026-06-12). Expected result: Issues found (government warning not found).",
+      "source": "real",
+      "application": {
+        "brandName": "Four Loko",
+        "classType": "MALT BEVERAGE WITH NATURAL AND ARTIFICIAL FLAVORS, ARTIFICIAL SWEETENER, CERTIFIED COLOR, AND FD&C YELLOW #5",
+        "alcoholPercent": 13.9,
+        "netContents": "6.8 FL OZ",
+        "bottlerNameAddress": "UNITED STATES DISTILLED PRODUCTS CO., PRINCETON, MN FOR PHUSION PROJECTS, LLC."
       }
     }
   ],
@@ -111,11 +555,38 @@
       "/samples/old-tom-clean.png",
       "/samples/real-mb-liquors-vodka.jpg",
       "/samples/real-iprandi-soave.jpg",
+      "/samples/real-valle-etrusca-rosso.jpg",
+      "/samples/real-garaudet-monthelie.jpg",
+      "/samples/real-charlie-henri-pinot.jpg",
+      "/samples/real-beaumes-de-venise.jpg",
+      "/samples/real-european-standard-vodka.png",
+      "/samples/real-zhenjiu-baijiu.png",
+      "/samples/real-victoria-beer.jpg",
+      "/samples/real-mastri-birrai-ipa.jpg",
+      "/samples/real-tsarine-champagne.jpg",
+      "/samples/real-mouton-rothschild.png",
+      "/samples/real-zd-wines-cabernet.jpg",
+      "/samples/real-austerum-red.jpg",
+      "/samples/real-house-of-harvey-sparkling.jpg",
+      "/samples/real-sentada-white.jpg",
+      "/samples/real-jack-daniels-rye.jpg",
+      "/samples/real-barenjager-honey.png",
+      "/samples/real-brouwerij-ipa.jpg",
+      "/samples/real-stillwater-debutante.png",
+      "/samples/photo-austerum-red.jpg",
+      "/samples/photo-victoria-beer.jpg",
       "/samples/stones-throw-case.png",
+      "/samples/proof-only.png",
+      "/samples/unit-mismatch-cl.png",
       "/samples/title-case-warning.png",
+      "/samples/unbolded-warning.png",
       "/samples/wrong-abv.png",
       "/samples/missing-warning.png",
-      "/samples/reworded-warning.png"
+      "/samples/reworded-warning.png",
+      "/samples/wrong-net-contents.png",
+      "/samples/wrong-brand.png",
+      "/samples/no-bottler.png",
+      "/samples/real-four-loko-shot.jpg"
     ]
   }
 }
