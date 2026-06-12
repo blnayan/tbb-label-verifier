@@ -2,9 +2,8 @@
  * Verification history, persisted client-side in IndexedDB.
  *
  * Every completed verification (single or batch) is saved here and worked
- * from the Review page. Records carry the downscaled image blob that was
- * actually verified, so the report always shows the exact pixels the model
- * saw.
+ * from the Review page. Records carry the image blob that was actually
+ * verified, so the report always shows the exact pixels the model saw.
  *
  * Each record also carries a review state. The deterministic rules settle
  * the clear-cut cases on their own: "pass" is approved automatically and
@@ -40,7 +39,7 @@ export interface VerificationRecord {
   filename: string
   application: ApplicationData
   result: VerificationResult
-  /** The downscaled image that was sent for verification. */
+  /** The image that was sent for verification. */
   image: Blob
   /** Auto-approved on pass; otherwise pending until manually reviewed. */
   review: ReviewState
