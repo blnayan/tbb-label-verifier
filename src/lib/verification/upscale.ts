@@ -29,9 +29,7 @@ const MAX_INPUT_BYTES = 4 * 1024 * 1024
 export function upscaleTargetWidth(input: {
   width: number | undefined
   bytes: number
-  mediaType: string
 }): number | null {
-  if (input.mediaType === "image/gif") return null
   if (input.bytes > MAX_INPUT_BYTES) return null
   if (input.width === undefined || input.width >= MIN_LEGIBLE_WIDTH) {
     return null
@@ -53,7 +51,6 @@ export async function upscaleForExtraction(
     const target = upscaleTargetWidth({
       width: meta.width,
       bytes: bytes.length,
-      mediaType: input.mediaType,
     })
     if (target === null) return input
     const out = await sharp(bytes)

@@ -226,7 +226,6 @@ const MEDIA_TYPES = {
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
   ".webp": "image/webp",
-  ".gif": "image/gif",
 }
 
 async function verifySample(sample) {

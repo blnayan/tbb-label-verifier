@@ -133,11 +133,7 @@ Rules:
 - Misprinted warnings are exactly what this review exists to catch, and misprints hide in word shape: a swapped or missing letter inside a long word reads "correctly" unless you verify its letters. After transcribing the warning, re-examine each of its words of 5+ letters in the image letter by letter and correct your transcription to the printed letters, even when that produces a misspelled word. A transcription containing a misspelling is often the correct answer.
 - Labels may print other caution or safety notices alongside it (keg-pressure CAUTION text, sulfite or allergen declarations). Those are NOT the government warning — report only the statement whose heading reads "GOVERNMENT WARNING", and never substitute another notice for it.`
 
-export type SupportedImageMediaType =
-  | "image/jpeg"
-  | "image/png"
-  | "image/gif"
-  | "image/webp"
+export type SupportedImageMediaType = "image/jpeg" | "image/png" | "image/webp"
 
 export interface ExtractionInput {
   imageBase64: string

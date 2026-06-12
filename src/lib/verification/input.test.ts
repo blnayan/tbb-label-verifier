@@ -182,12 +182,18 @@ describe("validateImage", () => {
     if (result.ok) expect(result.mediaType).toBe("image/jpeg")
   })
 
-  it.each(["image/png", "image/webp", "image/gif"])("accepts %s", (type) => {
+  it.each(["image/png", "image/webp"])("accepts %s", (type) => {
     expect(validateImage(type, 1024).ok).toBe(true)
   })
 
   it("rejects unsupported types", () => {
     const result = validateImage("application/pdf", 1024)
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error).toContain("JPEG")
+  })
+
+  it("rejects GIFs — animation frames make the verified pixels ambiguous", () => {
+    const result = validateImage("image/gif", 1024)
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.error).toContain("JPEG")
   })

@@ -44,7 +44,7 @@ export function parseApplicationFields(
   if (!Number.isFinite(alcoholPercent)) {
     return {
       ok: false,
-      error: `Alcohol content must be a number — got "${rawPercent}".`,
+      error: `Alcohol content must be a number, but got "${rawPercent}".`,
     }
   }
   if (alcoholPercent <= 0 || alcoholPercent > 100) {
@@ -75,21 +75,21 @@ export function parseApplicationFields(
     if (!imported && !domestic) {
       return {
         ok: false,
-        error: `Imported must be yes or no — got "${importedRaw}".`,
+        error: `Imported must be yes or no, but got "${importedRaw}".`,
       }
     }
     if (imported && !countryOfOrigin) {
       return {
         ok: false,
         error:
-          "Country of origin is required for imported products — every import must name one on the label (19 CFR 134).",
+          "Country of origin is required for imported products. Every import must name one on the label (19 CFR 134).",
       }
     }
     if (domestic && countryOfOrigin) {
       return {
         ok: false,
         error:
-          "Country of origin was provided but the product is marked domestic — mark it imported or clear the country.",
+          "Country of origin was provided but the product is marked domestic. Mark it imported or clear the country.",
       }
     }
   }
@@ -110,10 +110,12 @@ export function parseApplicationFields(
 /** 10 MB cap — generous for phone photos, small enough to keep uploads fast. */
 export const MAX_IMAGE_BYTES = 10 * 1024 * 1024
 
+// No GIF: animation frames make "the pixels that were verified" ambiguous,
+// and every processing step (downscale, upscale) would have to special-case
+// flattening them.
 const SUPPORTED_TYPES: ReadonlySet<string> = new Set([
   "image/jpeg",
   "image/png",
-  "image/gif",
   "image/webp",
 ])
 
@@ -126,7 +128,7 @@ export function validateImage(
   if (!SUPPORTED_TYPES.has(mediaType)) {
     return {
       ok: false,
-      error: "Unsupported image format — use JPEG, PNG, WebP, or GIF.",
+      error: "Unsupported image format. Use JPEG, PNG, or WebP.",
     }
   }
   if (sizeBytes <= 0) {

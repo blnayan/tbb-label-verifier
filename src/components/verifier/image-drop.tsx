@@ -43,7 +43,10 @@ export function ImageDrop({
 
   const accept = useCallback(
     (candidate: File | undefined | null) => {
+      // GIFs are not a supported upload (the server rejects them) — filter
+      // dropped/pasted files the same way the picker's accept list does.
       if (!candidate || !candidate.type.startsWith("image/")) return
+      if (candidate.type === "image/gif") return
       onFileChange(candidate)
     },
     [onFileChange]
@@ -55,7 +58,7 @@ export function ImageDrop({
         ref={inputRef}
         id={inputId}
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif"
+        accept="image/jpeg,image/png,image/webp"
         className="sr-only"
         disabled={disabled}
         onChange={(e) => accept(e.target.files?.[0])}
@@ -112,7 +115,7 @@ export function ImageDrop({
           <ImageUpIcon aria-hidden className="size-8 text-muted-foreground" />
           <span className="font-medium">Add the label image</span>
           <span className="text-sm text-muted-foreground">
-            Click to choose a file, or drag it here. JPEG, PNG, WebP, or GIF.
+            Click to choose a file, or drag it here. JPEG, PNG, or WebP.
           </span>
         </label>
       )}

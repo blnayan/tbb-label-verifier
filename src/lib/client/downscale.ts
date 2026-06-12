@@ -21,8 +21,9 @@ export function needsDownscale(bytes: number): boolean {
 }
 
 export async function downscaleImage(file: File): Promise<File> {
-  // GIFs may animate and canvas would flatten them; an oversized GIF is
-  // left for the server to reject with a clear error.
+  // GIFs are not a supported upload at all; flattening one to JPEG here
+  // would smuggle it past the server's rejection — pass it through so the
+  // server can refuse it with a clear error.
   if (!needsDownscale(file.size) || file.type === "image/gif") return file
 
   let bitmap: ImageBitmap
