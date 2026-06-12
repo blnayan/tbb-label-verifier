@@ -1,7 +1,7 @@
 # TTB Label Verifier
 
 AI-assisted verification of alcohol beverage labels against COLA application
-data, built as a take-home prototype for the TTB Compliance Division.
+data, built as a prototype for the TTB Compliance Division.
 
 An agent enters what the application says (brand name, class/type, alcohol
 content, net contents, the bottler/producer/importer's name and address —

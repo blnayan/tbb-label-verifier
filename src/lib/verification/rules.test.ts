@@ -50,7 +50,7 @@ describe("compareText (brand name / class type)", () => {
     )
   })
 
-  it("the interview nuance: STONE'S THROW vs Stone's Throw is a close match, not a failure", () => {
+  it("STONE'S THROW vs Stone's Throw is a close match, not a failure", () => {
     const result = compareText("Stone's Throw", "STONE'S THROW")
     expect(result.status).toBe("close_match")
   })
@@ -456,7 +456,7 @@ describe("checkGovernmentWarning", () => {
     ).toBe("not_found")
   })
 
-  it("the agent's catch: 'Government Warning' in title case is rejected", () => {
+  it("'Government Warning' in title case is rejected", () => {
     const titleCase = GOVERNMENT_WARNING_TEXT.replace(
       "GOVERNMENT WARNING",
       "Government Warning"

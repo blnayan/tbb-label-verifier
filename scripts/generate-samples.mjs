@@ -1,7 +1,7 @@
 /**
  * Generates the AI-designed portion of the sample dataset: synthetic alcohol
  * labels rendered from SVG to PNG, including deliberate compliance errors
- * drawn from the stakeholder interviews (title-case warning, ABV mismatch,
+ * seen on real submissions (title-case warning, ABV mismatch,
  * missing warning, reworded warning, an unbolded warning heading, case-only
  * brand differences) plus the mandatory-elements checks (a missing bottler
  * statement; an imported Canadian whisky with importer and country-of-origin

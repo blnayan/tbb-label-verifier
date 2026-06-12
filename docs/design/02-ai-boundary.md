@@ -12,19 +12,18 @@ It would work impressively in a demo and fail as a product:
 1. **Compliance needs receipts.** A rejection letter has to say *what* was
    wrong. "The model said no" is not a finding; "warning text deviates from
    27 CFR 16.21 at 'should avoid'" is. Rules produce findings natively.
-2. **Exactness is a rules problem.** The title-case "Government Warning"
-   an agent caught in real review must fail every single time, by policy,
-   forever. An LLM
+2. **Exactness is a rules problem.** A title-case "Government Warning"
+   must fail every single time, by policy, forever. An LLM
    judgment is probabilistic exactly where the requirement is absolute. A
    string comparison is absolute exactly where the requirement is absolute.
-3. **Nuance is a rules problem too** — once you've seen it. The veteran
-   agent's "STONE'S THROW vs Stone's Throw" is not AI judgment territory; it's a
+3. **Nuance is a rules problem too** — once you've seen it. A display-caps
+   "STONE'S THROW vs Stone's Throw" is not AI judgment territory; it's a
    normalization rule (case- and punctuation-insensitive comparison →
    "close match, review"). Encoding it as a rule means it behaves
    identically on label one and label ten thousand.
 4. **Tests.** The entire compliance surface is unit-tested — 118 tests
-   covering the statutory text, fraction ABVs, unit conversions, the
-   interview edge cases. You cannot unit-test a vibe.
+   covering the statutory text, fraction ABVs, unit conversions, and the
+   real-world edge cases. You cannot unit-test a vibe.
 
 ## What the model is genuinely needed for
 

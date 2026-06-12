@@ -50,8 +50,8 @@ export function normalizeLoose(text: string): string {
 /**
  * Compare a free-text field (brand name, class/type).
  *
- * Exact match passes. A match that only differs in case/punctuation (the
- * interviews' "STONE'S THROW" vs "Stone's Throw") is a close_match —
+ * Exact match passes. A match that only differs in case/punctuation (a
+ * display-caps "STONE'S THROW" vs "Stone's Throw") is a close_match —
  * flagged for the agent but not an automatic failure.
  */
 export function compareText(

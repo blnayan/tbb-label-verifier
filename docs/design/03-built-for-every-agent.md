@@ -1,12 +1,10 @@
 # Built for every agent
 
-> "Half our team is over 50. Clean, obvious, no hunting for buttons."
-> — the deputy director of label compliance
-
 The user base spans 28-year veterans with little patience for new tools
-and junior agents who could have built the tool themselves. The design
-target is the veteran; the test is that the power user never feels slowed
-down.
+and junior agents who could have built the tool themselves — and half the
+team is over 50. The design bar is clean, obvious, no hunting for buttons.
+The design target is the veteran; the test is that the power user never
+feels slowed down.
 
 ## Principles applied
 

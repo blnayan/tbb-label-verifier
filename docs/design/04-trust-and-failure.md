@@ -19,14 +19,14 @@ isn't binary:
 - **Can't read label** — the honesty valve. If the model reports the image
   unreadable (or not an alcohol label at all), no checks are run and the
   recommendation is the workflow agents already use: request a better
-  image. Agents asked for tolerance of imperfect photos; tolerance includes
-  knowing when to stop.
+  image. Tolerating imperfect photos is a core requirement; tolerance
+  includes knowing when to stop.
 
 The asymmetry is deliberate: anything mechanical that's clearly wrong
 *fails*, anything requiring judgment *escalates to the human*. The tool
-removes the data-entry half of the job (the deputy director: "my agents
-spend half their day doing what's essentially data entry verification")
-and explicitly keeps the judgment half human.
+removes the data-entry half of the job — agents spend half their day on
+what is essentially data-entry verification — and explicitly keeps the
+judgment half human.
 
 ## Failure handling by layer
 

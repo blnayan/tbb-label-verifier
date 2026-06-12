@@ -1,14 +1,11 @@
 # Speed is the product
 
-> "If we can't get results back in about 5 seconds, nobody's going to use
-> it. We learned that the hard way." — the deputy director of label
-> compliance
-
-The previous vendor's tool didn't fail on accuracy — it failed because 30–40
-seconds per label lost a race against a human eyeball. Agents can verify a
-simple label manually in well under a minute, so the tool's entire value
-proposition lives inside a ~5 second window. We treated that as a hard
-budget and spent it deliberately:
+If results take longer than about 5 seconds, nobody uses the tool — the
+division learned that the hard way. A previous vendor's tool didn't fail
+on accuracy; it failed because 30–40 seconds per label lost a race against
+a human eyeball. Agents can verify a simple label manually in well under a
+minute, so the tool's entire value proposition lives inside a ~5 second
+window. We treated that as a hard budget and spent it deliberately:
 
 | Budget item | Decision |
 | --- | --- |

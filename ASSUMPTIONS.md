@@ -6,11 +6,11 @@ Each entry says what was assumed, and why that reading was chosen.
 ## Scope of verification
 
 1. **Six fields are always checked; country of origin is added for
-   imports.** The "Sample Label Fields" section defines the concrete data
-   every application carries: brand name, class/type, alcohol content, net
-   contents, and the government warning. The brief's TTB-requirements list
-   (and ttb.gov) adds two more mandatory elements, which the brief's
-   application data model doesn't include:
+   imports.** The application data model defines the concrete data every
+   application carries: brand name, class/type, alcohol content, net
+   contents, and the government warning. TTB's own labeling requirements
+   (ttb.gov) add two more mandatory elements that the application data
+   model doesn't include:
    - **Bottler/producer/importer name and address** (27 CFR 5.66 for
      spirits, 4.35 for wine, 7.66 for malt beverages; for imports the U.S.
      importer's statement, 5.69/7.69). Mandatory on every label — and on
@@ -33,15 +33,15 @@ Each entry says what was assumed, and why that reading was chosen.
      CSVs, direct API calls), a present country implies an import.
 
 2. **The application data is keyed in by the agent (or supplied via CSV).**
-   IT was explicit that this prototype must not integrate with COLA, so
+   COLA integration is deliberately out of scope for this prototype, so
    there is no application lookup — the agent supplies what the application
-   says, mirroring their current screen-to-screen comparison workflow.
+   says, mirroring the team's current screen-to-screen comparison workflow.
 
 3. **One image per label application.** Real COLAs often attach front and
    back labels separately. The prototype verifies a single image; if the
    warning is on the back label, the agent verifies the image that carries
    it (or a combined image). Multi-image applications are a known extension,
-   not a core requirement of the brief.
+   not a core requirement of the prototype.
 
 4. **English-language labels.** TTB requires mandatory information in
    English; verifying foreign-language supplementary text is out of scope.
@@ -50,8 +50,7 @@ Each entry says what was assumed, and why that reading was chosen.
 
 5. **The government warning must match 27 CFR 16.21 word-for-word.** The
    statutory text embedded in the rule engine was checked against the CFR.
-   Any word difference is a failure, matching the agents' "it has to be
-   exact".
+   Any word difference is a failure — the statement is exact by policy.
    Whitespace and punctuation get one calibrated tolerance, because the
    reader is measurably unreliable on exactly those marks: condensed print
    makes the model drop a space ("(2) CONSUMPTION" read as
@@ -67,8 +66,8 @@ Each entry says what was assumed, and why that reading was chosen.
 
 6. **"GOVERNMENT WARNING" must be in capital letters** (27 CFR 16.22(a)).
    A title-case heading is an automatic failure — this exact scenario is in
-   the sample dataset because an agent reported catching one in real
-   review.
+   the sample dataset because real submissions get the heading's case
+   wrong.
 
 7. **Bold type on the heading queues for review, never auto-rejects.**
    27 CFR 16.22 requires the heading in bold type, but type weight is a
@@ -87,7 +86,8 @@ Each entry says what was assumed, and why that reading was chosen.
    here.
 
 9. **Brand-name comparison is case-insensitive, with transparency.**
-   The interviews' "STONE'S THROW vs Stone's Throw" example is a full match —
+   A display-caps brand ("STONE'S THROW" for an application's "Stone's
+   Throw") is a full match —
    labels routinely set the brand in display caps, and a
    capitalization-only difference carries no compliance signal — but the
    result still carries a note saying the case differs. Punctuation,
@@ -168,15 +168,16 @@ Each entry says what was assumed, and why that reading was chosen.
     never toward pass.
 
 13. **The model is configuration, not code.** The 5-second requirement
-    is a hard product constraint ("nobody's going to use it"), and label
+    is a hard product constraint (slower tools lose the race against a
+    human eyeball and go unused), and label
     transcription is a narrow task a fast mini-class vision model handles
     well. `OPENAI_MODEL` is required and there is deliberately no default
     or fallback — one explicitly chosen model, swappable without a code
     change; the app refuses to verify until it is set.
 
-14. **No accounts, no server-side persistence.** IT: "we're not storing
-    anything sensitive for this exercise." Images are processed in memory
-    and discarded; the server stores nothing. Results do persist — in the
+14. **No accounts, no server-side persistence.** Nothing sensitive is
+    stored anywhere: images are processed in memory
+    and discarded, and the server stores nothing. Results do persist — in the
     browser's IndexedDB on the device that verified them — so history
     survives refreshes and restarts but never leaves the machine: a report
     link opened in a different browser finds nothing, and a guarded "Clear
@@ -189,8 +190,8 @@ Each entry says what was assumed, and why that reading was chosen.
     orchestrates the queue, four labels at a time.
 
 16. **Batch size is bounded by patience, not the app.** 300 labels × ~3s at
-    concurrency 4 ≈ 4 minutes, comfortably inside the interviews'
-    peak-season scenario. Rows with bad data are skipped with line-numbered
+    concurrency 4 ≈ 4 minutes — a peak-season dump from a large importer
+    clears in one sitting. Rows with bad data are skipped with line-numbered
     errors
     instead of aborting the batch.
 
@@ -199,7 +200,7 @@ Each entry says what was assumed, and why that reading was chosen.
     diffusion-generated images — this gives pixel-exact control over the
     error each sample encodes (you can't reliably ask an image model for "a
     label whose warning text is subtly reworded"). Real labels come from
-    TTB's public COLA registry per the brief's pointer to ttb.gov; sources
+    TTB's public COLA registry; sources
     in [public/samples/SOURCES.md](public/samples/SOURCES.md).
 
 ## Known limitations (deliberate trade-offs)

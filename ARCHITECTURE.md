@@ -92,7 +92,7 @@ stateless container — which also keeps the FedRAMP-flavored conversation
 simple if this ever moves toward a government environment.
 
 ### GPT-5.4 mini with structured outputs
-The stakeholder interviews set a hard product constraint: ~5 seconds or
+Verification has a hard product constraint: results in ~5 seconds, or
 agents fall back to eyeballing. The model was chosen by measuring, not by
 spec sheet:
 gpt-5.4-nano is billed as the lowest-latency vision model, but live testing
@@ -144,7 +144,7 @@ small client-side pool. Reasons:
   HTTP.
 - Per-label progress, retries, and partial failure fall out naturally — a
   bad row or a failed call affects one row in the table, never the batch.
-- 300 labels (the interviews' peak-season number) ≈ 4 minutes at
+- 300 labels (a peak-season dump from a large importer) ≈ 4 minutes at
   concurrency 4, with the queue visibly draining.
 
 The trade-off: a closed tab abandons an in-flight batch. For a prototype
@@ -206,7 +206,7 @@ the compliance team actually works: clerks feed the queue, reviewers work
 it.
 
 ### No server database — history lives in the browser
-Nothing requires server-side persistence: no accounts (per IT), samples
+Nothing requires server-side persistence: no accounts in scope, samples
 are static files, and the server stays a stateless container. Results,
 however, are worth keeping: every completed verification (the result JSON,
 the exact image the model saw, and its review state) is saved to
@@ -256,7 +256,7 @@ percentage of any team is colorblind.
 ## Testing strategy
 
 TDD on every pure module: rule engine (including the regulatory edge cases
-from the interviews), input validation, CSV parsing, the concurrency pool,
+the rules exist to catch), input validation, CSV parsing, the concurrency pool,
 review-session navigation, and the IndexedDB history layer with its review
 states and schema migration (against `fake-indexeddb`) — 246 tests, no
 network. The AI boundary is deliberately thin and typed; the route handler
