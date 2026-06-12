@@ -152,7 +152,11 @@ export function imageDataUrl(input: ExtractionInput): string {
 let client: OpenAI | null = null
 function getClient(): OpenAI {
   if (!client) {
-    client = new OpenAI({ maxRetries: 1, timeout: 30_000 })
+    // maxRetries 3: the SDK backs off and honors retry-after, which matters
+    // since the parallel warning re-read doubled call volume — measured at
+    // batch concurrency 4, bursts trip the per-minute rate limit (429) and
+    // a single retry lands inside the same window.
+    client = new OpenAI({ maxRetries: 3, timeout: 30_000 })
   }
   return client
 }
