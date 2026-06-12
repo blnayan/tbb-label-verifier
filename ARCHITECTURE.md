@@ -4,8 +4,8 @@
 
 ```
 ┌──────────────────────────── Browser ────────────────────────────┐
-│  Sidebar dashboard: an Upload page that only uploads, a          │
-│  Verifications page where every verification is worked           │
+│  Navbar dashboard: an Upload page, a Verifications queue, and a  │
+│  full-screen report page where every verification is worked      │
 │                                                                  │
 │  Single label upload              Batch upload                   │
 │  (form + image)                   (CSV + images + progress)      │
@@ -29,7 +29,7 @@
 │      ├─► upscale.ts ── lanczos-upscale small images (<1600px)    │
 │      │                 so fine print outresolves the encoder     │
 │      │                                                           │
-│      ├─► extract.ts ──► OpenAI (GPT-5.4 mini, vision +           │
+│      ├─► extract.ts ──► OpenAI ($OPENAI_MODEL, vision +          │
 │      │       │          zod structured output)                   │
 │      │       │  full extraction ∥ blind warning re-read          │
 │      │       │  (two parallel calls on every label)              │
@@ -93,16 +93,19 @@ simple if this ever moves toward a government environment.
 
 ### GPT-5.4 mini with structured outputs
 Sarah's interview sets a hard product constraint: ~5 seconds or agents fall
-back to eyeballing. The default was chosen by measuring, not by spec sheet:
+back to eyeballing. The model was chosen by measuring, not by spec sheet:
 gpt-5.4-nano is billed as the lowest-latency vision model, but live testing
 showed it misreads the fine-print government warning on real labels (0/4
 stable on a real TTB photo) *and* returns no faster than mini in practice
 (~3.1–3.5s vs mini's ~2.3–3.2s). gpt-5.4-mini reads the same label 4/4.
-Reasoning effort is pinned to "none" — transcription needs no deliberation,
-and "none" measured ~1s faster than "low" with identical output. Structured
+Reasoning effort runs at "none" (set via `OPENAI_REASONING_EFFORT`) —
+transcription needs no deliberation, and "none" measured ~1s faster than
+"low" with identical output. Structured
 outputs (zod schema, validated by the SDK) remove an entire class of
-parse-and-retry failure. The choice lives in one env var — model swaps are a
-config change, not a refactor.
+parse-and-retry failure. The choice lives in one required env var
+(`OPENAI_MODEL`) with deliberately no default and no fallback — one
+explicitly chosen model, and a model swap is a config change, not a
+refactor.
 
 ### Latency budget, end to end
 - Images upload exactly as the user provided them — resample + JPEG
@@ -147,26 +150,39 @@ The trade-off: a closed tab abandons an in-flight batch. For a prototype
 that's acceptable; the production path is a server-side job store, which
 this architecture doesn't preclude.
 
-### Upload and review are separate jobs
-The Upload page only uploads: submitting frees the form immediately for the
-next label, and the verdict is announced in a toast; the full report is
-never shown inline. Every verification lands on the Verifications page
-carrying a review state, derived from the rule verdict: **pass ⇒
-auto-approved** and **fail ⇒ auto-rejected** — the deterministic rules
-already did that work — while genuine ambiguity (**needs review /
-unreadable**) waits in a queue until an agent records an approve/reject
-decision. Every decision, automatic or manual, is revisitable and
-changeable.
+### Upload feeds review, and review is a session
+Every verification lands on the Verifications page carrying a review
+state, derived from the rule verdict: **pass ⇒ auto-approved** and
+**fail ⇒ auto-rejected** — the deterministic rules already did that work —
+while genuine ambiguity (**needs review / unreadable**) waits in a queue
+until an agent records an approve/reject decision. Every decision,
+automatic or manual, is revisitable and changeable.
+
+The two upload modes hand off differently because they are different jobs.
+A single upload is one agent working one label: the form locks while the
+label verifies, and the report page opens automatically when the verdict
+lands — upload flows straight into review. A batch is fire-and-forget: the
+queue table is progress feedback only, and results collect on the
+Verifications page while the queue drains.
 
 Each verification gets its own report page (`/verifications/[id]`) rather
 than a dialog — reviewing is the core job, so it gets the whole screen,
-literally: the page steps outside the dashboard shell (no sidebar) and fits
+literally: the page steps outside the dashboard shell (no navbar) and fits
 everything in one viewport. The label image sits center stage sized to the
 screen, the application (what the label must show) on its left, and what
 was read off the label — each field with its match status — on its right,
 with Approve/Reject in the header. A long panel scrolls internally; the
 page itself never scrolls, so the agent compares image, application, and
 findings without losing sight of any of them.
+
+Working the queue is a session, not a page-per-record chore. A report
+opened from a Verifications tab carries that tab along (`?tab=…`): Back
+and Next step through that tab's records without deciding, and an
+approve/reject advances to the next record automatically — computed before
+the decision lands, so deciding a pending label still leads to the next
+pending one. When the tab's queue runs dry, the session exits back to the
+list. The navigation logic is pure and unit-tested
+(`src/lib/client/review-tab.ts`).
 
 The Verifications page is live: it subscribes to history changes (local
 listeners in-tab, a BroadcastChannel across tabs) and to the in-flight
@@ -229,20 +245,27 @@ percentage of any team is colorblind.
 | `src/lib/client/downscale.ts` | Last-resort shrink for files over the 10MB limit (tested) |
 | `src/lib/client/history.ts` | IndexedDB history + review states + change events (tested) |
 | `src/lib/client/uploads.ts` | In-memory in-flight upload registry (tested) |
+| `src/lib/client/review-tab.ts` | Review-session navigation: tab-aware report links, Back/Next stepping (tested) |
 | `src/app/api/verify/route.ts` | HTTP shell: validate → verify → typed errors |
-| `src/app/(dashboard)/*` | Sidebar shell; Upload (`/`) and Verifications (`/verifications`) pages |
+| `src/app/(dashboard)/*` | Navbar shell; Upload (`/`) and Verifications (`/verifications`) pages |
 | `src/components/verifier/*` | Upload views, review queue, full-page review report |
 | `scripts/generate-samples.mjs` | Synthetic sample-label generator |
+| `scripts/eval-samples.mjs` | Live eval of every sample against its hand-checked expected verdict |
 
 ## Testing strategy
 
 TDD on every pure module: rule engine (including the regulatory edge cases
 from the interviews), input validation, CSV parsing, the concurrency pool,
-and the IndexedDB history layer with its review states and schema migration
-(against `fake-indexeddb`) — 232 tests, no network. The AI boundary is deliberately thin and typed;
-the route handler is glue. The sample dataset doubles as a live end-to-end
-suite: each sample's description states its expected verdict, so a reviewer
-can validate the whole pipeline from the UI in two minutes.
+review-session navigation, and the IndexedDB history layer with its review
+states and schema migration (against `fake-indexeddb`) — 246 tests, no
+network. The AI boundary is deliberately thin and typed; the route handler
+is glue. The sample dataset doubles as a live end-to-end suite two ways:
+each sample's description states its expected verdict, so a reviewer can
+validate the whole pipeline from the UI in two minutes, and
+`scripts/eval-samples.mjs` verifies every sample against those hand-checked
+expectations automatically (rendered at `/eval-dashboard.html`), separating
+infrastructure noise from genuine model regressions and exiting non-zero on
+a regression.
 
 ## What production would add
 

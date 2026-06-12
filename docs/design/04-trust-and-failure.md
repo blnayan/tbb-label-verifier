@@ -15,7 +15,7 @@ isn't binary:
   photo). The tool says *what* and *why*; the human spends ten seconds, not
   ten minutes.
 - **Issues found** — a deterministic rule failed; the note cites the exact
-  divergence ("Label shows 40% — application says 45%").
+  divergence ("Label shows 40%, but the application says 45%.").
 - **Can't read label** — the honesty valve. If the model reports the image
   unreadable (or not an alcohol label at all), no checks are run and the
   recommendation is the workflow agents already use: request a better
@@ -32,7 +32,7 @@ the judgment half human.
 
 | Failure | Behavior |
 | --- | --- |
-| Wrong file type / oversized / empty image | Rejected before any model call, with the fix in the message ("use JPEG, PNG, WebP, or GIF"). |
+| Wrong file type / oversized / empty image | Rejected before any model call, with the fix in the message ("Use JPEG, PNG, or WebP."). |
 | Malformed CSV row | That row is skipped and reported with its line number; the rest of the batch runs. A missing column fails fast with the expected header list. |
 | Image filename in CSV but not uploaded | Row marked "Image file not uploaded" — visible, not fatal. |
 | AI service down / rate limited | Typed errors mapped to plain English, marked retryable; one label's failure never poisons the batch. |

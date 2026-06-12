@@ -172,10 +172,14 @@ Each entry says what was assumed, and why that reading was chosen.
     or fallback — one explicitly chosen model, swappable without a code
     change; the app refuses to verify until it is set.
 
-14. **No accounts, no persistence.** Marcus: "we're not storing anything
-    sensitive for this exercise." Images are processed in memory and
-    discarded; results live only in the browser session. This also keeps
-    the deployment a single stateless container.
+14. **No accounts, no server-side persistence.** Marcus: "we're not storing
+    anything sensitive for this exercise." Images are processed in memory
+    and discarded; the server stores nothing. Results do persist — in the
+    browser's IndexedDB on the device that verified them — so history
+    survives refreshes and restarts but never leaves the machine: a report
+    link opened in a different browser finds nothing, and a guarded "Clear
+    history" action erases everything. This keeps the deployment a single
+    stateless container.
 
 15. **Batch pairing is by filename.** A CSV column names each image file.
     This matches how bulk submissions arrive in practice (a spreadsheet plus
@@ -201,6 +205,12 @@ Each entry says what was assumed, and why that reading was chosen.
   cannot detect an import whose application wrongly marks it domestic
   (see #1).
 - One image per application (see #3).
+- Supported image formats are JPEG, PNG, and WebP. GIFs are rejected at
+  every entry point (file pickers, drag-and-drop, server validation):
+  animation frames make "the pixels that were verified" ambiguous, and
+  flattening one client-side would verify pixels the server never saw.
+- Verification history is device-local by design (see #14): a report link
+  only opens in the browser that verified the label.
 - A not-bold heading read queues for human review instead of failing —
   the model's weight judgment is unreliable; type-size rules unchecked
   (see #7, #8).

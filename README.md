@@ -18,8 +18,11 @@ passes are auto-approved and rule failures auto-rejected, while ambiguous
 results queue for a manual approve/reject decision made on each
 verification's own full-screen report page — the label image center stage,
 the application on its left, the field-by-field findings on its right, all
-in one viewport. Decisions can be revisited, and a guarded clear-history
-action wipes the record.
+in one viewport. A single upload opens its report the moment the verdict
+lands, and reviewing is a session: Back/Next step through the records of
+the tab the reviewer came from, and an approve/reject advances to the next
+waiting record automatically. Decisions can be revisited, and a guarded
+clear-history action wipes the record.
 
 **How it works in one sentence:** an OpenAI vision model *transcribes* the
 label into structured JSON; deterministic TypeScript rules *decide*
@@ -32,7 +35,7 @@ Requirements: Node.js 20+ and an OpenAI API key.
 
 ```bash
 npm install
-cp .env.example .env.local   # then put your OPENAI_API_KEY in .env.local
+cp .env.example .env.local   # set OPENAI_API_KEY and OPENAI_MODEL
 npm run dev
 ```
 
@@ -45,8 +48,8 @@ Results stream into the **Verifications** page live.
 | Variable | Required | Default | Purpose |
 | --- | --- | --- | --- |
 | `OPENAI_API_KEY` | yes | — | Auth for the OpenAI API (label extraction). |
-| `OPENAI_MODEL` | no | `gpt-5.4-mini` | Vision model used for extraction. Chosen by live measurement: reads real-label fine print reliably and came back faster than `gpt-5.4-nano`. |
-| `OPENAI_REASONING_EFFORT` | no | `none` | Reasoning effort for the extraction call — transcription needs no deliberation. Set to `low` for model tiers that don't accept `none` (e.g. gpt-5.5). |
+| `OPENAI_MODEL` | yes | none, deliberately | Vision model used for extraction. There is no default and no fallback — one explicitly chosen model, swappable without a code change; the app refuses to verify until it is set. `gpt-5.4-mini` measured best: it reads real-label fine print reliably and came back faster than `gpt-5.4-nano`. |
+| `OPENAI_REASONING_EFFORT` | no | unset (the API's own default applies) | Reasoning effort for the extraction call. Transcription needs no deliberation, so the lowest value the model tier accepts is right: `none` exists from gpt-5.1, while gpt-5.5 bottoms out at `low`. |
 
 ## Scripts
 
@@ -58,18 +61,21 @@ Results stream into the **Verifications** page live.
 | `npm run lint` / `npm run typecheck` | ESLint / TypeScript |
 | `node scripts/generate-samples.mjs` | Regenerate the synthetic sample labels |
 | `node scripts/generate-photo-variants.mjs` | Regenerate the photo-condition variants of real labels |
+| `node scripts/eval-samples.mjs` | Live end-to-end eval: verifies every sample against its hand-checked expected verdict (start the dev server first). Results render at `/eval-dashboard.html`; exits 1 on a regression. |
 
 ## Sample dataset
 
-`public/samples/` contains thirty-five labels: **twenty-one real labels**
+`public/samples/` contains thirty-eight labels: **twenty-one real labels**
 (beer, wine, spirits, imports — twenty from TTB's public COLA registry
 plus a brewery's keg-collar artwork; each paired with application data
 transcribed from the label, and one — Bärenjäger — with the entries from
 its actual application form), **two of
 those re-rendered under simulated photo conditions** (tilt, glare, blur) to
-exercise robustness, and twelve synthetic labels each encoding a compliance
+exercise robustness, and fifteen synthetic labels each encoding a compliance
 scenario (case-only brand differences, a title-case government warning, a
 warning heading without bold type, a wrong ABV, a missing/reworded warning,
+three near-miss warning misprints — a one-letter typo, a dropped word, and
+two swapped words — that probe whether the reader normalizes them away,
 wrong net contents, a wrong brand on an imported whisky, a proof-only
 statement, a cl-vs-mL unit difference, a missing bottler statement). Every sample's expected
 verdict is stated in its description and validated against the live
@@ -84,6 +90,7 @@ docker build -t tbb-label-verifier .
 docker run -d --name label-verifier \
   -p 3000:3000 \
   -e OPENAI_API_KEY=sk-... \
+  -e OPENAI_MODEL=gpt-5.4-mini \
   --restart unless-stopped \
   tbb-label-verifier
 ```
@@ -106,7 +113,7 @@ container exposes port 3000 and needs outbound HTTPS to
   GPT-5.4 mini via the official OpenAI SDK with structured outputs
   (zod-validated); Vitest. One deployable, no database.
 - **Core trade-off:** the AI is confined to transcription; all pass/fail
-  logic is deterministic, unit-tested TypeScript (232 tests). This makes
+  logic is deterministic, unit-tested TypeScript (246 tests). This makes
   compliance behavior auditable and lets the model be swapped via env var.
 - **Latency:** fastest vision-capable model + two parallel API calls per
   label (full extraction + a blind warning re-read — the warning

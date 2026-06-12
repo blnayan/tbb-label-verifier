@@ -9,10 +9,11 @@ veteran; the test is that the power user never feels slowed down.
 
 ## Principles applied
 
-**One screen, one decision.** No navigation, no settings, no onboarding.
-Two tabs — *Single label* and *Batch upload* — and each tab has exactly one
+**Two destinations, one decision.** The navbar holds exactly two links —
+*Upload* and *Verifications* — no settings, no onboarding. Upload has two
+tabs — *Single label* and *Batch upload* — and each tab has exactly one
 primary action, rendered as the biggest button on the screen with a verb on
-it ("Verify label"). If a user can find the button, they know what to do.
+it ("Upload"). If a user can find the button, they know what to do.
 
 **The workflow mirrors the paper checklist.** Jenny literally keeps a
 printed checklist: brand — check, ABV — check, warning — check. The report
@@ -34,7 +35,7 @@ wrong — and finding that it isn't.
 **Forgiveness over precision in inputs.** "45", "45%", "13.5" all parse;
 file picking works by click, drag, or paste; a batch CSV with two bad rows
 runs the other 298 and reports the bad ones by line number. Errors are
-written as instructions ("Alcohol content must be a number — got 'forty
+written as instructions ("Alcohol content must be a number, but got 'forty
 five'"), not as codes.
 
 **Speed serves usability.** A 3-second response keeps attention; the
