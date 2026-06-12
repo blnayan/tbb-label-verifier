@@ -1,5 +1,5 @@
 /**
- * Batch CSV parsing for "Janet's" bulk-upload workflow: a CSV pairs each
+ * Batch CSV parsing for the bulk-upload workflow: a CSV pairs each
  * uploaded image filename with its application data.
  *
  * Hand-rolled RFC-4180-style parser (quoted fields, escaped quotes, CRLF)

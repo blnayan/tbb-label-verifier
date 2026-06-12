@@ -1,7 +1,8 @@
 # Speed is the product
 
 > "If we can't get results back in about 5 seconds, nobody's going to use
-> it. We learned that the hard way." — Sarah Chen
+> it. We learned that the hard way." — the deputy director of label
+> compliance
 
 The previous vendor's tool didn't fail on accuracy — it failed because 30–40
 seconds per label lost a race against a human eyeball. Agents can verify a

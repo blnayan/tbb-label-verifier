@@ -1,11 +1,12 @@
 "use client"
 
 /**
- * Batch upload ("Janet's feature"): a CSV pairs application data with image
- * filenames; the agent drops both in — literally, both pickers accept
- * drag-and-drop — and the queue verifies in parallel, four at a time, each
- * label still inside the ~5 second budget. The queue table is progress
- * feedback only; the reports are worked on the Review page.
+ * Batch upload (the field offices' long-requested feature): a CSV pairs
+ * application data with image filenames; the agent drops both in —
+ * literally, both pickers accept drag-and-drop — and the queue verifies in
+ * parallel, four at a time, each label still inside the ~5 second budget.
+ * The queue table is progress feedback only; the reports are worked on the
+ * Verifications page.
  */
 
 import { useEffect, useMemo, useState } from "react"

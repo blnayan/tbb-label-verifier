@@ -33,7 +33,7 @@ Each entry says what was assumed, and why that reading was chosen.
      CSVs, direct API calls), a present country implies an import.
 
 2. **The application data is keyed in by the agent (or supplied via CSV).**
-   Marcus was explicit that this prototype must not integrate with COLA, so
+   IT was explicit that this prototype must not integrate with COLA, so
    there is no application lookup — the agent supplies what the application
    says, mirroring their current screen-to-screen comparison workflow.
 
@@ -50,7 +50,8 @@ Each entry says what was assumed, and why that reading was chosen.
 
 5. **The government warning must match 27 CFR 16.21 word-for-word.** The
    statutory text embedded in the rule engine was checked against the CFR.
-   Any word difference is a failure, matching Jenny's "it has to be exact".
+   Any word difference is a failure, matching the agents' "it has to be
+   exact".
    Whitespace and punctuation get one calibrated tolerance, because the
    reader is measurably unreliable on exactly those marks: condensed print
    makes the model drop a space ("(2) CONSUMPTION" read as
@@ -66,7 +67,8 @@ Each entry says what was assumed, and why that reading was chosen.
 
 6. **"GOVERNMENT WARNING" must be in capital letters** (27 CFR 16.22(a)).
    A title-case heading is an automatic failure — this exact scenario is in
-   the sample dataset because Jenny caught one last month.
+   the sample dataset because an agent reported catching one in real
+   review.
 
 7. **Bold type on the heading queues for review, never auto-rejects.**
    27 CFR 16.22 requires the heading in bold type, but type weight is a
@@ -85,7 +87,7 @@ Each entry says what was assumed, and why that reading was chosen.
    here.
 
 9. **Brand-name comparison is case-insensitive, with transparency.**
-   Dave's "STONE'S THROW vs Stone's Throw" example is a full match —
+   The interviews' "STONE'S THROW vs Stone's Throw" example is a full match —
    labels routinely set the brand in display caps, and a
    capitalization-only difference carries no compliance signal — but the
    result still carries a note saying the case differs. Punctuation,
@@ -165,14 +167,14 @@ Each entry says what was assumed, and why that reading was chosen.
     invariant throughout: a re-read can only move a label toward review,
     never toward pass.
 
-13. **The model is configuration, not code.** Sarah's 5-second requirement
+13. **The model is configuration, not code.** The 5-second requirement
     is a hard product constraint ("nobody's going to use it"), and label
     transcription is a narrow task a fast mini-class vision model handles
     well. `OPENAI_MODEL` is required and there is deliberately no default
     or fallback — one explicitly chosen model, swappable without a code
     change; the app refuses to verify until it is set.
 
-14. **No accounts, no server-side persistence.** Marcus: "we're not storing
+14. **No accounts, no server-side persistence.** IT: "we're not storing
     anything sensitive for this exercise." Images are processed in memory
     and discarded; the server stores nothing. Results do persist — in the
     browser's IndexedDB on the device that verified them — so history
@@ -187,8 +189,9 @@ Each entry says what was assumed, and why that reading was chosen.
     orchestrates the queue, four labels at a time.
 
 16. **Batch size is bounded by patience, not the app.** 300 labels × ~3s at
-    concurrency 4 ≈ 4 minutes, comfortably inside Sarah's peak-season
-    scenario. Rows with bad data are skipped with line-numbered errors
+    concurrency 4 ≈ 4 minutes, comfortably inside the interviews'
+    peak-season scenario. Rows with bad data are skipped with line-numbered
+    errors
     instead of aborting the batch.
 
 17. **"AI-generated" sample labels are AI-designed and programmatically

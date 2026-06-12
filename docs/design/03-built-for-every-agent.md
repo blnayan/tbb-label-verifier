@@ -1,11 +1,12 @@
-# Built for Dave *and* Jenny
+# Built for every agent
 
-> "We need something my mother could figure out… Half our team is over 50.
-> Clean, obvious, no hunting for buttons." — Sarah Chen
+> "Half our team is over 50. Clean, obvious, no hunting for buttons."
+> — the deputy director of label compliance
 
-The user base spans a 28-year veteran who prints his emails and a junior
-agent who could have built the tool herself. The design target is the
-veteran; the test is that the power user never feels slowed down.
+The user base spans 28-year veterans with little patience for new tools
+and junior agents who could have built the tool themselves. The design
+target is the veteran; the test is that the power user never feels slowed
+down.
 
 ## Principles applied
 
@@ -15,7 +16,7 @@ tabs — *Single label* and *Batch upload* — and each tab has exactly one
 primary action, rendered as the biggest button on the screen with a verb on
 it ("Upload"). If a user can find the button, they know what to do.
 
-**The workflow mirrors the paper checklist.** Jenny literally keeps a
+**The workflow mirrors the paper checklist.** Agents literally keep a
 printed checklist: brand — check, ABV — check, warning — check. The report
 is that checklist, rendered: each field gets a row with *what the
 application says*, *what the label says*, and a plain-English note. Nothing
@@ -28,8 +29,8 @@ colorblind). The labels avoid jargon: "Can't read label" rather than
 "low-confidence extraction".
 
 **No silent magic.** Every value the AI read is shown next to the value it
-was compared against. Trust for someone like Dave isn't built by accuracy
-claims; it's built by the tool showing its work so he can catch it being
+was compared against. Trust for a veteran agent isn't built by accuracy
+claims; it's built by the tool showing its work so they can catch it being
 wrong — and finding that it isn't.
 
 **Forgiveness over precision in inputs.** "45", "45%", "13.5" all parse;
@@ -39,9 +40,9 @@ written as instructions ("Alcohol content must be a number, but got 'forty
 five'"), not as codes.
 
 **Speed serves usability.** A 3-second response keeps attention; the
-skeleton state and per-row queue status make waiting legible. Jenny's
-power-user path — load sample, verify, next — has zero friction; Dave's
-careful path has zero surprises.
+skeleton state and per-row queue status make waiting legible. The power
+user's path — load sample, verify, next — has zero friction; the careful
+veteran's path has zero surprises.
 
 ## What was deliberately left out
 

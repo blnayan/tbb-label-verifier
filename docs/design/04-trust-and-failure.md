@@ -19,14 +19,14 @@ isn't binary:
 - **Can't read label** — the honesty valve. If the model reports the image
   unreadable (or not an alcohol label at all), no checks are run and the
   recommendation is the workflow agents already use: request a better
-  image. Jenny asked for tolerance of imperfect photos; tolerance includes
+  image. Agents asked for tolerance of imperfect photos; tolerance includes
   knowing when to stop.
 
 The asymmetry is deliberate: anything mechanical that's clearly wrong
 *fails*, anything requiring judgment *escalates to the human*. The tool
-removes the data-entry half of the job (Sarah: "my agents spend half their
-day doing what's essentially data entry verification") and explicitly keeps
-the judgment half human.
+removes the data-entry half of the job (the deputy director: "my agents
+spend half their day doing what's essentially data entry verification")
+and explicitly keeps the judgment half human.
 
 ## Failure handling by layer
 
@@ -41,9 +41,10 @@ the judgment half human.
 
 ## Why transparency is the trust strategy
 
-Dave has watched modernization projects fail since 2008, and his skepticism
-is rational: tools that hide their reasoning get blamed for every
-disagreement. This tool's bet is the opposite of "trust me":
+The division's veterans have watched modernization projects fail for
+decades, and their skepticism is rational: tools that hide their reasoning
+get blamed for every disagreement. This tool's bet is the opposite of
+"trust me":
 
 - every verdict shows its inputs (expected vs. found, verbatim),
 - every rule's behavior is documented and unit-tested,

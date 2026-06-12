@@ -70,8 +70,8 @@ Why this split, rather than asking the model "does this label match?":
 - **Testability.** The compliance behavior is 118 unit tests that run in
   milliseconds with no API key. An end-to-end AI judgment can't be tested
   without live calls and tolerance for nondeterminism.
-- **The failure modes match the staff.** Dave doesn't trust black boxes —
-  and he's right not to. When the tool is wrong it's either a transcription
+- **The failure modes match the staff.** Veteran agents don't trust black
+  boxes — and they're right not to. When the tool is wrong it's either a transcription
   error (visible: the "On label" column shows what the model read) or a rule
   bug (fixable, testable). There is no "the AI just decided differently
   today."
@@ -92,8 +92,9 @@ stateless container — which also keeps the FedRAMP-flavored conversation
 simple if this ever moves toward a government environment.
 
 ### GPT-5.4 mini with structured outputs
-Sarah's interview sets a hard product constraint: ~5 seconds or agents fall
-back to eyeballing. The model was chosen by measuring, not by spec sheet:
+The stakeholder interviews set a hard product constraint: ~5 seconds or
+agents fall back to eyeballing. The model was chosen by measuring, not by
+spec sheet:
 gpt-5.4-nano is billed as the lowest-latency vision model, but live testing
 showed it misreads the fine-print government warning on real labels (0/4
 stable on a real TTB photo) *and* returns no faster than mini in practice
@@ -143,8 +144,8 @@ small client-side pool. Reasons:
   HTTP.
 - Per-label progress, retries, and partial failure fall out naturally — a
   bad row or a failed call affects one row in the table, never the batch.
-- 300 labels (Sarah's peak-season number) ≈ 4 minutes at concurrency 4,
-  with the queue visibly draining.
+- 300 labels (the interviews' peak-season number) ≈ 4 minutes at
+  concurrency 4, with the queue visibly draining.
 
 The trade-off: a closed tab abandons an in-flight batch. For a prototype
 that's acceptable; the production path is a server-side job store, which
@@ -205,7 +206,7 @@ the compliance team actually works: clerks feed the queue, reviewers work
 it.
 
 ### No server database — history lives in the browser
-Nothing requires server-side persistence: no accounts (per Marcus), samples
+Nothing requires server-side persistence: no accounts (per IT), samples
 are static files, and the server stays a stateless container. Results,
 however, are worth keeping: every completed verification (the result JSON,
 the exact image the model saw, and its review state) is saved to
