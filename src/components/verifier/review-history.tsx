@@ -18,6 +18,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { HistoryIcon, InboxIcon, SearchIcon, Trash2Icon } from "lucide-react"
 import { toast } from "sonner"
 
@@ -67,12 +68,18 @@ import {
   type VerificationRecord,
 } from "@/lib/client/history"
 import {
+  parseReviewTab,
+  reportHref,
+  verificationsHref,
+  type ReviewTab,
+} from "@/lib/client/review-tab"
+import {
   listInFlight,
   subscribeToUploads,
   type InFlightUpload,
 } from "@/lib/client/uploads"
 
-type TabValue = "pending" | "approved" | "rejected" | "all"
+type TabValue = ReviewTab
 
 const TAB_EMPTY: Record<TabValue, { title: string; description: string }> = {
   pending: {
@@ -126,10 +133,11 @@ export function ReviewHistory() {
   const [inFlight, setInFlight] = useState<InFlightUpload[]>(() =>
     listInFlight()
   )
-  // Controlled so the active tab never jumps as decisions empty the queue.
-  // Always lands on "All" — the full chronological record — with the
-  // "Needs review" badge signaling any waiting queue.
-  const [tab, setTab] = useState<TabValue>("all")
+  // The active tab lives in the URL (?tab=…) so a report page can send the
+  // user back to the tab they left from. A fresh visit lands on "All" — the
+  // full chronological record — with the "Needs review" badge signaling any
+  // waiting queue.
+  const tab = parseReviewTab(useSearchParams().get("tab"))
 
   useEffect(() => {
     listVerifications()
@@ -210,7 +218,18 @@ export function ReviewHistory() {
   return (
     <div className="flex flex-col gap-4">
       <VerifyingStrip uploads={inFlight} />
-      <Tabs value={tab} onValueChange={(value) => setTab(value as TabValue)}>
+      <Tabs
+        value={tab}
+        onValueChange={(value) =>
+          // Shallow update: switching tabs filters in place, so it should
+          // not re-render the route or grow the browser history.
+          window.history.replaceState(
+            null,
+            "",
+            verificationsHref(value as TabValue)
+          )
+        }
+      >
         <div className="flex flex-wrap items-center justify-between gap-3">
           <TabsList className="h-11">
             <TabsTrigger value="all" className="px-4 text-base">
@@ -252,6 +271,7 @@ export function ReviewHistory() {
                 title={TAB_TABLE[value].title}
                 description={TAB_TABLE[value].description}
                 records={byTab[value]}
+                tab={value}
               />
             )}
           </TabsContent>
@@ -308,10 +328,12 @@ function RecordsTable({
   title,
   description,
   records,
+  tab,
 }: {
   title: string
   description: string
   records: VerificationRecord[]
+  tab: TabValue
 }) {
   return (
     <Card>
@@ -358,7 +380,7 @@ function RecordsTable({
                     size="sm"
                     className="w-24"
                     nativeButton={false}
-                    render={<Link href={`/verifications/${record.id}`} />}
+                    render={<Link href={reportHref(record.id, tab)} />}
                   >
                     <SearchIcon data-icon="inline-start" />
                     {record.review.state === "pending" ? "Review" : "Revisit"}

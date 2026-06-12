@@ -19,7 +19,7 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import {
   ArrowLeftIcon,
   CheckCircle2Icon,
@@ -63,6 +63,7 @@ import {
   type ReviewDecision,
   type VerificationRecord,
 } from "@/lib/client/history"
+import { parseReviewTab, verificationsHref } from "@/lib/client/review-tab"
 import { fieldLabel } from "@/lib/verification/rules"
 
 /** Application | image | on-label — the image gets the widest track. */
@@ -71,6 +72,12 @@ const PANES_GRID =
 
 export function ReviewDetail({ id }: { id: string }) {
   const router = useRouter()
+  // The list page tags report links with the tab they came from (?tab=…),
+  // so the back link and the post-decision redirect both land the user on
+  // the tab they left, not back on "All".
+  const backHref = verificationsHref(
+    parseReviewTab(useSearchParams().get("tab"))
+  )
   // undefined = still loading from IndexedDB; null = no such record.
   const [record, setRecord] = useState<VerificationRecord | null | undefined>(
     undefined
@@ -109,7 +116,7 @@ export function ReviewDetail({ id }: { id: string }) {
           ? `${target.application.brandName} approved.`
           : `${target.application.brandName} rejected.`
       )
-      router.push("/verifications")
+      router.push(backHref)
     } catch {
       toast.error("Could not save the review decision.")
       setDeciding(false)
@@ -150,7 +157,7 @@ export function ReviewDetail({ id }: { id: string }) {
             <Button
               variant="outline"
               nativeButton={false}
-              render={<Link href="/verifications" />}
+              render={<Link href={backHref} />}
             >
               <ArrowLeftIcon data-icon="inline-start" />
               Back to verifications
@@ -169,7 +176,7 @@ export function ReviewDetail({ id }: { id: string }) {
       <header className="flex shrink-0 flex-wrap items-center justify-between gap-x-6 gap-y-3">
         <div className="flex min-w-0 items-center gap-4">
           <Link
-            href="/verifications"
+            href={backHref}
             className="inline-flex shrink-0 items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeftIcon className="size-4" />

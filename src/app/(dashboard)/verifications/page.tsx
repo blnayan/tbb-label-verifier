@@ -1,3 +1,5 @@
+import { Suspense } from "react"
+
 import { ReviewHistory } from "@/components/verifier/review-history"
 
 export default function VerificationsPage() {
@@ -11,7 +13,12 @@ export default function VerificationsPage() {
           against the label side by side — every decision can be revisited.
         </p>
       </header>
-      <ReviewHistory />
+      {/* ReviewHistory reads the active tab from ?tab=, and useSearchParams
+          needs a Suspense boundary on a statically prerendered page. The
+          component renders its own skeleton, so no fallback is needed. */}
+      <Suspense>
+        <ReviewHistory />
+      </Suspense>
     </div>
   )
 }
