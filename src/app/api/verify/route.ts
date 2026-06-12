@@ -24,6 +24,12 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+  if (!process.env.OPENAI_MODEL) {
+    return NextResponse.json(
+      { error: "Server is missing the OPENAI_MODEL environment variable — no default model is configured." },
+      { status: 500 },
+    );
+  }
 
   let form: FormData;
   try {

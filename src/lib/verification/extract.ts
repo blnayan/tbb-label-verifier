@@ -14,29 +14,33 @@ import { z } from "zod"
 import type { LabelExtraction } from "./types"
 
 /**
- * gpt-5.4-mini by default. The assignment has a hard ~5 second budget per
- * label ("If we can't get results back in about 5 seconds, nobody's going to
- * use it"), which pointed at gpt-5.4-nano — but measured live, nano misreads
- * the fine-print government warning on real labels (0/4 stable) while mini
- * reads it 4/4 AND returns faster (~2.3–3.2s vs ~3.1–3.5s). Fastest model
- * on paper isn't fastest in practice. Override with OPENAI_MODEL.
+ * The extraction model comes solely from OPENAI_MODEL — one explicitly
+ * configured model, no hardcoded default to silently fall back to. When
+ * picking one, mind the ~5 second budget per label ("If we can't get
+ * results back in about 5 seconds, nobody's going to use it") and measure
+ * live: on the 5.4 tier, mini-class read real-label fine print reliably
+ * while nano-class misread the government warning AND returned slower.
  */
-export const DEFAULT_MODEL = "gpt-5.4-mini"
-
 export function extractionModel(): string {
-  return process.env.OPENAI_MODEL || DEFAULT_MODEL
+  const model = process.env.OPENAI_MODEL
+  if (!model) {
+    throw new Error(
+      "Set the OPENAI_MODEL environment variable — no default model is configured."
+    )
+  }
+  return model
 }
 
 /**
- * GPT-5.4 models are reasoning models; transcription needs no deliberation,
- * and "none" measured ~1s faster than "low" with identical extractions.
- * Override with OPENAI_REASONING_EFFORT — e.g. newer tiers (gpt-5.5) drop
- * "none" and want "low".
+ * Reasoning effort, only if explicitly configured — valid values are
+ * tier-specific ("minimal" is gpt-5's floor, "none" exists from gpt-5.1,
+ * gpt-5.5 bottoms out at "low"), so there is no safe hardcoded default.
+ * Unset means the request omits the parameter and the API default applies;
+ * transcription needs no deliberation, so the lowest effort the chosen
+ * model accepts is usually the right setting.
  */
-export const DEFAULT_REASONING_EFFORT = "none"
-
-export function reasoningEffort(): string {
-  return process.env.OPENAI_REASONING_EFFORT || DEFAULT_REASONING_EFFORT
+export function reasoningEffort(): string | null {
+  return process.env.OPENAI_REASONING_EFFORT || null
 }
 
 const labelExtractionSchema = z.object({
@@ -154,9 +158,10 @@ function getClient(): OpenAI {
 export async function extractLabel(
   input: ExtractionInput
 ): Promise<LabelExtraction> {
+  const effort = reasoningEffort()
   const response = await getClient().responses.parse({
     model: extractionModel(),
-    reasoning: { effort: reasoningEffort() as "low" },
+    ...(effort && { reasoning: { effort: effort as "low" } }),
     max_output_tokens: 4096,
     instructions: SYSTEM_PROMPT,
     input: [

@@ -1,40 +1,32 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import {
-  DEFAULT_MODEL,
-  DEFAULT_REASONING_EFFORT,
-  extractionModel,
-  imageDataUrl,
-  reasoningEffort,
-} from "./extract"
+import { extractionModel, imageDataUrl, reasoningEffort } from "./extract"
 
 afterEach(() => {
   vi.unstubAllEnvs()
 })
 
 describe("extractionModel", () => {
-  it("defaults to the fastest reliable vision model (measured live)", () => {
-    vi.stubEnv("OPENAI_MODEL", "")
-    expect(extractionModel()).toBe(DEFAULT_MODEL)
-    expect(DEFAULT_MODEL).toBe("gpt-5.4-mini")
+  it("returns the configured OPENAI_MODEL", () => {
+    vi.stubEnv("OPENAI_MODEL", "gpt-5-mini")
+    expect(extractionModel()).toBe("gpt-5-mini")
   })
 
-  it("honors the OPENAI_MODEL override", () => {
-    vi.stubEnv("OPENAI_MODEL", "gpt-5.4-nano")
-    expect(extractionModel()).toBe("gpt-5.4-nano")
+  it("throws when OPENAI_MODEL is unset — one explicit model, no fallback", () => {
+    vi.stubEnv("OPENAI_MODEL", "")
+    expect(() => extractionModel()).toThrow(/OPENAI_MODEL/)
   })
 })
 
 describe("reasoningEffort", () => {
-  it("defaults to no reasoning for latency", () => {
-    vi.stubEnv("OPENAI_REASONING_EFFORT", "")
-    expect(reasoningEffort()).toBe(DEFAULT_REASONING_EFFORT)
-    expect(DEFAULT_REASONING_EFFORT).toBe("none")
-  })
-
-  it("honors the OPENAI_REASONING_EFFORT override", () => {
+  it("returns the configured OPENAI_REASONING_EFFORT", () => {
     vi.stubEnv("OPENAI_REASONING_EFFORT", "medium")
     expect(reasoningEffort()).toBe("medium")
+  })
+
+  it("returns null when unset — the API's own default applies, no fallback", () => {
+    vi.stubEnv("OPENAI_REASONING_EFFORT", "")
+    expect(reasoningEffort()).toBeNull()
   })
 })
 

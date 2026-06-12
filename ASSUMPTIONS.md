@@ -97,10 +97,12 @@ Each entry says what was assumed, and why that reading was chosen.
     [ARCHITECTURE.md](ARCHITECTURE.md) and
     [docs/design/02-ai-boundary.md](docs/design/02-ai-boundary.md).
 
-13. **GPT-5.4 mini is the default model.** Sarah's 5-second requirement
+13. **The model is configuration, not code.** Sarah's 5-second requirement
     is a hard product constraint ("nobody's going to use it"), and label
-    transcription is a narrow task the fastest vision model handles well.
-    `OPENAI_MODEL` overrides it without a code change.
+    transcription is a narrow task a fast mini-class vision model handles
+    well. `OPENAI_MODEL` is required and there is deliberately no default
+    or fallback — one explicitly chosen model, swappable without a code
+    change; the app refuses to verify until it is set.
 
 14. **No accounts, no persistence.** Marcus: "we're not storing anything
     sensitive for this exercise." Images are processed in memory and
