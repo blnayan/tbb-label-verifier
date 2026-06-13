@@ -42,21 +42,53 @@ Open http://localhost:3000, pick **“Try a sample label…”**, and press **Up
 
 `public/samples/` contains thirty-eight labels: **twenty-one real labels** (beer, wine, spirits, imports — twenty from TTB's public COLA registry plus a brewery's keg-collar artwork; each paired with application data transcribed from the label, and one — Bärenjäger — with the entries from its actual application form), **two of those re-rendered under simulated photo conditions** (tilt, glare, blur) to exercise robustness, and fifteen synthetic labels each encoding a compliance scenario (case-only brand differences, a title-case government warning, a warning heading without bold type, a wrong ABV, a missing/reworded warning, three near-miss warning misprints — a one-letter typo, a dropped word, and two swapped words — that probe whether the reader normalizes them away, wrong net contents, a wrong brand on an imported whisky, a proof-only statement, a cl-vs-mL unit difference, a missing bottler statement). Every sample's expected verdict is stated in its description and validated against the live pipeline. See [public/samples/SOURCES.md](public/samples/SOURCES.md).
 
-## Deployment (Docker, any VPS)
+## Deployment (Docker)
 
-The app is a single stateless container — no database, no volumes.
+The app is a single stateless container — no database, no volumes. The container listens on port 3000 and needs outbound HTTPS to `api.openai.com` for label extraction.
+
+1. Set production environment variables in `.env.local` or your container platform's secret manager:
+
+```bash
+OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-5.4-mini
+OPENAI_REASONING_EFFORT=none
+```
+
+`OPENAI_REASONING_EFFORT` is model-specific. For the deployed `gpt-5.4-mini` model, `none` is valid.
+
+2. Build the image:
 
 ```bash
 docker build -t tbb-label-verifier .
-docker run -d --name label-verifier \
+```
+
+3. Run the container:
+
+```bash
+docker run -d \
+  --name tbb-label-verifier \
+  --env-file .env.local \
   -p 3000:3000 \
-  -e OPENAI_API_KEY=sk-... \
-  -e OPENAI_MODEL=gpt-5.4-mini \
   --restart unless-stopped \
   tbb-label-verifier
 ```
 
-Put your usual reverse proxy (Caddy/nginx/Traefik) in front for TLS. The container exposes port 3000 and needs outbound HTTPS to `api.openai.com` only.
+Open `http://localhost:3000` on the host, or put whatever ingress, load balancer, proxy, or container network your environment uses in front of container port 3000.
+
+You can also deploy with Compose:
+
+```bash
+docker compose up -d --build
+```
+
+The included Compose file starts the app without publishing a host port and attaches it to an external Docker network named `proxy`. Adapt the Compose networking or add a `ports:` mapping if your deployment does not use that network.
+
+Verify the container:
+
+```bash
+docker ps --filter name=tbb-label-verifier
+curl -I http://localhost:3000
+```
 
 ## Documentation
 

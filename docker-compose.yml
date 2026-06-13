@@ -1,0 +1,22 @@
+name: tbb-label-verifier
+
+services:
+  web:
+    build:
+      context: .
+    image: tbb-label-verifier:latest
+    container_name: tbb-label-verifier-web
+    restart: unless-stopped
+    env_file:
+      - .env.local
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
+    name: proxy
