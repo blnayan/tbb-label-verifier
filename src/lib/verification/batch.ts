@@ -102,8 +102,7 @@ export function parseBatchCsv(text: string): BatchParseResult {
   }
 
   type ColumnName =
-    | (typeof REQUIRED_HEADERS)[number]
-    | (typeof OPTIONAL_HEADERS)[number]
+    (typeof REQUIRED_HEADERS)[number] | (typeof OPTIONAL_HEADERS)[number]
 
   const header = rows[0].fields.map((h) => h.trim())
   const indexOf: Partial<Record<ColumnName, number>> = {}

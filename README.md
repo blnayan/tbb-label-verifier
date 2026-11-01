@@ -8,7 +8,7 @@ An agent enters what the application says (brand name, class/type, alcohol conte
 
 ## Quick start
 
-Requirements: Node.js 20+ and an OpenAI API key.
+Requirements: Node.js 22.12+ and an OpenAI API key.
 
 ```bash
 npm install
@@ -32,7 +32,7 @@ Open http://localhost:3000, pick **“Try a sample label…”**, and press **Up
 | --- | --- |
 | `npm run dev` | Dev server on :3000 |
 | `npm run build` / `npm start` | Production build / serve |
-| `npm test` | Unit tests (Vitest) — rule engine, input validation, CSV parsing, concurrency pool, IndexedDB history |
+| `npm test` | Unit tests (Vitest) — rule engine, input validation, CSV parsing, concurrency pool, IndexedDB history, OpenAI SDK request/response contract |
 | `npm run lint` / `npm run typecheck` | ESLint / TypeScript |
 | `node scripts/generate-samples.mjs` | Regenerate the synthetic sample labels |
 | `node scripts/generate-photo-variants.mjs` | Regenerate the photo-condition variants of real labels |
@@ -101,6 +101,6 @@ curl -I http://localhost:3000
 ## Approach, tools, trade-offs (summary)
 
 - **Stack:** Next.js 16 (App Router) + TypeScript + Tailwind v4 + shadcn/ui; GPT-5.4 mini via the official OpenAI SDK with structured outputs (zod-validated); Vitest. One deployable, no database.
-- **Core trade-off:** the AI is confined to transcription; all pass/fail logic is deterministic, unit-tested TypeScript (246 tests). This makes compliance behavior auditable and lets the model be swapped via env var.
+- **Core trade-off:** the AI is confined to transcription; all pass/fail logic is deterministic, unit-tested TypeScript (250 tests). This makes compliance behavior auditable and lets the model be swapped via env var.
 - **Latency:** fastest vision-capable model + two parallel API calls per label (full extraction + a blind warning re-read — the warning auto-passes only when both agree) keeps verification inside the ~5s budget; batch mode runs four labels concurrently.
 - **Known limitations** are listed at the end of [ASSUMPTIONS.md](ASSUMPTIONS.md) — notably: country of origin is checked only for products marked imported, one image per label, and an uncertain bold-type read (null) never penalizes a label.
